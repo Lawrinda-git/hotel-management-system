@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class HotelsConfig(AppConfig):
-    name = 'hotels'
+    name = 'apps.hotels'
