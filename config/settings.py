@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     "apps.feedback",
 
 ]
-AUTH_USER_MODEL = "account.Staff"
+AUTH_USER_MODEL = "accounts.Staff"
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
