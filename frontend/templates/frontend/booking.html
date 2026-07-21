@@ -276,7 +276,20 @@
             if (response.ok) {
                 feedback.classList.remove('text-error');
                 feedback.classList.add('text-primary');
-                loadRooms();
+                const checkoutResponse = await fetch('{% url "paystack_checkout" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({ invoice_id: data.invoice.id }),
+                });
+                const checkoutData = await checkoutResponse.json();
+                if (!checkoutResponse.ok) {
+                    throw new Error(checkoutData.detail || 'Could not start Paystack checkout.');
+                }
+                window.location.href = checkoutData.authorization_url;
             } else {
                 feedback.classList.add('text-error');
             }

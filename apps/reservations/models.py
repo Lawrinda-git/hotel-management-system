@@ -26,6 +26,9 @@ class Reservation(models.Model):
         on_delete=models.CASCADE,       # guest deleted → their reservations deleted too
         related_name="reservations",
     )
+    hotel = models.ForeignKey(
+        "hotels.Hotel", on_delete=models.CASCADE, null=True, blank=True, related_name="reservations",
+    )
     check_in         = models.DateTimeField()
     check_out        = models.DateTimeField()
     actual_check_in  = models.DateTimeField(null=True, blank=True)  # filled on arrival

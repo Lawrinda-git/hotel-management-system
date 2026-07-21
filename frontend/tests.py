@@ -63,22 +63,37 @@ class PublicJourneyTests(TestCase):
         self.assertEqual(user.staff_name, "Updated User")
         self.assertTrue(user.profile_picture.name.startswith("profile_pictures/"))
 
+    def test_profile_updates_phone_number(self):
+        user = Staff.objects.create_user(
+            username="phone@example.com", email="phone@example.com", password="SafePass123",
+            staff_name="Phone User", role="guest",
+        )
+        self.client.force_login(user)
+        response = self.client.post(
+            reverse("profile"),
+            {"full_name": "Phone User", "email": "phone@example.com", "staff_phone": "+233201234567"},
+        )
+        self.assertRedirects(response, reverse("profile"))
+        user.refresh_from_db()
+        self.assertEqual(user.staff_phone, "+233201234567")
+
     def test_registration_and_login(self):
         registration = self.client.post(
             reverse("api_register"),
-            data=json.dumps({"full_name": "Test User", "email": "user@example.com", "password": "SafePass123"}),
+            data=json.dumps({"full_name": "Test User", "email": "user@example.com", "phone": "+233201234567", "password": "SafePass123"}),
             content_type="application/json",
         )
         self.assertEqual(registration.status_code, 201)
-        with patch("frontend.views.secrets.randbelow", return_value=123456):
+        with patch("frontend.views.secrets.randbelow", return_value=123456), patch("frontend.views._send_verification_sms") as send_sms:
             login = self.client.post(
                 reverse("api_login"),
-                data=json.dumps({"email": "user@example.com", "password": "SafePass123"}),
+                data=json.dumps({"email": "user@example.com", "password": "SafePass123", "verification_channel": "sms"}),
                 content_type="application/json",
             )
         self.assertEqual(login.status_code, 202)
         self.assertTrue(login.json()["two_factor_required"])
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 0)
+        send_sms.assert_called_once()
 
         verification = self.client.post(
             reverse("api_two_factor_verify"),
@@ -137,9 +152,22 @@ class PublicJourneyTests(TestCase):
             },
         ):
             callback = self.client.get(reverse("google_callback"), {"state": state, "code": "test-code"})
-        self.assertRedirects(callback, reverse("two_factor"))
+        self.assertRedirects(callback, reverse("verification"))
         self.assertTrue(Staff.objects.filter(email="google@example.com").exists())
         self.assertEqual(len(mail.outbox), 1)
+
+    def test_verification_page_renders(self):
+        user = Staff.objects.create_user(
+            username="verify@example.com", email="verify@example.com", password="SafePass123",
+            staff_name="Verify User", role="guest",
+        )
+        session = self.client.session
+        session["pending_login_user_id"] = user.id
+        session["pending_login_channel"] = "sms"
+        session.save()
+        response = self.client.get(reverse("verification"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Current method: SMS")
 
     def test_booking_reserves_available_room(self):
         options = self.client.get(reverse("booking_options"))

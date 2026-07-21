@@ -31,5 +31,5 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = ("id", "invoice", "invoice_detail", "amount", "method", "payment_date")
-        read_only_fields = ("payment_date",)
+        fields = ("id", "invoice", "invoice_detail", "amount", "method", "status", "provider_reference", "provider_response", "payment_date")
+        read_only_fields = ("status", "provider_reference", "provider_response", "payment_date")

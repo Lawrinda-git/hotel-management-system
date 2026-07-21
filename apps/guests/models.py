@@ -14,7 +14,7 @@ class Guest(models.Model):
     guest_name  = models.CharField(max_length=100)
     guest_phone = models.CharField(max_length=20, blank=True)
     guest_email = models.CharField(max_length=100, unique=True)
-    id_number   = models.CharField(max_length=50, unique=True)   # passport or national ID
+    id_number   = models.CharField(max_length=50, unique=True, blank=True, null=True)   # passport or national ID
     nationality = models.CharField(max_length=50, blank=True)
     created_at  = models.DateTimeField(auto_now_add=True)
 

@@ -8,12 +8,14 @@ class RoomType(models.Model):
     type automatically share the same nightly rate.
     """
 
-    type_name       = models.CharField(max_length=100, unique=True)
+    hotel           = models.ForeignKey("hotels.Hotel", on_delete=models.CASCADE, null=True, blank=True, related_name="room_types")
+    type_name       = models.CharField(max_length=100)
     price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
     description     = models.TextField(blank=True)
 
     class Meta:
         db_table = "room_type"
+        constraints = [models.UniqueConstraint(fields=("hotel", "type_name"), name="room_type_hotel_name_unique")]
 
     def __str__(self):
         return f"{self.type_name} (GH₵{self.price_per_night}/night)"
@@ -57,7 +59,12 @@ class Room(models.Model):
         null=True,
         related_name="rooms",
     )
+    reservation = models.ForeignKey(
+        "reservations.Reservation", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="assigned_rooms",
+    )
     room_number         = models.CharField(max_length=10)
+    price_per_night     = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     status              = models.CharField(
         max_length=20,
         choices=RoomStatus.choices,
@@ -97,6 +104,9 @@ class Maintenance(models.Model):
         on_delete=models.SET_NULL,      # keep record even if staff member is removed
         null=True,
         related_name="maintenance_tasks",
+    )
+    hotel = models.ForeignKey(
+        "hotels.Hotel", on_delete=models.CASCADE, null=True, blank=True, related_name="maintenance_records",
     )
     room = models.ForeignKey(
         Room,

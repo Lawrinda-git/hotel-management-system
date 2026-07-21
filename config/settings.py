@@ -160,10 +160,15 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
+BREVO_API_KEY = config("BREVO_API_KEY", default="")
+BREVO_SMS_SENDER = config("BREVO_SMS_SENDER", default="StayHub")
+PAYSTACK_SECRET_KEY = config("PAYSTACK_SECRET_KEY", default="")
+PAYSTACK_PUBLIC_KEY = config("PAYSTACK_PUBLIC_KEY", default="")
+PAYSTACK_RETURN_URL = config("PAYSTACK_RETURN_URL", default="http://localhost:8000/booking/")
+
 # Development mail is printed to the terminal.  Set EMAIL_BACKEND to Django's
 # SMTP backend and the SMTP_* variables in the deployment environment to send
 # real password-reset and two-step-verification messages.
-BREVO_API_KEY = config("BREVO_API_KEY", default="")
 EMAIL_BACKEND = (
     config("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 )

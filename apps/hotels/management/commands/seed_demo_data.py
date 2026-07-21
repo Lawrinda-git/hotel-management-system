@@ -23,21 +23,25 @@ class Command(BaseCommand):
         ]
         created_hotels = 0
         created_rooms = 0
+        hotel_objects = {}
         for name, email, phone, address in hotels:
             hotel, created = Hotel.objects.update_or_create(
                 hotel_email=email,
                 defaults={"hotel_name": name, "hotel_phone": phone, "hotel_address": address},
             )
             created_hotels += int(created)
+            hotel_objects[name] = hotel
             for department_name in ("Front Office", "Housekeeping", "Food and Beverage"):
                 Department.objects.get_or_create(hotel=hotel, dept_name=department_name)
 
         type_objects = {}
-        for name, price, description in room_types:
-            type_objects[name], _ = RoomType.objects.update_or_create(
-                type_name=name,
-                defaults={"price_per_night": price, "description": description},
-            )
+        for hotel_name, hotel in hotel_objects.items():
+            for name, price, description in room_types:
+                type_objects[(hotel_name, name)], _ = RoomType.objects.update_or_create(
+                    hotel=hotel,
+                    type_name=name,
+                    defaults={"price_per_night": price, "description": description},
+                )
 
         room_plan = {
             "Azure Sands Resort": [("101", "Ocean View Suite", 1), ("102", "Ocean View Suite", 1), ("201", "Executive Suite", 2), ("301", "Presidential Villa", 3)],
@@ -52,7 +56,8 @@ class Command(BaseCommand):
                     hotel=hotel,
                     room_number=room_number,
                     defaults={
-                        "room_type": type_objects[type_name],
+                        "room_type": type_objects[(hotel_name, type_name)],
+                        "price_per_night": type_objects[(hotel_name, type_name)].price_per_night,
                         "floor": floor,
                         "status": unavailable.get((hotel_name, room_number), Room.RoomStatus.AVAILABLE),
                         "housekeeping_status": Room.HousekeepingStatus.CLEAN,

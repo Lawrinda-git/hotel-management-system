@@ -3,6 +3,8 @@ import logging
 import secrets
 import smtplib
 import time
+from decimal import Decimal
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from datetime import datetime
@@ -19,6 +21,7 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from apps.guests.models import Guest
+from apps.billing.models import Invoice
 from apps.reservations.models import Reservation, RoomReservation
 from apps.rooms.models import Room
 
@@ -33,17 +36,25 @@ def _begin_two_factor(request, user):
     request.session["pending_login_user_id"] = user.id
     request.session["pending_login_code"] = make_password(code)
     request.session["pending_login_expires_at"] = time.time() + 600
-    from django.core.mail import send_mail
+    channel = request.session.get("pending_login_channel", "email")
     try:
-        send_mail(
-            "Your StayHub verification code",
-            f"Your verification code is {code}. It expires in 10 minutes.",
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
-        )
-    except (smtplib.SMTPException, OSError):
-        logger.exception("Unable to send two-factor email to %s", user.email)
+        if channel == "sms":
+            phone_number = (user.staff_phone or "").strip()
+            if not phone_number:
+                raise ValueError("SMS verification requires a phone number")
+            _send_verification_sms(phone_number, code)
+        else:
+            from django.core.mail import send_mail
+
+            send_mail(
+                "Your StayHub verification code",
+                f"Your verification code is {code}. It expires in 10 minutes.",
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+    except (smtplib.SMTPException, OSError, HTTPError, URLError, ValueError):
+        logger.exception("Unable to send two-factor %s to %s", channel, user.email)
         for key in ("pending_login_user_id", "pending_login_code", "pending_login_expires_at"):
             request.session.pop(key, None)
         return {"sent": False, "dev_code": None}
@@ -51,16 +62,42 @@ def _begin_two_factor(request, user):
     return {"sent": True, "dev_code": None}
 
 
+def _send_verification_sms(phone_number, code):
+    if not settings.BREVO_API_KEY:
+        raise ValueError("BREVO_API_KEY is not configured")
+    payload = json.dumps({
+        "sender": getattr(settings, "BREVO_SMS_SENDER", "StayHub"),
+        "recipient": phone_number,
+        "content": f"Your StayHub verification code is {code}. It expires in 10 minutes.",
+        "type": "transactional",
+        "unicodeEnabled": True,
+    }).encode("utf-8")
+    request = Request(
+        "https://api.brevo.com/v3/transactionalSMS/send",
+        data=payload,
+        headers={
+            "accept": "application/json",
+            "api-key": settings.BREVO_API_KEY,
+            "content-type": "application/json",
+        },
+        method="POST",
+    )
+    with urlopen(request, timeout=15) as response:
+        if response.status >= 300:
+            raise ValueError(f"Brevo SMS API returned HTTP {response.status}")
+
+
 def _complete_or_challenge_login(request, user):
     challenge = _begin_two_factor(request, user)
     if not challenge["sent"]:
         return JsonResponse({
-            "detail": "We couldn't send the verification email. Please try again later.",
+            "detail": "We couldn't send the verification code. Please try again later.",
         }, status=503)
+    channel = request.session.get("pending_login_channel", "email")
     response = {
-        "detail": "We sent a verification code to your email.",
+        "detail": f"We sent a verification code to your {channel}.",
         "two_factor_required": True,
-        "redirect_url": "/two-factor/",
+        "redirect_url": "/verification/",
     }
     return JsonResponse(response, status=202)
 
@@ -93,6 +130,7 @@ def profile(request):
     if request.method == "POST":
         full_name = (request.POST.get("full_name") or "").strip()
         email = (request.POST.get("email") or "").strip().lower()
+        staff_phone = (request.POST.get("staff_phone") or "").strip()
         upload = request.FILES.get("profile_picture")
         if not full_name or not email:
             return render(request, "frontend/profile.html", {"profile_error": "Name and email are required."})
@@ -104,6 +142,7 @@ def profile(request):
         user.last_name = parts[1] if len(parts) > 1 else ""
         user.email = email
         user.username = email
+        user.staff_phone = staff_phone
         if request.POST.get("clear_picture") == "1" and user.profile_picture:
             user.profile_picture.delete(save=False)
             user.profile_picture = None
@@ -131,9 +170,12 @@ def api_login(request):
         or ""
     ).strip()
     password = (payload.get("password") or "").strip()
+    verification_channel = str(payload.get("verification_channel") or "email").strip().lower()
 
     if not identifier or not password:
         return JsonResponse({"detail": "username/email and password are required."}, status=400)
+    if verification_channel not in {"email", "sms"}:
+        return JsonResponse({"detail": "verification_channel must be email or sms."}, status=400)
 
     user = None
     if "@" in identifier:
@@ -147,6 +189,11 @@ def api_login(request):
     authenticated_user = authenticate(request, username=user.username, password=password)
     if authenticated_user is None:
         return JsonResponse({"detail": "Invalid credentials."}, status=400)
+
+    if verification_channel == "sms" and not (authenticated_user.staff_phone or "").strip():
+        return JsonResponse({"detail": "Add a phone number to use SMS verification."}, status=400)
+
+    request.session["pending_login_channel"] = verification_channel
 
     return _complete_or_challenge_login(request, authenticated_user)
 
@@ -184,7 +231,9 @@ def password_reset(request):
 def two_factor(request):
     if not request.session.get("pending_login_user_id"):
         return redirect("signin")
-    return render(request, "frontend/two_factor.html")
+    return render(request, "frontend/verification.html", {
+        "verification_channel": request.session.get("pending_login_channel", "email"),
+    })
 
 
 @require_http_methods(["POST"])
@@ -257,7 +306,7 @@ def google_callback(request):
     challenge = _begin_two_factor(request, user)
     if not challenge["sent"]:
         return redirect("signin")
-    return redirect("two_factor")
+    return redirect("verification")
 
 
 @require_http_methods(["POST"])
@@ -270,6 +319,7 @@ def api_register(request):
 
     full_name = (payload.get("full_name") or payload.get("name") or "").strip()
     email = (payload.get("email") or "").strip().lower()
+    staff_phone = (payload.get("staff_phone") or payload.get("phone") or "").strip()
     password = (payload.get("password") or "").strip()
 
     if not full_name or not email or not password:
@@ -287,6 +337,7 @@ def api_register(request):
         email=email,
         password=password,
         staff_name=full_name,
+        staff_phone=staff_phone,
         role="guest",
         first_name=first_name,
         last_name=last_name,
@@ -333,7 +384,7 @@ def booking_options(request):
     rooms = (
         Room.objects.select_related("hotel", "room_type")
         .filter(status=Room.RoomStatus.AVAILABLE)
-        .order_by("hotel__hotel_name", "room_type__price_per_night", "room_number")
+        .order_by("hotel__hotel_name", "price_per_night", "room_number")
     )
 
     payload = [
@@ -349,7 +400,7 @@ def booking_options(request):
             "room_type": {
                 "id": room.room_type_id,
                 "type_name": room.room_type.type_name if room.room_type else None,
-                "price_per_night": str(room.room_type.price_per_night) if room.room_type else None,
+                "price_per_night": str(room.price_per_night or (room.room_type.price_per_night if room.room_type else 0)) if room.room_type or room.price_per_night else None,
                 "description": room.room_type.description if room.room_type else "",
             },
         }
@@ -427,13 +478,22 @@ def create_booking(request):
 
         reservation = Reservation.objects.create(
             guest=guest,
+            hotel=room.hotel,
             check_in=check_in,
             check_out=check_out,
             status=Reservation.ReservationStatus.CONFIRMED,
         )
         RoomReservation.objects.create(resv=reservation, room=room)
         room.status = Room.RoomStatus.RESERVED
-        room.save(update_fields=["status"])
+        room.reservation = reservation
+        room.save(update_fields=["status", "reservation"])
+
+        nightly_rate = room.price_per_night or (room.room_type.price_per_night if room.room_type else 0)
+        nights = max(1, (check_out.date() - check_in.date()).days)
+        service_fee = 45
+        tax = round((nightly_rate * nights + service_fee) * Decimal("0.12"), 2)
+        total_amount = (nightly_rate * nights) + service_fee + tax
+        invoice = Invoice.objects.create(hotel=room.hotel, reservation=reservation, total_amount=total_amount)
 
     return JsonResponse(
         {
@@ -443,6 +503,11 @@ def create_booking(request):
                 "status": reservation.status,
                 "check_in": reservation.check_in.isoformat(),
                 "check_out": reservation.check_out.isoformat(),
+            },
+            "invoice": {
+                "id": invoice.id,
+                "total_amount": str(invoice.total_amount),
+                "status": invoice.status,
             },
         },
         status=201,

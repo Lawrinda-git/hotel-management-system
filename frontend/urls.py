@@ -15,6 +15,7 @@ urlpatterns = [
     path("api/auth/register/", views.api_register, name="api_register"),
     path("api/auth/google/", views.google_login, name="google_login"),
     path("api/auth/google/callback/", views.google_callback, name="google_callback"),
+    path("verification/", views.two_factor, name="verification"),
     path("two-factor/", views.two_factor, name="two_factor"),
     path("api/auth/two-factor/verify/", views.api_two_factor_verify, name="api_two_factor_verify"),
     path("password-reset/", views.password_reset, name="password_reset"),

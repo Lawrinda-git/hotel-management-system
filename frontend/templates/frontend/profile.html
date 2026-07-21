@@ -21,6 +21,7 @@
       {% if request.user.profile_picture %}<label class="flex items-center gap-2 text-sm text-on-surface-variant"><input type="checkbox" name="clear_picture" value="1"> Remove current picture</label>{% endif %}
       <label class="block text-sm font-semibold text-primary">Full name<input name="full_name" value="{{ request.user.staff_name }}" required class="mt-2 w-full rounded-xl border border-outline-variant px-4 py-3"></label>
       <label class="block text-sm font-semibold text-primary">Email<input name="email" type="email" value="{{ request.user.email }}" required class="mt-2 w-full rounded-xl border border-outline-variant px-4 py-3"></label>
+      <label class="block text-sm font-semibold text-primary">Phone number<input name="staff_phone" type="tel" value="{{ request.user.staff_phone }}" class="mt-2 w-full rounded-xl border border-outline-variant px-4 py-3"></label>
       <button class="w-full rounded-xl bg-primary py-3 font-bold text-white" type="submit">Save profile</button>
     </form>
   </section>

@@ -23,6 +23,7 @@ class Invoice(models.Model):
 
     # OneToOneField = a ForeignKey with unique=True
     # Each reservation can only have ONE invoice
+    hotel = models.ForeignKey("hotels.Hotel", on_delete=models.CASCADE, null=True, blank=True, related_name="invoices")
     reservation  = models.OneToOneField(
         "reservations.Reservation",
         on_delete=models.CASCADE,
@@ -73,7 +74,14 @@ class Payment(models.Model):
         CARD          = "Card",          "Card"
         MOBILE_MONEY  = "Mobile_Money",  "Mobile Money"
         BANK_TRANSFER = "Bank_Transfer", "Bank Transfer"
+        PAYSTACK      = "Paystack",      "Paystack"
 
+    class PaymentStatus(models.TextChoices):
+        PENDING   = "pending",   "Pending"
+        SUCCESS   = "success",   "Success"
+        FAILED    = "failed",    "Failed"
+
+    hotel = models.ForeignKey("hotels.Hotel", on_delete=models.CASCADE, null=True, blank=True, related_name="payments")
     invoice      = models.ForeignKey(
         Invoice,
         on_delete=models.CASCADE,
@@ -84,6 +92,9 @@ class Payment(models.Model):
         max_length=30,
         choices=PaymentMethod.choices,
     )
+    status       = models.CharField(max_length=20, choices=PaymentStatus.choices, default=PaymentStatus.PENDING)
+    provider_reference = models.CharField(max_length=100, blank=True, unique=True, null=True)
+    provider_response = models.JSONField(blank=True, null=True)
     payment_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:

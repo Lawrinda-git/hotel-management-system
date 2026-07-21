@@ -18,6 +18,7 @@ class Feedback(models.Model):
     and MaxValueValidator.
     """
 
+    hotel = models.ForeignKey("hotels.Hotel", on_delete=models.CASCADE, null=True, blank=True, related_name="feedbacks")
     guest = models.ForeignKey(
         "guests.Guest",
         on_delete=models.CASCADE,
@@ -31,7 +32,7 @@ class Feedback(models.Model):
     rating = models.SmallIntegerField(
         validators=[
             MinValueValidator(1),   # minimum rating: 1
-            MaxValueValidator(6),   # maximum rating: 6 (matches CHECK(1-6) in ER diagram)
+            MaxValueValidator(5),   # matches the database schema CHECK(rating BETWEEN 1 AND 5)
         ]
     )
     comments = models.TextField(blank=True)
@@ -44,5 +45,5 @@ class Feedback(models.Model):
     def __str__(self):
         return (
             f"Feedback #{self.pk} — {self.guest.guest_name} "
-            f"★{self.rating}/6 (Resv #{self.resv_id})"
+            f"★{self.rating}/5 (Resv #{self.resv_id})"
         )
