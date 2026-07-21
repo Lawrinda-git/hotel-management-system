@@ -13,6 +13,7 @@ from apps.reservations.models import Reservation
 from apps.rooms.models import Room, RoomType
 
 
+@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
 class PublicJourneyTests(TestCase):
     def setUp(self):
         hotel = Hotel.objects.create(
@@ -30,7 +31,7 @@ class PublicJourneyTests(TestCase):
 
     def test_all_public_pages_render(self):
         for name in (
-            "splash", "splash_page", "signin", "staff_login", "create_account",
+            "splash", "splash_page", "signin", "create_account",
             "guest_home", "explore_stays", "hotel_details", "booking", "design_system",
         ):
             response = self.client.get(reverse(name))
@@ -57,7 +58,7 @@ class PublicJourneyTests(TestCase):
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 202)
-        self.assertEqual(response.json()["redirect_url"], "/verification/")
+        self.assertEqual(response.json()["redirect_url"], "/verification-method/")
 
     def test_guest_cannot_use_staff_login(self):
         Staff.objects.create_user(
@@ -79,7 +80,7 @@ class PublicJourneyTests(TestCase):
         self.client.force_login(user)
         response = self.client.post(
             reverse("profile"),
-            {"full_name": "Updated User", "email": "profile@example.com", "profile_picture": SimpleUploadedFile("avatar.png", b"fake-image", content_type="image/png")},
+            {"full_name": "Updated User", "email": "profile@example.com", "staff_phone": "+233201234567", "profile_picture": SimpleUploadedFile("avatar.png", b"fake-image", content_type="image/png")},
         )
         self.assertRedirects(response, reverse("profile"))
         user.refresh_from_db()
@@ -110,12 +111,16 @@ class PublicJourneyTests(TestCase):
         with patch("frontend.views.secrets.randbelow", return_value=123456), patch("frontend.views._send_verification_sms") as send_sms:
             login = self.client.post(
                 reverse("api_login"),
-                data=json.dumps({"email": "user@example.com", "password": "SafePass123", "verification_channel": "sms"}),
+                data=json.dumps({"email": "user@example.com", "password": "SafePass123"}),
                 content_type="application/json",
             )
         self.assertEqual(login.status_code, 202)
-        self.assertTrue(login.json()["two_factor_required"])
+        self.assertTrue(login.json()["verification_method_required"])
         self.assertEqual(len(mail.outbox), 0)
+
+        with patch("frontend.views.secrets.randbelow", return_value=123456), patch("frontend.views._send_verification_sms") as send_sms:
+            method = self.client.post(reverse("verification_method"), {"verification_channel": "sms"})
+        self.assertRedirects(method, reverse("verification"))
         send_sms.assert_called_once()
 
         verification = self.client.post(
@@ -141,8 +146,11 @@ class PublicJourneyTests(TestCase):
                 data=json.dumps({"email": "smtp@example.com", "password": "SafePass123"}),
                 content_type="application/json",
             )
-        self.assertEqual(response.status_code, 503)
-        self.assertNotIn("dev_code", response.json())
+        self.assertEqual(response.status_code, 202)
+        with patch("django.core.mail.send_mail", side_effect=smtplib.SMTPAuthenticationError(535, b"authentication failed")):
+            method = self.client.post(reverse("verification_method"), {"verification_channel": "email"})
+        self.assertEqual(method.status_code, 200)
+        self.assertContains(method, "could not send")
 
     def test_password_reset_sends_an_email(self):
         self.client.post(
@@ -175,9 +183,9 @@ class PublicJourneyTests(TestCase):
             },
         ):
             callback = self.client.get(reverse("google_callback"), {"state": state, "code": "test-code"})
-        self.assertRedirects(callback, reverse("verification"))
+        self.assertRedirects(callback, reverse("verification_method"))
         self.assertTrue(Staff.objects.filter(email="google@example.com").exists())
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_verification_page_renders(self):
         user = Staff.objects.create_user(
@@ -215,8 +223,8 @@ class PublicJourneyTests(TestCase):
         duplicate = self.client.post(
             reverse("create_booking"),
             data=json.dumps({
-                "guest_name": "Booking Guest", "guest_email": "guest@example.com",
-                "id_number": "P1234567", "room_id": self.room.id,
+                "guest_name": "Booking Guest", "guest_email": "guest@example.com", "guest_phone": "+233201234567",
+                "id_number": "P1234567", "nationality": "Testland", "room_id": self.room.id,
                 "check_in": "2027-06-10T14:00:00Z", "check_out": "2027-06-11T11:00:00Z",
             }),
             content_type="application/json",

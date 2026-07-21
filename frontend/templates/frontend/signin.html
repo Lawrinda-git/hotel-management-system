@@ -41,17 +41,6 @@
                         </button>
                     </div>
                 </div>
-                <div class="space-y-2">
-                    <label class="block font-label-md text-label-md text-primary ml-1" for="verification-channel">Verification Method</label>
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant">sms</span>
-                        <select class="w-full h-14 pl-12 pr-4 bg-surface rounded-xl border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all duration-200 font-body-md shadow-sm appearance-none" id="verification-channel" name="verification_channel">
-                            <option value="email" selected>Email</option>
-                            <option value="sms">SMS</option>
-                        </select>
-                    </div>
-                    <p class="text-sm text-on-surface-variant px-1">Choose where we send your six-digit sign-in code.</p>
-                </div>
                 <button class="w-full h-14 bg-secondary-container text-on-secondary-fixed font-label-md text-label-md rounded-xl shadow-lg shadow-secondary/10 hover:shadow-xl hover:bg-secondary-fixed transition-all duration-300 active:scale-95 flex items-center justify-center space-x-2" type="submit">
                     <span>Sign In</span>
                     <span class="material-symbols-outlined text-xl">arrow_forward</span>
@@ -141,7 +130,6 @@
                 body: JSON.stringify({
                     email: document.getElementById('email').value,
                     password: document.getElementById('password').value,
-                    verification_channel: document.getElementById('verification-channel').value,
                 }),
             });
             const data = await response.json();

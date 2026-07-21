@@ -1,0 +1,17 @@
+{% extends "frontend/base.html" %}
+{% block title %}StayHub | Choose verification method{% endblock %}
+{% block body_class %}bg-background min-h-screen flex items-center justify-center px-5{% endblock %}
+{% block content %}
+<main class="w-full max-w-md rounded-3xl bg-surface-container-lowest p-8 shadow-xl">
+  <span class="material-symbols-outlined text-primary text-4xl">verified_user</span>
+  <h1 class="mt-4 font-headline-lg text-primary">Choose verification method</h1>
+  <p class="mt-2 text-on-surface-variant">Choose where we should send your six-digit sign-in code.</p>
+  {% if error %}<p class="mt-4 rounded-xl bg-error-container px-4 py-3 text-sm text-on-error-container">{{ error }}</p>{% endif %}
+  <form method="post" class="mt-7 space-y-4">
+    {% csrf_token %}
+    <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-outline-variant p-4"><input type="radio" name="verification_channel" value="email" checked><span><strong>Email</strong><small class="block text-on-surface-variant">{{ user.email }}</small></span></label>
+    <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-outline-variant p-4"><input type="radio" name="verification_channel" value="sms"><span><strong>SMS</strong><small class="block text-on-surface-variant">{{ user.staff_phone|default:"Add a phone number in your profile first" }}</small></span></label>
+    <button class="w-full rounded-xl bg-primary py-3 font-bold text-white" type="submit">Send verification code</button>
+  </form>
+</main>
+{% endblock %}

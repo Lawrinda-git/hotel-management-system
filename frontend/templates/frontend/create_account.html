@@ -36,7 +36,7 @@
                 <label class="block font-label-md text-label-md text-on-surface ml-1" for="phone">Phone Number</label>
                 <div class="relative group input-focus-ring rounded-lg overflow-hidden transition-all duration-300">
                     <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">call</span>
-                    <input class="w-full bg-surface-container-lowest border border-outline-variant/40 py-3.5 pl-12 pr-4 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary transition-colors placeholder:text-outline/50" id="phone" name="phone" placeholder="+233201234567" type="tel">
+                    <div class="flex gap-2"><select id="country-code" class="w-28 bg-surface-container-lowest border border-outline-variant/40 py-3.5 px-2 rounded-lg" aria-label="Country code"><option selected>+233</option><option>+234</option><option>+254</option><option>+27</option><option>+44</option><option>+1</option></select><input class="min-w-0 flex-1 bg-surface-container-lowest border border-outline-variant/40 py-3.5 px-4 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary transition-colors placeholder:text-outline/50" id="phone" name="phone" placeholder="24 123 4567" required type="tel"></div>
                 </div>
                 <p class="text-sm text-on-surface-variant ml-1">Required if you want SMS verification later.</p>
             </div>
@@ -129,6 +129,7 @@
                 body: JSON.stringify({
                     full_name: document.getElementById('fullName').value,
                     email: document.getElementById('email').value,
+                    country_code: document.getElementById('country-code').value,
                     phone: document.getElementById('phone').value,
                     password: document.getElementById('password').value,
                 }),

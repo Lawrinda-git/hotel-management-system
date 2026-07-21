@@ -56,6 +56,7 @@
             </button>
             <p class="font-body-md text-sm text-white/90 min-h-5" id="staff-login-feedback"></p>
         </form>
+        <div class="px-8 md:px-12 pb-8 text-center"><a href="{% url 'google_login' %}?staff=1" class="inline-flex items-center justify-center gap-2 rounded-xl border border-outline-variant/50 bg-white px-5 py-3 text-sm font-semibold text-on-surface">Continue with Google</a><button type="button" class="ml-2 inline-flex items-center justify-center gap-2 rounded-xl border border-outline-variant/50 px-5 py-3 text-sm font-semibold text-white" onclick="document.getElementById('staff-login-feedback').textContent='Apple staff sign-in requires Apple Developer configuration.'">Apple</button></div>
         <div class="h-1.5 w-full bg-gradient-to-r from-primary via-secondary-container to-primary"></div>
     </div>
     <footer class="mt-8 text-center text-white/80">

@@ -11,8 +11,10 @@
     <input name="full_name" required placeholder="Full name" class="w-full rounded-xl border border-outline-variant px-4 py-3">
     <input name="email" required type="email" placeholder="Admin email" class="w-full rounded-xl border border-outline-variant px-4 py-3">
     <input name="password" required minlength="8" type="password" placeholder="Password" class="w-full rounded-xl border border-outline-variant px-4 py-3">
+    <div class="flex gap-2"><select name="country_code" class="w-28 rounded-xl border border-outline-variant px-2"><option selected>+233</option><option>+234</option><option>+254</option><option>+27</option><option>+44</option><option>+1</option></select><input name="staff_phone" required type="tel" placeholder="24 123 4567" class="min-w-0 flex-1 rounded-xl border border-outline-variant px-4 py-3"></div>
     <input name="signup_key" required placeholder="Admin signup key" class="w-full rounded-xl border border-outline-variant px-4 py-3">
     <button class="w-full rounded-xl bg-primary py-3 font-bold text-white" type="submit">Create admin account</button>
   </form>
+  <a href="{% url 'staff_login' %}" class="mt-5 block text-center text-primary">Back to staff login</a>
 </main>
 {% endblock %}

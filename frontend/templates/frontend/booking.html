@@ -35,15 +35,15 @@
                 </div>
                 <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
                     <label class="block font-label-md text-label-md text-primary mb-3" for="guest-phone">Guest Phone</label>
-                    <div class="flex gap-2"><select id="country-code" class="w-28 px-2 py-3 bg-surface-container-low border border-outline-variant rounded-lg"><option selected>+233</option><option>+234</option><option>+254</option><option>+27</option><option>+44</option><option>+1</option></select><input id="guest-phone" class="min-w-0 flex-1 px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="tel" placeholder="24 123 4567"></div>
-                </div>
-                <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
-                    <label class="block font-label-md text-label-md text-primary mb-3" for="id-number">ID Number</label>
-                    <input id="id-number" class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="text" placeholder="Passport or national ID">
+                    <div class="flex gap-2"><select id="country-code" class="w-28 px-2 py-3 bg-surface-container-low border border-outline-variant rounded-lg"><option selected>+233</option><option>+234</option><option>+254</option><option>+27</option><option>+44</option><option>+1</option></select><input id="guest-phone" required class="min-w-0 flex-1 px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="tel" placeholder="24 123 4567"></div>
                 </div>
                 <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20 md:col-span-2">
                     <label class="block font-label-md text-label-md text-primary mb-3" for="nationality">Nationality</label>
-                    <select id="nationality" class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md"><option value="Ghana" selected>Ghana</option><option>Nigeria</option><option>Kenya</option><option>South Africa</option><option>United Kingdom</option><option>United States</option><option>Other</option></select>
+                    <select id="nationality" required class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md"><option value="Ghana" selected>Ghana</option><option>Nigeria</option><option>Kenya</option><option>South Africa</option><option>United Kingdom</option><option>United States</option><option>Other</option></select>
+                </div>
+                <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
+                    <label class="block font-label-md text-label-md text-primary mb-3" for="id-number">ID Number</label>
+                    <input id="id-number" required class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="text" placeholder="GHA-123456789-0">
                 </div>
             </section>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

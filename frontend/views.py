@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import secrets
 import smtplib
 import time
@@ -15,7 +16,7 @@ from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.hashers import check_password, make_password
-from django.db import transaction
+from django.db import connection, transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
@@ -28,6 +29,20 @@ from apps.rooms.models import Room
 
 Staff = get_user_model()
 logger = logging.getLogger(__name__)
+
+
+def _phone_value(country_code, local_number):
+    country_code = (country_code or "+233").strip()
+    local_number = (local_number or "").strip()
+    if local_number.startswith("+"):
+        value = local_number
+    else:
+        value = f"{country_code}{local_number.lstrip('0')}"
+    return value if re.fullmatch(r"\+[1-9]\d{7,14}", value) else ""
+
+
+def _ghana_card_valid(value):
+    return bool(re.fullmatch(r"GHA-\d{9}-\d", (value or "").strip().upper()))
 
 
 def _google_redirect_uri(request):
@@ -97,18 +112,13 @@ def _send_verification_sms(phone_number, code):
 
 
 def _complete_or_challenge_login(request, user):
-    challenge = _begin_two_factor(request, user)
-    if not challenge["sent"]:
-        return JsonResponse({
-            "detail": "We couldn't send the verification code. Please try again later.",
-        }, status=503)
-    channel = request.session.get("pending_login_channel", "email")
-    response = {
-        "detail": f"We sent a verification code to your {channel}.",
-        "two_factor_required": True,
-        "redirect_url": "/verification/",
-    }
-    return JsonResponse(response, status=202)
+    request.session["pending_login_user_id"] = user.id
+    request.session.pop("pending_login_channel", None)
+    return JsonResponse({
+        "detail": "Choose how you want to receive your verification code.",
+        "verification_method_required": True,
+        "redirect_url": "/verification-method/",
+    }, status=202)
 
 
 def _redirect_for_role(role):
@@ -132,6 +142,18 @@ def signin(request):
     return render(request, "frontend/signin.html")
 
 
+def database_health(request):
+    """Confirm the configured Django database is reachable."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+        return JsonResponse({"status": "ok", "database": connection.vendor})
+    except Exception:
+        logger.exception("Database health check failed")
+        return JsonResponse({"status": "error", "database": connection.vendor}, status=503)
+
+
 @login_required(login_url="signin")
 def profile(request):
     """Show and update the signed-in user's profile."""
@@ -139,10 +161,10 @@ def profile(request):
     if request.method == "POST":
         full_name = (request.POST.get("full_name") or "").strip()
         email = (request.POST.get("email") or "").strip().lower()
-        staff_phone = (request.POST.get("staff_phone") or "").strip()
+        staff_phone = _phone_value(request.POST.get("country_code"), request.POST.get("staff_phone"))
         upload = request.FILES.get("profile_picture")
-        if not full_name or not email:
-            return render(request, "frontend/profile.html", {"profile_error": "Name and email are required."})
+        if not full_name or not email or not staff_phone:
+            return render(request, "frontend/profile.html", {"profile_error": "Name, email, and a valid phone number are required."})
         if Staff.objects.filter(email__iexact=email).exclude(pk=user.pk).exists():
             return render(request, "frontend/profile.html", {"profile_error": "That email is already in use."})
         parts = full_name.split(maxsplit=1)
@@ -180,12 +202,9 @@ def api_login(request):
     ).strip()
     password = (payload.get("password") or "").strip()
     staff_only = bool(payload.get("staff_login"))
-    verification_channel = str(payload.get("verification_channel") or "email").strip().lower()
 
     if not identifier or not password:
         return JsonResponse({"detail": "username/email and password are required."}, status=400)
-    if verification_channel not in {"email", "sms"}:
-        return JsonResponse({"detail": "verification_channel must be email or sms."}, status=400)
 
     user = None
     if "@" in identifier:
@@ -202,16 +221,13 @@ def api_login(request):
     if authenticated_user is None:
         return JsonResponse({"detail": "Invalid credentials."}, status=400)
 
-    if verification_channel == "sms" and not (authenticated_user.staff_phone or "").strip():
-        return JsonResponse({"detail": "Add a phone number to use SMS verification."}, status=400)
-
-    request.session["pending_login_channel"] = verification_channel
-
     return _complete_or_challenge_login(request, authenticated_user)
 
 
 def staff_login(request):
     """Staff portal login page."""
+    if not Staff.objects.exists():
+        return redirect("admin_signup")
     return render(request, "frontend/staff_login.html")
 
 
@@ -221,20 +237,21 @@ def admin_signup(request):
         email = (request.POST.get("email") or "").strip().lower()
         password = request.POST.get("password") or ""
         signup_key = request.POST.get("signup_key") or ""
+        staff_phone = _phone_value(request.POST.get("country_code"), request.POST.get("staff_phone"))
         if settings.ADMIN_SIGNUP_KEY and signup_key != settings.ADMIN_SIGNUP_KEY:
             return render(request, "frontend/admin_signup.html", {"error": "The admin signup key is invalid."})
         if not settings.ADMIN_SIGNUP_KEY and not settings.DEBUG:
             return render(request, "frontend/admin_signup.html", {"error": "Admin signup is disabled until ADMIN_SIGNUP_KEY is configured."})
-        if not full_name or not email or len(password) < 8:
-            return render(request, "frontend/admin_signup.html", {"error": "Enter a name, valid email, and password of at least 8 characters."})
+        if not full_name or not email or len(password) < 8 or not staff_phone:
+            return render(request, "frontend/admin_signup.html", {"error": "Enter a name, valid email, password, and phone number."})
         if Staff.objects.filter(email__iexact=email).exists() or Staff.objects.filter(username__iexact=email).exists():
             return render(request, "frontend/admin_signup.html", {"error": "An account with that email already exists."})
         parts = full_name.split(maxsplit=1)
         Staff.objects.create_superuser(
             username=email, email=email, password=password, first_name=parts[0],
-            last_name=parts[1] if len(parts) > 1 else "", staff_name=full_name, role="admin",
+            last_name=parts[1] if len(parts) > 1 else "", staff_name=full_name, staff_phone=staff_phone, role="admin",
         )
-        return redirect("signin")
+        return redirect("staff_login")
     return render(request, "frontend/admin_signup.html")
 
 
@@ -276,6 +293,25 @@ def two_factor(request):
     })
 
 
+def verification_method(request):
+    user_id = request.session.get("pending_login_user_id")
+    user = Staff.objects.filter(pk=user_id, is_active=True).first() if user_id else None
+    if user is None:
+        return redirect("signin")
+    if request.method == "POST":
+        channel = (request.POST.get("verification_channel") or "").strip().lower()
+        if channel not in {"email", "sms"}:
+            return render(request, "frontend/verification_method.html", {"user": user, "error": "Choose email or SMS."})
+        if channel == "sms" and not (user.staff_phone or "").strip():
+            return render(request, "frontend/verification_method.html", {"user": user, "error": "Add a phone number to your profile before using SMS."})
+        request.session["pending_login_channel"] = channel
+        challenge = _begin_two_factor(request, user)
+        if not challenge["sent"]:
+            return render(request, "frontend/verification_method.html", {"user": user, "error": "We could not send the verification code. Try again."})
+        return redirect("verification")
+    return render(request, "frontend/verification_method.html", {"user": user})
+
+
 @require_http_methods(["POST"])
 def api_two_factor_verify(request):
     try:
@@ -305,6 +341,7 @@ def google_login(request):
         return redirect("signin")
     state = secrets.token_urlsafe(32)
     request.session["google_oauth_state"] = state
+    request.session["google_oauth_staff"] = request.GET.get("staff") == "1"
     redirect_uri = _google_redirect_uri(request)
     request.session["google_oauth_redirect_uri"] = redirect_uri
     query = urlencode({
@@ -324,6 +361,7 @@ def google_callback(request):
     if request.GET.get("error") or not request.GET.get("code"):
         return redirect("signin")
     redirect_uri = request.session.pop("google_oauth_redirect_uri", None) or _google_redirect_uri(request)
+    staff_login_flow = request.session.pop("google_oauth_staff", False)
     try:
         data = urlencode({
             "code": request.GET["code"], "client_id": settings.GOOGLE_OAUTH_CLIENT_ID,
@@ -337,19 +375,23 @@ def google_callback(request):
             raise ValueError("Invalid Google identity token")
         email = claims["email"].lower()
         full_name = claims.get("name") or email.split("@", 1)[0]
-        user, created = Staff.objects.get_or_create(email=email, defaults={
-            "username": email, "staff_name": full_name, "role": "guest",
-            "first_name": claims.get("given_name", ""), "last_name": claims.get("family_name", ""),
-        })
-        if created:
-            user.set_unusable_password()
-            user.save(update_fields=["password"])
+        if staff_login_flow:
+            user = Staff.objects.filter(email__iexact=email).exclude(role__iexact="guest").first()
+            if user is None:
+                return redirect("staff_login")
+        else:
+            user, created = Staff.objects.get_or_create(email=email, defaults={
+                "username": email, "staff_name": full_name, "role": "guest",
+                "first_name": claims.get("given_name", ""), "last_name": claims.get("family_name", ""),
+            })
+            if created:
+                user.set_unusable_password()
+                user.save(update_fields=["password"])
     except Exception:
-        return redirect("signin")
-    challenge = _begin_two_factor(request, user)
-    if not challenge["sent"]:
-        return redirect("signin")
-    return redirect("verification")
+        return redirect("staff_login" if staff_login_flow else "signin")
+    request.session["pending_login_user_id"] = user.id
+    request.session.pop("pending_login_channel", None)
+    return redirect("verification_method")
 
 
 @require_http_methods(["POST"])
@@ -362,11 +404,11 @@ def api_register(request):
 
     full_name = (payload.get("full_name") or payload.get("name") or "").strip()
     email = (payload.get("email") or "").strip().lower()
-    staff_phone = (payload.get("staff_phone") or payload.get("phone") or "").strip()
+    staff_phone = _phone_value(payload.get("country_code"), payload.get("staff_phone") or payload.get("phone"))
     password = (payload.get("password") or "").strip()
 
-    if not full_name or not email or not password:
-        return JsonResponse({"detail": "full_name, email, and password are required."}, status=400)
+    if not full_name or not email or not password or not staff_phone:
+        return JsonResponse({"detail": "full_name, email, phone, and password are required."}, status=400)
 
     if Staff.objects.filter(username__iexact=email).exists() or Staff.objects.filter(email__iexact=email).exists():
         return JsonResponse({"detail": "An account with that email already exists."}, status=409)
@@ -469,9 +511,9 @@ def create_booking(request):
     check_out_raw = (payload.get("check_out") or "").strip()
     room_id = payload.get("room_id")
 
-    if not all([guest_name, guest_email, id_number, check_in_raw, check_out_raw, room_id]):
+    if not all([guest_name, guest_email, guest_phone, id_number, nationality, check_in_raw, check_out_raw, room_id]):
         return JsonResponse(
-            {"detail": "guest_name, guest_email, id_number, room_id, check_in, and check_out are required."},
+            {"detail": "guest_name, guest_email, phone, nationality, ID number, room_id, check_in, and check_out are required."},
             status=400,
         )
 
@@ -483,6 +525,8 @@ def create_booking(request):
 
     if check_out <= check_in:
         return JsonResponse({"detail": "check_out must be after check_in."}, status=400)
+    if nationality.lower() == "ghana" and not _ghana_card_valid(id_number):
+        return JsonResponse({"detail": "Ghana Card PIN must use the format GHA-123456789-0."}, status=400)
 
     try:
         room = Room.objects.select_related("hotel", "room_type").get(pk=room_id)

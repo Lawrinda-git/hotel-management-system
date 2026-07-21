@@ -21,7 +21,7 @@
       {% if request.user.profile_picture %}<label class="flex items-center gap-2 text-sm text-on-surface-variant"><input type="checkbox" name="clear_picture" value="1"> Remove current picture</label>{% endif %}
       <label class="block text-sm font-semibold text-primary">Full name<input name="full_name" value="{{ request.user.staff_name }}" required class="mt-2 w-full rounded-xl border border-outline-variant px-4 py-3"></label>
       <label class="block text-sm font-semibold text-primary">Email<input name="email" type="email" value="{{ request.user.email }}" required class="mt-2 w-full rounded-xl border border-outline-variant px-4 py-3"></label>
-      <label class="block text-sm font-semibold text-primary">Phone number<input name="staff_phone" type="tel" value="{{ request.user.staff_phone }}" class="mt-2 w-full rounded-xl border border-outline-variant px-4 py-3"></label>
+      <label class="block text-sm font-semibold text-primary">Phone number<div class="mt-2 flex gap-2"><select name="country_code" class="w-28 rounded-xl border border-outline-variant px-2"><option selected>+233</option><option>+234</option><option>+254</option><option>+27</option><option>+44</option><option>+1</option></select><input name="staff_phone" type="tel" value="{{ request.user.staff_phone|cut:'+233' }}" required placeholder="24 123 4567" class="min-w-0 flex-1 rounded-xl border border-outline-variant px-4 py-3"></div></label>
       <button class="w-full rounded-xl bg-primary py-3 font-bold text-white" type="submit">Save profile</button>
     </form>
   </section>
