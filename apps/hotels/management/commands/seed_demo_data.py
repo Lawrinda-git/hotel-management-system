@@ -9,9 +9,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         hotels = [
-            ("Azure Sands Resort", "reservations@azuresands.example", "+233 30 290 4100", "Baa Atoll, Maldives"),
-            ("The Golden Palm Accra", "stay@goldenpalm.example", "+233 30 277 1840", "15 Independence Avenue, Accra"),
-            ("Cape Coast Heritage Hotel", "hello@cape-heritage.example", "+233 24 601 8821", "Victoria Road, Cape Coast"),
+            ("Labadi Beach Resort", "reservations@labadi.example", "+233 30 277 1000", "La Road, Labadi, Accra"),
+            ("Aqua Safari Resort", "stay@aquasafari.example", "+233 30 352 0100", "Ada Foah, Greater Accra"),
+            ("Coconut Grove Beach Resort", "hello@coconutgrove.example", "+233 24 601 8821", "Brenu Beach, Cape Coast"),
         ]
         room_types = [
             ("Classic Room", "145.00", "A bright, comfortable room with a queen bed, work desk, and city views."),
@@ -44,11 +44,11 @@ class Command(BaseCommand):
                 )
 
         room_plan = {
-            "Azure Sands Resort": [("101", "Ocean View Suite", 1), ("102", "Ocean View Suite", 1), ("201", "Executive Suite", 2), ("301", "Presidential Villa", 3)],
-            "The Golden Palm Accra": [("110", "Classic Room", 1), ("111", "Classic Room", 1), ("210", "Deluxe King", 2), ("211", "Deluxe King", 2), ("310", "Family Residence", 3), ("311", "Executive Suite", 3)],
-            "Cape Coast Heritage Hotel": [("05", "Classic Room", 0), ("06", "Classic Room", 0), ("12", "Deluxe King", 1), ("14", "Ocean View Suite", 1), ("20", "Family Residence", 2), ("21", "Executive Suite", 2)],
+            "Labadi Beach Resort": [("101", "Ocean View Suite", 1), ("102", "Ocean View Suite", 1), ("201", "Executive Suite", 2), ("301", "Presidential Villa", 3)],
+            "Aqua Safari Resort": [("110", "Classic Room", 1), ("111", "Classic Room", 1), ("210", "Deluxe King", 2), ("211", "Deluxe King", 2), ("310", "Family Residence", 3), ("311", "Executive Suite", 3)],
+            "Coconut Grove Beach Resort": [("05", "Classic Room", 0), ("06", "Classic Room", 0), ("12", "Deluxe King", 1), ("14", "Ocean View Suite", 1), ("20", "Family Residence", 2), ("21", "Executive Suite", 2)],
         }
-        unavailable = {("Azure Sands Resort", "201"): Room.RoomStatus.RESERVED, ("The Golden Palm Accra", "211"): Room.RoomStatus.OCCUPIED, ("Cape Coast Heritage Hotel", "14"): Room.RoomStatus.MAINTENANCE}
+        unavailable = {("Labadi Beach Resort", "201"): Room.RoomStatus.RESERVED, ("Aqua Safari Resort", "211"): Room.RoomStatus.OCCUPIED, ("Coconut Grove Beach Resort", "14"): Room.RoomStatus.MAINTENANCE}
         for hotel_name, rooms in room_plan.items():
             hotel = Hotel.objects.get(hotel_name=hotel_name)
             for room_number, type_name, floor in rooms:

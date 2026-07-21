@@ -15,7 +15,7 @@
         <button class="w-full bg-secondary text-on-secondary font-label-md py-3 rounded-lg mb-6 hover:brightness-110 transition-all active:scale-[0.98]">Book Now</button>
         <div class="flex flex-col">
             <div class="flex items-center gap-4 px-6 py-3 text-on-primary-fixed hover:text-on-primary transition-all cursor-pointer"><span class="material-symbols-outlined">settings</span><span class="font-body-md">Settings</span></div>
-            <div class="flex items-center gap-4 px-6 py-3 text-on-primary-fixed hover:text-on-primary transition-all cursor-pointer"><span class="material-symbols-outlined">logout</span><span class="font-body-md">Logout</span></div>
+            <a href="{% url 'logout' %}" class="flex items-center gap-4 px-6 py-3 text-on-primary-fixed hover:text-on-primary transition-all"><span class="material-symbols-outlined">logout</span><span class="font-body-md">Logout</span></a>
         </div>
     </div>
 </aside>

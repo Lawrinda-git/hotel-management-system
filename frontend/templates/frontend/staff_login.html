@@ -116,7 +116,8 @@
                     'X-CSRFToken': getCookie('csrftoken'),
                 },
                 body: JSON.stringify({
-                    username: document.getElementById('username').value,
+                    email: document.getElementById('username').value,
+                    staff_login: true,
                     password: document.getElementById('password').value,
                 }),
             });

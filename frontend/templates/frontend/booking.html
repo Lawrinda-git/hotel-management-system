@@ -35,7 +35,7 @@
                 </div>
                 <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
                     <label class="block font-label-md text-label-md text-primary mb-3" for="guest-phone">Guest Phone</label>
-                    <input id="guest-phone" class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="tel" placeholder="+1 555 0100">
+                    <div class="flex gap-2"><select id="country-code" class="w-28 px-2 py-3 bg-surface-container-low border border-outline-variant rounded-lg"><option selected>+233</option><option>+234</option><option>+254</option><option>+27</option><option>+44</option><option>+1</option></select><input id="guest-phone" class="min-w-0 flex-1 px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="tel" placeholder="24 123 4567"></div>
                 </div>
                 <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
                     <label class="block font-label-md text-label-md text-primary mb-3" for="id-number">ID Number</label>
@@ -43,7 +43,7 @@
                 </div>
                 <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20 md:col-span-2">
                     <label class="block font-label-md text-label-md text-primary mb-3" for="nationality">Nationality</label>
-                    <input id="nationality" class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="text" placeholder="Country of citizenship">
+                    <select id="nationality" class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md"><option value="Ghana" selected>Ghana</option><option>Nigeria</option><option>Kenya</option><option>South Africa</option><option>United Kingdom</option><option>United States</option><option>Other</option></select>
                 </div>
             </section>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -51,14 +51,14 @@
                     <label class="block font-label-md text-label-md text-primary mb-3">Check-in Date</label>
                     <div class="relative flex items-center">
                         <span class="material-symbols-outlined absolute left-3 text-outline">calendar_today</span>
-                        <input id="check-in" class="date-picker-custom w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="date" value="2024-10-15">
+                        <input id="check-in" class="date-picker-custom w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="date" value="2026-08-15" min="2026-01-01">
                     </div>
                 </div>
                 <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
                     <label class="block font-label-md text-label-md text-primary mb-3">Check-out Date</label>
                     <div class="relative flex items-center">
                         <span class="material-symbols-outlined absolute left-3 text-outline">calendar_month</span>
-                        <input id="check-out" class="date-picker-custom w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="date" value="2024-10-20">
+                        <input id="check-out" class="date-picker-custom w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="date" value="2026-08-20" min="2026-01-01">
                     </div>
                 </div>
             </div>
@@ -252,7 +252,7 @@
         const payload = {
             guest_name: document.getElementById('guest-name').value,
             guest_email: document.getElementById('guest-email').value,
-            guest_phone: document.getElementById('guest-phone').value,
+            guest_phone: document.getElementById('country-code').value + document.getElementById('guest-phone').value.replace(/^0+/, ''),
             id_number: document.getElementById('id-number').value,
             nationality: document.getElementById('nationality').value,
             check_in: new Date(checkInValue).toISOString(),

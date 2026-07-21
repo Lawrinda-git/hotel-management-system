@@ -186,5 +186,9 @@ GOOGLE_OAUTH_CLIENT_SECRET = config("GOOGLE_OAUTH_CLIENT_SECRET", default="")
 GOOGLE_OAUTH_REDIRECT_URI = config(
     "GOOGLE_OAUTH_REDIRECT_URI", default="http://localhost:8000/api/auth/google/callback/"
 )
+GOOGLE_OAUTH_REDIRECT_URIS = [
+    value.strip() for value in config("GOOGLE_OAUTH_REDIRECT_URIS", default=GOOGLE_OAUTH_REDIRECT_URI).split(",") if value.strip()
+]
+ADMIN_SIGNUP_KEY = config("ADMIN_SIGNUP_KEY", default="")
 
 

@@ -5,13 +5,13 @@ import smtplib
 import time
 from decimal import Decimal
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 from urllib.request import Request, urlopen
 from datetime import datetime
 
 import jwt
 from django.conf import settings
-from django.contrib.auth import authenticate, get_user_model, login
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.hashers import check_password, make_password
@@ -28,6 +28,15 @@ from apps.rooms.models import Room
 
 Staff = get_user_model()
 logger = logging.getLogger(__name__)
+
+
+def _google_redirect_uri(request):
+    """Choose the registered callback matching the URL the user opened."""
+    request_host = request.get_host().split(":", 1)[0].lower()
+    for redirect_uri in settings.GOOGLE_OAUTH_REDIRECT_URIS:
+        if urlparse(redirect_uri).hostname == request_host:
+            return redirect_uri
+    return settings.GOOGLE_OAUTH_REDIRECT_URI
 
 
 def _begin_two_factor(request, user):
@@ -170,6 +179,7 @@ def api_login(request):
         or ""
     ).strip()
     password = (payload.get("password") or "").strip()
+    staff_only = bool(payload.get("staff_login"))
     verification_channel = str(payload.get("verification_channel") or "email").strip().lower()
 
     if not identifier or not password:
@@ -185,6 +195,8 @@ def api_login(request):
 
     if user is None:
         return JsonResponse({"detail": "Invalid credentials."}, status=400)
+    if staff_only and (user.role or "").lower() == "guest":
+        return JsonResponse({"detail": "This account is not a staff account."}, status=403)
 
     authenticated_user = authenticate(request, username=user.username, password=password)
     if authenticated_user is None:
@@ -201,6 +213,34 @@ def api_login(request):
 def staff_login(request):
     """Staff portal login page."""
     return render(request, "frontend/staff_login.html")
+
+
+def admin_signup(request):
+    if request.method == "POST":
+        full_name = (request.POST.get("full_name") or "").strip()
+        email = (request.POST.get("email") or "").strip().lower()
+        password = request.POST.get("password") or ""
+        signup_key = request.POST.get("signup_key") or ""
+        if settings.ADMIN_SIGNUP_KEY and signup_key != settings.ADMIN_SIGNUP_KEY:
+            return render(request, "frontend/admin_signup.html", {"error": "The admin signup key is invalid."})
+        if not settings.ADMIN_SIGNUP_KEY and not settings.DEBUG:
+            return render(request, "frontend/admin_signup.html", {"error": "Admin signup is disabled until ADMIN_SIGNUP_KEY is configured."})
+        if not full_name or not email or len(password) < 8:
+            return render(request, "frontend/admin_signup.html", {"error": "Enter a name, valid email, and password of at least 8 characters."})
+        if Staff.objects.filter(email__iexact=email).exists() or Staff.objects.filter(username__iexact=email).exists():
+            return render(request, "frontend/admin_signup.html", {"error": "An account with that email already exists."})
+        parts = full_name.split(maxsplit=1)
+        Staff.objects.create_superuser(
+            username=email, email=email, password=password, first_name=parts[0],
+            last_name=parts[1] if len(parts) > 1 else "", staff_name=full_name, role="admin",
+        )
+        return redirect("signin")
+    return render(request, "frontend/admin_signup.html")
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("signin")
 
 
 def create_account(request):
@@ -265,9 +305,11 @@ def google_login(request):
         return redirect("signin")
     state = secrets.token_urlsafe(32)
     request.session["google_oauth_state"] = state
+    redirect_uri = _google_redirect_uri(request)
+    request.session["google_oauth_redirect_uri"] = redirect_uri
     query = urlencode({
         "client_id": settings.GOOGLE_OAUTH_CLIENT_ID,
-        "redirect_uri": settings.GOOGLE_OAUTH_REDIRECT_URI,
+        "redirect_uri": redirect_uri,
         "response_type": "code",
         "scope": "openid email profile",
         "state": state,
@@ -281,11 +323,12 @@ def google_callback(request):
         return redirect("signin")
     if request.GET.get("error") or not request.GET.get("code"):
         return redirect("signin")
+    redirect_uri = request.session.pop("google_oauth_redirect_uri", None) or _google_redirect_uri(request)
     try:
         data = urlencode({
             "code": request.GET["code"], "client_id": settings.GOOGLE_OAUTH_CLIENT_ID,
             "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET,
-            "redirect_uri": settings.GOOGLE_OAUTH_REDIRECT_URI, "grant_type": "authorization_code",
+            "redirect_uri": redirect_uri, "grant_type": "authorization_code",
         }).encode()
         token_request = Request("https://oauth2.googleapis.com/token", data=data, method="POST")
         token_data = json.loads(urlopen(token_request, timeout=10).read().decode())
@@ -516,21 +559,25 @@ def create_booking(request):
 
 # ─── Staff Dashboard Pages ──────────────────────────────────────
 
+@login_required(login_url="staff_login")
 def manager_dashboard(request):
     """Manager/Admin dashboard view."""
     return render(request, "frontend/manager_dashboard.html")
 
 
+@login_required(login_url="staff_login")
 def receptionist_dashboard(request):
     """Receptionist operations dashboard."""
     return render(request, "frontend/receptionist_dashboard.html")
 
 
+@login_required(login_url="staff_login")
 def accountant_dashboard(request):
     """Accountant/financial dashboard."""
     return render(request, "frontend/accountant_dashboard.html")
 
 
+@login_required(login_url="staff_login")
 def housekeeping_dashboard(request):
     """Housekeeping operations dashboard."""
     return render(request, "frontend/housekeeping_dashboard.html")

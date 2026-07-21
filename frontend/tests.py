@@ -31,9 +31,7 @@ class PublicJourneyTests(TestCase):
     def test_all_public_pages_render(self):
         for name in (
             "splash", "splash_page", "signin", "staff_login", "create_account",
-            "guest_home", "explore_stays", "hotel_details", "booking",
-            "manager_dashboard", "receptionist_dashboard", "accountant_dashboard",
-            "housekeeping_dashboard", "design_system",
+            "guest_home", "explore_stays", "hotel_details", "booking", "design_system",
         ):
             response = self.client.get(reverse(name))
             self.assertEqual(response.status_code, 200, name)
@@ -47,6 +45,31 @@ class PublicJourneyTests(TestCase):
         response = self.client.get(reverse("guest_home"))
         self.assertContains(response, "Morgan")
         self.assertNotContains(response, ">Alex<")
+
+    def test_staff_can_sign_in_with_email(self):
+        Staff.objects.create_user(
+            username="manager@example.com", email="manager@example.com", password="SafePass123",
+            staff_name="Manager User", role="manager",
+        )
+        response = self.client.post(
+            reverse("api_login"),
+            data=json.dumps({"email": "manager@example.com", "password": "SafePass123", "staff_login": True}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.json()["redirect_url"], "/verification/")
+
+    def test_guest_cannot_use_staff_login(self):
+        Staff.objects.create_user(
+            username="guest-staff@example.com", email="guest-staff@example.com", password="SafePass123",
+            staff_name="Guest User", role="guest",
+        )
+        response = self.client.post(
+            reverse("api_login"),
+            data=json.dumps({"email": "guest-staff@example.com", "password": "SafePass123", "staff_login": True}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 403)
 
     def test_profile_updates_name_and_picture(self):
         user = Staff.objects.create_user(
