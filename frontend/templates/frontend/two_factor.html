@@ -1,0 +1,29 @@
+{% extends "frontend/base.html" %}
+{% block title %}StayHub | Verify sign in{% endblock %}
+{% block body_class %}bg-background min-h-screen flex items-center justify-center px-5{% endblock %}
+{% block content %}
+<main class="w-full max-w-md rounded-3xl bg-surface-container-lowest p-8 shadow-xl">
+  <span class="material-symbols-outlined text-primary text-4xl">verified_user</span>
+  <h1 class="mt-4 font-headline-lg text-primary">Verify your sign-in</h1>
+  <p class="mt-2 text-on-surface-variant">Enter the six-digit code sent to your email. It expires in 10 minutes.</p>
+  <form id="verify-form" class="mt-7 space-y-4">
+    {% csrf_token %}
+    <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required class="w-full rounded-xl border border-outline-variant px-4 py-4 text-center text-2xl tracking-[0.5em]" placeholder="000000">
+    <button class="w-full rounded-xl bg-primary py-4 font-bold text-white" type="submit">Verify and sign in</button>
+    <p id="feedback" class="text-sm text-on-surface-variant"></p>
+  </form>
+</main>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+function csrf() { return document.cookie.split('; ').find(v => v.startsWith('csrftoken='))?.split('=')[1] || ''; }
+document.getElementById('verify-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const feedback = document.getElementById('feedback');
+  const response = await fetch('{% url "api_two_factor_verify" %}', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrf()}, body: JSON.stringify({code: document.getElementById('code').value})});
+  const data = await response.json();
+  if (!response.ok) { feedback.textContent = data.detail || 'Could not verify that code.'; return; }
+  window.location.assign(data.redirect_url);
+});
+</script>
+{% endblock %}

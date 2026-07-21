@@ -1,0 +1,28 @@
+{% extends "frontend/base.html" %}
+{% block title %}StayHub | Profile{% endblock %}
+{% block body_class %}bg-background min-h-screen px-5 py-10{% endblock %}
+{% block content %}
+<main class="mx-auto max-w-xl">
+  <a href="{% url 'guest_home' %}" class="text-primary">← Back to StayHub</a>
+  <section class="mt-6 rounded-3xl bg-surface-container-lowest p-8 shadow-xl">
+    <h1 class="font-headline-lg text-primary">Your profile</h1>
+    <p class="mt-2 text-on-surface-variant">Update your details and choose your own profile picture.</p>
+    {% if profile_error %}<p class="mt-4 rounded-xl bg-error-container px-4 py-3 text-sm text-on-error-container">{{ profile_error }}</p>{% endif %}
+    <form class="mt-7 space-y-5" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="flex items-center gap-5">
+        {% if request.user.profile_picture %}
+          <img src="{{ request.user.profile_picture.url }}" alt="Profile picture" class="h-24 w-24 rounded-full object-cover ring-4 ring-primary-fixed">
+        {% else %}
+          <div class="flex h-24 w-24 items-center justify-center rounded-full bg-primary text-3xl font-bold text-white">{{ request.user.first_name|default:request.user.username|first|upper }}</div>
+        {% endif %}
+        <div class="flex-1"><label class="block text-sm font-semibold text-primary" for="profile_picture">Profile picture</label><input id="profile_picture" name="profile_picture" type="file" accept="image/*" class="mt-2 block w-full text-sm"><p class="mt-1 text-xs text-on-surface-variant">PNG, JPG, or another image up to 5 MB.</p></div>
+      </div>
+      {% if request.user.profile_picture %}<label class="flex items-center gap-2 text-sm text-on-surface-variant"><input type="checkbox" name="clear_picture" value="1"> Remove current picture</label>{% endif %}
+      <label class="block text-sm font-semibold text-primary">Full name<input name="full_name" value="{{ request.user.staff_name }}" required class="mt-2 w-full rounded-xl border border-outline-variant px-4 py-3"></label>
+      <label class="block text-sm font-semibold text-primary">Email<input name="email" type="email" value="{{ request.user.email }}" required class="mt-2 w-full rounded-xl border border-outline-variant px-4 py-3"></label>
+      <button class="w-full rounded-xl bg-primary py-3 font-bold text-white" type="submit">Save profile</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

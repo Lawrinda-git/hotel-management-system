@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
+from decouple import config
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -136,6 +138,8 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "frontend" / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -155,5 +159,27 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
 ]
 CORS_ALLOW_ALL_ORIGINS = True
+
+# Development mail is printed to the terminal.  Set EMAIL_BACKEND to Django's
+# SMTP backend and the SMTP_* variables in the deployment environment to send
+# real password-reset and two-step-verification messages.
+BREVO_API_KEY = config("BREVO_API_KEY", default="")
+EMAIL_BACKEND = (
+    config("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+)
+EMAIL_HOST = config("SMTP_HOST", default="")
+EMAIL_PORT = config("SMTP_PORT", default=587, cast=int)
+EMAIL_HOST_USER = config("SMTP_USERNAME", default="")
+EMAIL_HOST_PASSWORD = config("SMTP_PASSWORD", default="")
+EMAIL_USE_TLS = config("SMTP_USE_TLS", default=True, cast=bool)
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="StayHub <no-reply@stayhub.local>")
+
+# Google OAuth is deliberately environment-configured: never commit a client
+# secret to source control.  The redirect URI must exactly match Google Cloud.
+GOOGLE_OAUTH_CLIENT_ID = config("GOOGLE_OAUTH_CLIENT_ID", default="")
+GOOGLE_OAUTH_CLIENT_SECRET = config("GOOGLE_OAUTH_CLIENT_SECRET", default="")
+GOOGLE_OAUTH_REDIRECT_URI = config(
+    "GOOGLE_OAUTH_REDIRECT_URI", default="http://localhost:8000/api/auth/google/callback/"
+)
 
 

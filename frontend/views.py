@@ -1,10 +1,21 @@
 import json
+import logging
+import secrets
+import smtplib
+import time
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 from datetime import datetime
 
+import jwt
+from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.hashers import check_password, make_password
 from django.db import transaction
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from apps.guests.models import Guest
@@ -13,6 +24,45 @@ from apps.rooms.models import Room
 
 
 Staff = get_user_model()
+logger = logging.getLogger(__name__)
+
+
+def _begin_two_factor(request, user):
+    """Send a short-lived email code before creating an authenticated session."""
+    code = f"{secrets.randbelow(1_000_000):06d}"
+    request.session["pending_login_user_id"] = user.id
+    request.session["pending_login_code"] = make_password(code)
+    request.session["pending_login_expires_at"] = time.time() + 600
+    from django.core.mail import send_mail
+    try:
+        send_mail(
+            "Your StayHub verification code",
+            f"Your verification code is {code}. It expires in 10 minutes.",
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+    except (smtplib.SMTPException, OSError):
+        logger.exception("Unable to send two-factor email to %s", user.email)
+        for key in ("pending_login_user_id", "pending_login_code", "pending_login_expires_at"):
+            request.session.pop(key, None)
+        return {"sent": False, "dev_code": None}
+    request.session.pop("pending_login_dev_code", None)
+    return {"sent": True, "dev_code": None}
+
+
+def _complete_or_challenge_login(request, user):
+    challenge = _begin_two_factor(request, user)
+    if not challenge["sent"]:
+        return JsonResponse({
+            "detail": "We couldn't send the verification email. Please try again later.",
+        }, status=503)
+    response = {
+        "detail": "We sent a verification code to your email.",
+        "two_factor_required": True,
+        "redirect_url": "/two-factor/",
+    }
+    return JsonResponse(response, status=202)
 
 
 def _redirect_for_role(role):
@@ -34,6 +84,36 @@ def splash(request):
 def signin(request):
     """Customer sign-in page."""
     return render(request, "frontend/signin.html")
+
+
+@login_required(login_url="signin")
+def profile(request):
+    """Show and update the signed-in user's profile."""
+    user = request.user
+    if request.method == "POST":
+        full_name = (request.POST.get("full_name") or "").strip()
+        email = (request.POST.get("email") or "").strip().lower()
+        upload = request.FILES.get("profile_picture")
+        if not full_name or not email:
+            return render(request, "frontend/profile.html", {"profile_error": "Name and email are required."})
+        if Staff.objects.filter(email__iexact=email).exclude(pk=user.pk).exists():
+            return render(request, "frontend/profile.html", {"profile_error": "That email is already in use."})
+        parts = full_name.split(maxsplit=1)
+        user.staff_name = full_name
+        user.first_name = parts[0]
+        user.last_name = parts[1] if len(parts) > 1 else ""
+        user.email = email
+        user.username = email
+        if request.POST.get("clear_picture") == "1" and user.profile_picture:
+            user.profile_picture.delete(save=False)
+            user.profile_picture = None
+        if upload:
+            if upload.size > 5 * 1024 * 1024 or not (upload.content_type or "").startswith("image/"):
+                return render(request, "frontend/profile.html", {"profile_error": "Use an image file smaller than 5 MB."})
+            user.profile_picture = upload
+        user.save()
+        return redirect("profile")
+    return render(request, "frontend/profile.html")
 
 
 @require_http_methods(["POST"])
@@ -68,14 +148,7 @@ def api_login(request):
     if authenticated_user is None:
         return JsonResponse({"detail": "Invalid credentials."}, status=400)
 
-    login(request, authenticated_user)
-    return JsonResponse(
-        {
-            "detail": "Signed in successfully.",
-            "role": authenticated_user.role,
-            "redirect_url": _redirect_for_role(authenticated_user.role),
-        }
-    )
+    return _complete_or_challenge_login(request, authenticated_user)
 
 
 def staff_login(request):
@@ -86,6 +159,105 @@ def staff_login(request):
 def create_account(request):
     """New user registration page."""
     return render(request, "frontend/create_account.html")
+
+
+def password_reset(request):
+    """Email a safe reset link without revealing whether an address exists."""
+    if request.method == "POST":
+        form = PasswordResetForm(request.POST)
+        if form.is_valid():
+            try:
+                form.save(
+                    request=request,
+                    use_https=request.is_secure(),
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    email_template_name="frontend/password_reset_email.html",
+                    subject_template_name="frontend/password_reset_subject.txt",
+                )
+            except (smtplib.SMTPException, OSError):
+                # Do not reveal account existence or turn a mail outage into a 500.
+                logger.exception("Unable to send password-reset email")
+        return redirect("password_reset_done")
+    return render(request, "frontend/password_reset.html")
+
+
+def two_factor(request):
+    if not request.session.get("pending_login_user_id"):
+        return redirect("signin")
+    return render(request, "frontend/two_factor.html")
+
+
+@require_http_methods(["POST"])
+def api_two_factor_verify(request):
+    try:
+        payload = json.loads(request.body.decode("utf-8")) if request.body else {}
+    except json.JSONDecodeError:
+        return JsonResponse({"detail": "Invalid JSON payload."}, status=400)
+    user_id = request.session.get("pending_login_user_id")
+    expires_at = request.session.get("pending_login_expires_at", 0)
+    expected_code = request.session.get("pending_login_code", "")
+    code = str(payload.get("code", "")).strip()
+    if not user_id or time.time() > expires_at:
+        request.session.flush()
+        return JsonResponse({"detail": "This code has expired. Sign in again."}, status=400)
+    if not code or not check_password(code, expected_code):
+        return JsonResponse({"detail": "That verification code is not valid."}, status=400)
+    user = Staff.objects.filter(pk=user_id, is_active=True).first()
+    if user is None:
+        return JsonResponse({"detail": "Account unavailable."}, status=400)
+    login(request, user)
+    for key in ("pending_login_user_id", "pending_login_code", "pending_login_expires_at"):
+        request.session.pop(key, None)
+    return JsonResponse({"detail": "Signed in successfully.", "redirect_url": _redirect_for_role(user.role)})
+
+
+def google_login(request):
+    if not settings.GOOGLE_OAUTH_CLIENT_ID or not settings.GOOGLE_OAUTH_CLIENT_SECRET:
+        return redirect("signin")
+    state = secrets.token_urlsafe(32)
+    request.session["google_oauth_state"] = state
+    query = urlencode({
+        "client_id": settings.GOOGLE_OAUTH_CLIENT_ID,
+        "redirect_uri": settings.GOOGLE_OAUTH_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "state": state,
+        "prompt": "select_account",
+    })
+    return redirect(f"https://accounts.google.com/o/oauth2/v2/auth?{query}")
+
+
+def google_callback(request):
+    if request.GET.get("state") != request.session.pop("google_oauth_state", None):
+        return redirect("signin")
+    if request.GET.get("error") or not request.GET.get("code"):
+        return redirect("signin")
+    try:
+        data = urlencode({
+            "code": request.GET["code"], "client_id": settings.GOOGLE_OAUTH_CLIENT_ID,
+            "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET,
+            "redirect_uri": settings.GOOGLE_OAUTH_REDIRECT_URI, "grant_type": "authorization_code",
+        }).encode()
+        token_request = Request("https://oauth2.googleapis.com/token", data=data, method="POST")
+        token_data = json.loads(urlopen(token_request, timeout=10).read().decode())
+        claims = jwt.decode(token_data["id_token"], options={"verify_signature": False})
+        if claims.get("aud") != settings.GOOGLE_OAUTH_CLIENT_ID or claims.get("iss") not in {"accounts.google.com", "https://accounts.google.com"} or not claims.get("email_verified"):
+            raise ValueError("Invalid Google identity token")
+        email = claims["email"].lower()
+        full_name = claims.get("name") or email.split("@", 1)[0]
+        user, created = Staff.objects.get_or_create(email=email, defaults={
+            "username": email, "staff_name": full_name, "role": "guest",
+            "first_name": claims.get("given_name", ""), "last_name": claims.get("family_name", ""),
+        })
+        if created:
+            user.set_unusable_password()
+            user.save(update_fields=["password"])
+    except Exception:
+        return redirect("signin")
+    challenge = _begin_two_factor(request, user)
+    if not challenge["sent"]:
+        return redirect("signin")
+    return redirect("two_factor")
 
 
 @require_http_methods(["POST"])
@@ -135,7 +307,9 @@ def api_register(request):
 
 def guest_home(request):
     """Main customer home/explore page after login."""
-    return render(request, "frontend/guest_home.html")
+    name = request.user.get_full_name().strip() if request.user.is_authenticated else "Guest"
+    name = name or (request.user.staff_name if request.user.is_authenticated else "Guest")
+    return render(request, "frontend/guest_home.html", {"display_name": name})
 
 
 def explore_stays(request):

@@ -33,3 +33,6 @@ Thumbs.db
 
 # Migrations
 **/migrations/*.pyc
+
+#env
+.env

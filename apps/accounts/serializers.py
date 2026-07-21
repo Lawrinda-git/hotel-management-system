@@ -47,6 +47,7 @@ class StaffSerializer(serializers.ModelSerializer):
             "is_superuser",
             "date_joined",
             "hired_at",
+            "profile_picture",
         )
         read_only_fields = ("date_joined", "hired_at")
 
