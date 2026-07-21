@@ -1,0 +1,58 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub | Discover Your Next Escape{% endblock %}
+{% block body_class %}bg-background text-on-background min-h-screen overflow-x-hidden{% endblock %}
+{% block content %}
+<main class="relative min-h-screen w-full flex flex-col justify-end items-center overflow-hidden">
+    <div class="absolute inset-0 z-0 h-full w-full">
+        <div class="h-full w-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAc4lQMtL3rEsMhIaO5i0SZdpLIGajI_YBD4YateLS9UnIWOEP4sE-XiJ4P2CPwJ6qEeatgxTyISsp6R9aogkYKgBzyepoQpNtanEnTPfmSMsf5gaTaNs-gsW6Sb0pXSzq2JLkt7RG6VGs8hn7oJ7qZAUjKQei1pbSfTXzX69FfWV-RwbuO2BK2PehKj1vmDJ9ML8aup7VDQM-UnfnT2TVQT2Vj9W0XLij9D6_ntodY2DGX-wjrqLDcm54hD4Hk0riN5jY3GkNf-QYv')"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent"></div>
+    </div>
+    <header class="fixed top-0 w-full z-50 flex items-center justify-between px-margin-mobile h-16 md:px-margin-desktop">
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-white font-bold tracking-tight md:font-headline-lg md:text-headline-lg">StayHub</h1>
+        <button class="text-white opacity-80 hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-3xl">help_outline</span></button>
+    </header>
+    <section class="relative z-10 w-full max-w-screen-xl px-margin-mobile pb-24 md:px-margin-desktop md:pb-32 flex flex-col items-center md:items-start text-center md:text-left">
+        <div class="space-y-4 max-w-2xl mb-12 animate-fade-in-up">
+            <p class="font-label-md text-label-md text-secondary-fixed tracking-[0.2em] uppercase">Premier Destinations</p>
+            <h2 class="font-headline-xl text-headline-xl text-secondary-container leading-tight">Discover Your Next Escape</h2>
+            <p class="font-body-lg text-body-lg text-white/80 max-w-lg">Experience world-class hospitality in handpicked locations. Your journey into curated luxury begins with a single tap.</p>
+        </div>
+        <div class="flex flex-col md:flex-row gap-gutter w-full md:w-auto items-center">
+            <a href="{% url 'signin' %}" class="w-full md:w-56 py-4 px-8 bg-secondary-container text-primary font-label-md text-label-md rounded-xl shadow-xl hover:bg-secondary-fixed transition-all active:scale-95 flex items-center justify-center gap-2 group">Sign In <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span></a>
+            <a href="{% url 'create_account' %}" class="w-full md:w-56 py-4 px-8 border-[1.5px] border-white/60 text-white font-label-md text-label-md rounded-xl glass-panel hover:bg-white/10 transition-all active:scale-95 flex items-center justify-center">Create Account</a>
+        </div>
+        <div class="mt-16 flex items-center gap-6 opacity-60">
+            <div class="flex -space-x-3">
+                <img class="w-8 h-8 rounded-full border-2 border-primary bg-surface shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTfERJZptS_tBrJVqkanp6utfp_fQTxrGyhe979qRKDj7mf_7lH4gQK9qhSOwMegcYLgkyjiJEFb5MMIJLSFBjf3pE3JVpoqPt-WnX7Gzb37r1CQ8-MzmBetYtwsE19Yefx-T9cSwSRegTWvrCdzexwzP_AhC03Xvik2TflWzdJqUf8jULcPvslxw8TIbuhqWaeA3LxGuuGdsfMRV8831nhLRhokjkaQn-ag1mxfw4kvMsMyBlwahFj78OItTodjYMdF62GDf_F2qX" alt="User">
+                <img class="w-8 h-8 rounded-full border-2 border-primary bg-surface shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTR27h9MqyGBMZ9zfruPtYqdQ7HDGIAd1foycFB2N60nhqeL0G9keNrz1AwBSEVF0I3lVfgmbiiSneIK1P3s-JfBYFJ32HkNUPStRXm6905mBKbGBu7Sjz_oPPMvUB1_eaHWwuG8LnQw1jeFTVm-C1Zdk-M9Tu3RVx8-rShDJiiJyO2zoyXYNS8FyuF782qg3Dqx_TI3SZFX2M_-xOncOyekOaIptP_-AZcH4_dB7bRsKXq4QAkBS0yywOHyoGXxXYc_MImbv4aioA" alt="User">
+                <img class="w-8 h-8 rounded-full border-2 border-primary bg-surface shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBy7uwgIcDDxrsPLngf_4s3bNGrqMB9-dZVZmjnaVji9y6g0iNoTWr20B_SHsSEBd6e6s_LqmdSRfpueps0_J2sRXjQlS4FCi7d47Py66k1KDSvGDIHzQxere9znPvFEayRWQvApszrFSsdaH9DHIVbBG2CtHXmFxOayTJVYr-PAFX2fPxiEMFjWaqXUDCV0vJZYycCrj7R5p095lKkpL3a09g0qhz34qWig6abO3_bW-DU2c1Aq9Bt3JgIJdvKKo_ValJHghn5q75Y" alt="User">
+            </div>
+            <p class="text-white text-label-sm font-label-sm">Joined by 12k+ travelers this month</p>
+        </div>
+    </section>
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+        <div class="w-8 h-1 bg-secondary-container rounded-full"></div>
+        <div class="w-2 h-1 bg-white/40 rounded-full"></div>
+        <div class="w-2 h-1 bg-white/40 rounded-full"></div>
+    </div>
+</main>
+{% endblock %}
+{% block extra_style %}
+<style>
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+</style>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    document.addEventListener('mousemove', (e) => {
+        const bg = document.querySelector('[style*="grand luxury hotel lobby"]');
+        if(bg && window.innerWidth > 768) {
+            const mx = (e.clientX - window.innerWidth / 2) * 0.005;
+            const my = (e.clientY - window.innerHeight / 2) * 0.005;
+            bg.style.transform = `scale(1.05) translate(${mx}px, ${my}px)`;
+        }
+    });
+</script>
+{% endblock %}

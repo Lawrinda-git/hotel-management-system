@@ -1,0 +1,122 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub | Book Your Luxury Stay{% endblock %}
+{% block body_class %}bg-background text-on-surface{% endblock %}
+{% block content %}
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+    <div class="flex items-center justify-between px-margin-mobile h-16 w-full max-w-screen-xl mx-auto">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary text-2xl">menu</span>
+            <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold tracking-tight">StayHub</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity cursor-pointer">notifications</span>
+            <div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTP_tdwJe-QjJIz7hzPpMoDZ2XqAjf9s_Xhi9gcTOW_X3BUlwSlqtGKqE6LZJfoZZeNkkHp3CYZp-4K3PXqNXJcaTtI-OzUJPA6IBTjW9V54qFXbeq9d2MYTbmLp32mgzY05Bdj_KnDECEkxf06MQPk9oItcJHRH-oFsDE2Xuuk0fVSA8BQNN52q0MBkDX27rzebX8Hkn54YI8x0KMjU6z0up7RlbTdQhdMwM8_RY0Z13ZgOh9NWLfulkRI9Q3NdozWSy2xE-BYsyd" alt="User">
+            </div>
+        </div>
+    </div>
+</header>
+<main class="pt-24 pb-32 px-margin-mobile max-w-screen-xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+        <div class="lg:col-span-8 space-y-8">
+            <section>
+                <h2 class="font-headline-lg text-headline-lg text-primary mb-2">Reserve Your Experience</h2>
+                <p class="font-body-md text-body-md text-on-surface-variant mb-6">Select your dates and room preferences to secure your stay at StayHub.</p>
+            </section>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
+                    <label class="block font-label-md text-label-md text-primary mb-3">Check-in Date</label>
+                    <div class="relative flex items-center">
+                        <span class="material-symbols-outlined absolute left-3 text-outline">calendar_today</span>
+                        <input class="date-picker-custom w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="date" value="2024-10-15">
+                    </div>
+                </div>
+                <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
+                    <label class="block font-label-md text-label-md text-primary mb-3">Check-out Date</label>
+                    <div class="relative flex items-center">
+                        <span class="material-symbols-outlined absolute left-3 text-outline">calendar_month</span>
+                        <input class="date-picker-custom w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="date" value="2024-10-20">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-4">Select Room Type</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="relative group cursor-pointer overflow-hidden rounded-xl border-2 border-outline-variant hover:border-primary transition-all duration-300">
+                        <div class="aspect-[16/10] bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBMb7XLMiU1grbio66Y9amvOpQkLWKbM38zWgWhAK-MRsi9WTLA3-H4UJxwJJQkzJ_UDocW-rAs4sYYtp0y05SOBCjxzPDZ6oR5vNQg6SbcowYzPwAwAW4eXmTdqHr_GHEqsx_XOvodKsda-H3ZaRWl8Bw6OgbgMRnYN6bttUKRgWvDhWaAx4eizljbX8oJ4PVZFPc0M5LWVLVmCFqt2TErsuy0sapZOuOtHn0KaG2X2X32mb318VCZRpIrwQhT5u0avKzPouVuMNZc')"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                        <div class="absolute bottom-0 p-6 text-white w-full">
+                            <div class="flex justify-between items-end">
+                                <div><p class="font-label-sm text-label-sm text-secondary-container mb-1">MOST POPULAR</p><h4 class="font-headline-md text-headline-md">Deluxe Room</h4><p class="font-body-md text-sm opacity-80">42m² • City View • King Bed</p></div>
+                                <div class="text-right"><p class="font-headline-md text-secondary-fixed">$299</p><p class="text-xs opacity-70">per night</p></div>
+                            </div>
+                        </div>
+                        <div class="absolute top-4 right-4 bg-primary text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined">check_circle</span></div>
+                    </div>
+                    <div class="relative group cursor-pointer overflow-hidden rounded-xl border-2 border-primary transition-all duration-300">
+                        <div class="aspect-[16/10] bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBvBg4M4VIzhk9qSeEu9rpsgtKbormZP_VtSO6Qcgco_xfk3I6qgw1cLbXMYwWdx4PjeBYh44n4nEqsq0S56awwxPOk3vgKRY-Ngu7y--A7hkVXbMyCUSzwf6QUVEluKMvnmPohLKpVNDzwj0xtiOn1tgLvCXFkwXEa7kOXvrOAqhm97GW8OBYahdeUKKbxv3I_eTJKOZ3RhBOZ_mhc3jAZr6nek1XOfG4lWMx214gmMEE0H2Dfvc9ZW5tAxm2ihOV8hBRl80J0Z4qK')"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                        <div class="absolute bottom-0 p-6 text-white w-full">
+                            <div class="flex justify-between items-end">
+                                <div><p class="font-label-sm text-label-sm text-secondary-container mb-1">PREMIUM CHOICE</p><h4 class="font-headline-md text-headline-md">Executive Suite</h4><p class="font-body-md text-sm opacity-80">85m² • Sea View • Private Balcony</p></div>
+                                <div class="text-right"><p class="font-headline-md text-secondary-fixed">$549</p><p class="text-xs opacity-70">per night</p></div>
+                            </div>
+                        </div>
+                        <div class="absolute top-4 right-4 bg-primary text-white p-2 rounded-full opacity-100 transition-opacity"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 bg-surface-container-low rounded-xl flex items-center justify-between">
+                <div><h4 class="font-headline-md text-headline-md text-on-surface">Guests</h4><p class="font-body-md text-on-surface-variant">Maximum 4 guests per suite</p></div>
+                <div class="flex items-center gap-6 bg-surface-container-lowest p-2 rounded-lg border border-outline-variant">
+                    <button class="w-10 h-10 rounded-md flex items-center justify-center bg-surface-container-high hover:bg-surface-variant transition-colors text-primary active:scale-90 transition-transform" onclick="updateGuests(-1)"><span class="material-symbols-outlined">remove</span></button>
+                    <span class="font-headline-md text-headline-md w-8 text-center" id="guest-count">2</span>
+                    <button class="w-10 h-10 rounded-md flex items-center justify-center bg-primary text-white hover:opacity-90 transition-opacity active:scale-90 transition-transform" onclick="updateGuests(1)"><span class="material-symbols-outlined">add</span></button>
+                </div>
+            </div>
+        </div>
+        <div class="lg:col-span-4">
+            <div class="sticky top-24 glass-card p-8 rounded-3xl shadow-xl space-y-6">
+                <h3 class="font-headline-md text-headline-md text-primary border-b border-outline-variant/30 pb-4">Booking Summary</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center"><span class="text-on-surface-variant font-body-md">Executive Suite</span><span class="font-label-md">$549 x 5 nights</span></div>
+                    <div class="flex justify-between items-center"><span class="text-on-surface-variant font-body-md">Service Fee</span><span class="font-label-md">$45</span></div>
+                    <div class="flex justify-between items-center"><span class="text-on-surface-variant font-body-md">Luxury Tax (12%)</span><span class="font-label-md">$329</span></div>
+                </div>
+                <div class="pt-6 border-t border-primary/20">
+                    <div class="flex justify-between items-end mb-8">
+                        <div><p class="text-primary font-label-md uppercase tracking-widest">Total Price</p><p class="text-xs text-on-surface-variant">Inclusive of all fees</p></div>
+                        <p class="font-headline-lg text-primary text-4xl font-bold tracking-tight">$3,119</p>
+                    </div>
+                    <button class="w-full bg-secondary-container text-on-secondary-fixed py-5 rounded-2xl font-label-md text-lg hover:brightness-95 transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-3"><span>Confirm Booking</span><span class="material-symbols-outlined">arrow_forward</span></button>
+                    <p class="text-center mt-6 text-xs text-on-surface-variant flex items-center justify-center gap-2"><span class="material-symbols-outlined text-sm">lock</span> Secure encrypted checkout</p>
+                </div>
+                <div class="rounded-2xl overflow-hidden h-32 relative group">
+                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDDe5cmZbuuHG_KpZUsB7Visq5rARrvTMQn-j_gZsAQkLyEaMKfitGSFYZWysoJf5o9a42KqbDiAIqsuFC_eWbzN57uSwQs721yaciSKzJovJdp5rKl7DpjIzvu_LTfe07vzmLyNEFLo4QNgDwqKBZ2hdnRqHn0xXy9M2CCFVw00EsUa2Sn_O5rowXgIOqjyYpmi74xt4b2I061HTwEQhO_RuC0SKVStkz9avxHiVBT7kPicE45SMVe_LksYoYGxkghCty0D_ROZTy4')"></div>
+                    <div class="absolute inset-0 bg-primary/10"></div>
+                    <div class="absolute inset-0 flex items-center justify-center"><span class="bg-white/90 px-4 py-2 rounded-full text-xs font-bold text-primary shadow-sm">View Location</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-20 pb-safe px-4 bg-surface/80 backdrop-blur-xl border-t border-outline-variant/30 z-50">
+    <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all p-2 rounded-lg" href="{% url 'guest_home' %}"><span class="material-symbols-outlined">home</span><span class="font-label-sm text-label-sm">Home</span></a>
+    <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all p-2 rounded-lg" href="{% url 'explore_stays' %}"><span class="material-symbols-outlined">search</span><span class="font-label-sm text-label-sm">Search</span></a>
+    <a class="flex flex-col items-center justify-center text-primary font-bold transition-all p-2 rounded-lg" href="#"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span><span class="font-label-sm text-label-sm">Bookings</span></a>
+    <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all p-2 rounded-lg" href="#"><span class="material-symbols-outlined">person</span><span class="font-label-sm text-label-sm">Profile</span></a>
+</nav>
+{% endblock %}
+{% block extra_style %}
+<style>
+    .date-picker-custom::-webkit-calendar-picker-indicator { filter: invert(13%) sepia(85%) saturate(3635%) hue-rotate(224deg) brightness(92%) contrast(101%); cursor: pointer; }
+</style>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    function updateGuests(val) { const el = document.getElementById('guest-count'); let c = parseInt(el.innerText); let n = c + val; if(n >= 1 && n <= 4) el.innerText = n; }
+    const card = document.querySelector('.glass-card');
+    if(card) { document.addEventListener('mousemove', (e) => { const x = e.clientX / window.innerWidth; const y = e.clientY / window.innerHeight; card.style.transform = `translate(${(x-0.5)*10}px, ${(y-0.5)*10}px)`; }); }
+</script>
+{% endblock %}

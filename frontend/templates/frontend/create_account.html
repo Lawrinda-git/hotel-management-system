@@ -1,0 +1,87 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}Join StayHub - Modern Luxury Stays{% endblock %}
+{% block body_class %}bg-surface text-on-surface min-h-screen flex items-center justify-center selection:bg-secondary-container selection:text-on-secondary-container{% endblock %}
+{% block content %}
+<div class="fixed inset-0 z-0">
+    <div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-surface to-secondary/5"></div>
+    <div class="absolute inset-0 opacity-40 mix-blend-overlay pointer-events-none" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCnEzar-AZUQSPNmfYOzgv51L9cf5wcx4VFM43kC4UcF0LRqzWphaZta_weWhcgF0-lYPiD5p6Pap9VfgjYZcKOI7d-x2hzB_Ygk8jvAoKFrIWu61OcAzHdeZflM8PwVM3XuBq-RBBMk3pDaCeSeVR-kSATmGvEv_3AXaLVkTz0E6t-nDjT1LreAI809MIPUD_N8J41S3_xrFp9FYq27rqWMc4ONlYABOlbUQo6sivZ34X0XMpsHbcCmaiBx6yzxB0rkoiUqb5ustUI')"></div>
+</div>
+<main class="relative z-10 w-full max-w-[480px] px-margin-mobile md:px-0 py-12">
+    <div class="glass-panel border border-outline-variant/30 rounded-xl shadow-2xl p-8 md:p-12">
+        <header class="text-center mb-10">
+            <div class="inline-flex items-center justify-center mb-6">
+                <span class="material-symbols-outlined text-primary text-[40px] leading-none">travel_explore</span>
+            </div>
+            <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary tracking-tight mb-2">Join StayHub</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant">Experience the art of modern hospitality.</p>
+        </header>
+        <form class="space-y-6" id="registrationForm" method="post" action="{% url 'create_account' %}">
+            {% csrf_token %}
+            <div class="space-y-2">
+                <label class="block font-label-md text-label-md text-on-surface ml-1" for="fullName">Full Name</label>
+                <div class="relative group input-focus-ring rounded-lg overflow-hidden transition-all duration-300">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">person</span>
+                    <input class="w-full bg-surface-container-lowest border border-outline-variant/40 py-3.5 pl-12 pr-4 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary transition-colors placeholder:text-outline/50" id="fullName" name="fullName" placeholder="Alexander Sterling" required type="text">
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="block font-label-md text-label-md text-on-surface ml-1" for="email">Email Address</label>
+                <div class="relative group input-focus-ring rounded-lg overflow-hidden transition-all duration-300">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">alternate_email</span>
+                    <input class="w-full bg-surface-container-lowest border border-outline-variant/40 py-3.5 pl-12 pr-4 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary transition-colors placeholder:text-outline/50" id="email" name="email" placeholder="alex@stayhub.com" required type="email">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="block font-label-md text-label-md text-on-surface ml-1" for="password">Password</label>
+                    <div class="relative group input-focus-ring rounded-lg overflow-hidden">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">lock</span>
+                        <input class="w-full bg-surface-container-lowest border border-outline-variant/40 py-3.5 pl-12 pr-4 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary transition-colors placeholder:text-outline/50" id="password" name="password" placeholder="••••••••" required type="password">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block font-label-md text-label-md text-on-surface ml-1" for="confirmPassword">Confirm</label>
+                    <div class="relative group input-focus-ring rounded-lg overflow-hidden">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">verified_user</span>
+                        <input class="w-full bg-surface-container-lowest border border-outline-variant/40 py-3.5 pl-12 pr-4 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary transition-colors placeholder:text-outline/50" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required type="password">
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 py-2">
+                <input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" id="terms" type="checkbox">
+                <label class="font-label-sm text-label-sm text-on-surface-variant leading-tight" for="terms">I agree to the <a class="text-primary hover:underline font-semibold" href="#">Terms of Service</a> and <a class="text-primary hover:underline font-semibold" href="#">Privacy Policy</a></label>
+            </div>
+            <button class="w-full bg-secondary-container hover:bg-secondary-fixed-dim text-on-secondary-fixed font-label-md text-label-md py-4 rounded-lg shadow-lg shadow-secondary-container/20 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 group" type="submit">
+                Create Account
+                <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </button>
+        </form>
+        <footer class="mt-10 text-center">
+            <p class="font-body-md text-body-md text-on-surface-variant">Already a member? <a class="text-primary font-semibold hover:text-on-primary-fixed-variant transition-colors inline-flex items-center gap-1 group" href="{% url 'signin' %}">Sign In <span class="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">login</span></a></p>
+        </footer>
+    </div>
+    <div class="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-4 text-outline-variant opacity-60">
+        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">security</span><span class="font-label-sm text-label-sm">Secure Connection</span></div>
+        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">verified</span><span class="font-label-sm text-label-sm">Verified Experience</span></div>
+    </div>
+</main>
+{% endblock %}
+{% block extra_style %}
+<style>.input-focus-ring:focus-within { box-shadow: 0 0 0 2px rgba(0,40,142,0.1); }</style>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', () => { const icon = input.closest('.relative').querySelector('.material-symbols-outlined'); if(icon) { icon.style.color = '#00288e'; icon.style.transition = 'color 0.3s ease'; } });
+        input.addEventListener('blur', () => { const icon = input.closest('.relative').querySelector('.material-symbols-outlined'); if(icon) icon.style.color = '#757684'; });
+    });
+    const pass = document.getElementById('password');
+    const confirmPass = document.getElementById('confirmPassword');
+    confirmPass.addEventListener('input', () => {
+        if(confirmPass.value === pass.value && confirmPass.value !== '') { confirmPass.classList.add('border-primary'); confirmPass.classList.remove('border-outline-variant/40'); }
+        else { confirmPass.classList.remove('border-primary'); confirmPass.classList.add('border-outline-variant/40'); }
+    });
+</script>
+{% endblock %}

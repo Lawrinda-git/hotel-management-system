@@ -1,0 +1,168 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub | Luxury Stays{% endblock %}
+{% block body_class %}bg-background text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed{% endblock %}
+{% block content %}
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+    <div class="flex items-center justify-between px-margin-mobile h-16 w-full">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container bg-surface-container-high active:scale-95 transition-transform">
+                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTMFMp65DnnbzkwVLnA7WiVQFdH2uLRWZJ7dftM_Sej9uQFLBKxh2UWkxYj53SqCuR4LObcFRPznzjJwrWO9D-NReCeyqrgfmxeynnCFzSnbQ_q8wACQ9lWByYiZ0_9xNDsnol3248K5hldKMhb51oe0vKGIJZkhOacouOiAWEtid6y_aACkLonDrAFHzx9MPrFlJVR74fizCYgYkcJJlcYfrZJmHq7H32b69UG80iCpNGpi5_yc2X-FzcEHNKUibhnpQhxfL8WmBb" alt="Profile">
+            </div>
+            <div class="flex flex-col">
+                <span class="text-label-sm font-label-sm text-on-surface-variant">Welcome back,</span>
+                <span class="text-body-md font-body-md font-bold text-primary">Alex</span>
+            </div>
+        </div>
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold tracking-tight">StayHub</h1>
+        <button class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95">notifications</button>
+    </div>
+</header>
+<main class="pt-24 pb-32 px-margin-mobile max-w-md mx-auto">
+    <section class="mb-8">
+        <div class="relative group">
+            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <span class="material-symbols-outlined text-outline">search</span>
+            </div>
+            <input class="w-full pl-12 pr-4 py-4 bg-surface-container-lowest border-none rounded-2xl shadow-sm focus:ring-2 focus:ring-primary text-body-md font-body-md placeholder:text-outline-variant transition-all" placeholder="Where would you like to go?" type="text">
+            <button class="absolute inset-y-2 right-2 px-4 bg-primary text-on-primary rounded-xl font-label-md text-label-md active:scale-95 transition-all">Search</button>
+        </div>
+    </section>
+    <section class="mb-10 overflow-hidden">
+        <div class="flex justify-between items-end mb-4">
+            <h2 class="font-headline-md text-headline-md text-on-surface">Categories</h2>
+            <button class="text-label-md font-label-md text-primary-container">View all</button>
+        </div>
+        <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+            <button class="flex flex-col items-center gap-2 group shrink-0">
+                <div class="w-16 h-16 rounded-2xl bg-primary text-on-primary flex items-center justify-center shadow-lg group-active:scale-90 transition-all">
+                    <span class="material-symbols-outlined text-[28px]">pool</span>
+                </div>
+                <span class="text-label-sm font-label-sm font-semibold">Resorts</span>
+            </button>
+            <button class="flex flex-col items-center gap-2 group shrink-0">
+                <div class="w-16 h-16 rounded-2xl bg-surface-container-high text-on-surface-variant flex items-center justify-center shadow-sm group-hover:bg-primary-container group-hover:text-white transition-all">
+                    <span class="material-symbols-outlined text-[28px]">villa</span>
+                </div>
+                <span class="text-label-sm font-label-sm">Villas</span>
+            </button>
+            <button class="flex flex-col items-center gap-2 group shrink-0">
+                <div class="w-16 h-16 rounded-2xl bg-surface-container-high text-on-surface-variant flex items-center justify-center shadow-sm group-hover:bg-primary-container group-hover:text-white transition-all">
+                    <span class="material-symbols-outlined text-[28px]">apartment</span>
+                </div>
+                <span class="text-label-sm font-label-sm">Boutique</span>
+            </button>
+            <button class="flex flex-col items-center gap-2 group shrink-0">
+                <div class="w-16 h-16 rounded-2xl bg-surface-container-high text-on-surface-variant flex items-center justify-center shadow-sm group-hover:bg-primary-container group-hover:text-white transition-all">
+                    <span class="material-symbols-outlined text-[28px]">cabin</span>
+                </div>
+                <span class="text-label-sm font-label-sm">Cabins</span>
+            </button>
+        </div>
+    </section>
+    <section class="mb-10">
+        <div class="flex justify-between items-end mb-6">
+            <h2 class="font-headline-md text-headline-md text-on-surface">Featured Escapes</h2>
+            <span class="material-symbols-outlined text-primary-container cursor-pointer">tune</span>
+        </div>
+        <div class="space-y-6">
+            <div class="relative group h-[420px] rounded-2xl overflow-hidden shadow-xl active:scale-[0.98] transition-transform duration-300">
+                <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBv9qq86T5kUsAPmYrq1yScwKOjXgaVznCpqofK0ySoEH5idrBwUbj_17Wss0vTLCr49sVcBN5NzoICOah2up9se0-ttTpwb_aGikfupoX1fHpS9Ut2AQFIT4dXZ8IAFxmn6V2KMXK3sZ08zlvAL3baMHJRn9HOdypbJR3VWMIinyGLJ8eWRLnohzkAY83r29xKjJnEgS2LWZ_XEe9yhJCBgKbTWRng9qctDjZoE3E7b3fmvUsL9fS0Tu5LB-ctl3-SXPcYfUS66M8k')"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent"></div>
+                <div class="absolute top-4 left-4 glass-card px-3 py-1 rounded-full flex items-center gap-1.5 border-secondary-fixed/30">
+                    <span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">stars</span>
+                    <span class="text-label-sm font-label-sm text-on-secondary-fixed-variant tracking-wider uppercase">Platinum Collection</span>
+                </div>
+                <button class="absolute top-4 right-4 w-10 h-10 rounded-full glass-card flex items-center justify-center text-on-surface active:scale-90 transition-all">
+                    <span class="material-symbols-outlined">favorite</span>
+                </button>
+                <div class="absolute bottom-0 left-0 p-6 w-full">
+                    <div class="flex items-center gap-1 text-secondary-fixed mb-2">
+                        <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                        <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                        <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                        <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                        <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                        <span class="text-label-sm font-label-sm ml-1 text-white/90">5.0 (1.2k reviews)</span>
+                    </div>
+                    <h3 class="font-headline-lg-mobile text-headline-lg-mobile text-white mb-1">Azure Sands Resort</h3>
+                    <div class="flex items-center gap-2 text-white/80 mb-4">
+                        <span class="material-symbols-outlined text-base">location_on</span>
+                        <span class="text-body-md font-body-md">Maldives, Baa Atoll</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex flex-col">
+                            <span class="text-label-sm font-label-sm text-white/70">Starting at</span>
+                            <span class="text-headline-md font-headline-md text-secondary-fixed">$850<span class="text-body-md font-body-md text-white/80 ml-1">/night</span></span>
+                        </div>
+                        <a href="{% url 'hotel_details' %}" class="bg-secondary-container text-on-secondary-container px-6 py-3 rounded-xl font-label-md text-label-md font-bold shadow-lg active:scale-95 transition-all">Book Now</a>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-3 group active:scale-[0.97] transition-all">
+                    <div class="relative h-48 rounded-2xl overflow-hidden shadow-md">
+                        <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBOAAHTFAZis7mNk8MIB_SltOI-I-Lnmmg8-Sj8xxQtdNNVIF0S4SJ6NYs8yOr0TlDhG_ebLbN0CJMYptgBMa8nofg_guIAH1QWsZNjxDNKfk9YtetRrjSHsJKoXeUy1h4ZDo1HdtuAhomhBs4_YwXt3AlOr-7GneCbl-E-AABv9nYcvqlNhn1dCpaKGDH7TaWDM-HOaQSLWqh-cQb0UsDEv2zYOlLBWv3Zk3vtAs227BAuRconGozJtQPy8pjRamEfmebtLnGSXPNY')"></div>
+                        <button class="absolute top-2 right-2 w-8 h-8 rounded-full glass-card flex items-center justify-center text-on-surface"><span class="material-symbols-outlined text-sm">favorite</span></button>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-label-md font-label-md text-on-surface line-clamp-1">Hotel L'Artiste</span>
+                            <div class="flex items-center gap-0.5 text-secondary"><span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span><span class="text-label-sm font-label-sm">4.9</span></div>
+                        </div>
+                        <span class="text-label-sm font-label-sm text-on-surface-variant">Paris, France</span>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-3 group active:scale-[0.97] transition-all">
+                    <div class="relative h-48 rounded-2xl overflow-hidden shadow-md">
+                        <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC8tsIij3Rt5R8pLZM4AG7G4PA5yvR7W1rCNo9whLOhC_MfPX2T8gpoI8gkMI7Nyr-CwhpdTLpfDbCwO7DyitpznsgEFW2bchvggWli7eAegFi3aUC5visBA0XRv5L4UDn1leScldzd7g-gW8WR79SOiGPhZc_PB3-aMNEQegkQ4IwMh77KgR__dx9oQpLSOpMqRVS5OwOrm9J-P59ux1Om6-1XH8WKtk1MIpdVb_o_VfxFterb8lAQ-rCVH_Be7VvW9owTzxg3kh8g')"></div>
+                        <button class="absolute top-2 right-2 w-8 h-8 rounded-full glass-card flex items-center justify-center text-on-surface"><span class="material-symbols-outlined text-sm">favorite</span></button>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-label-md font-label-md text-on-surface line-clamp-1">Villa Como Mist</span>
+                            <div class="flex items-center gap-0.5 text-secondary"><span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span><span class="text-label-sm font-label-sm">4.8</span></div>
+                        </div>
+                        <span class="text-label-sm font-label-sm text-on-surface-variant">Lake Como, Italy</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="mb-10">
+        <div class="bg-primary-container/10 p-6 rounded-2xl border border-primary-container/20 flex items-center gap-4">
+            <div class="w-16 h-16 bg-secondary-container rounded-xl flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-on-secondary-container text-3xl">loyalty</span>
+            </div>
+            <div>
+                <h3 class="text-label-md font-label-md font-bold text-primary-container uppercase tracking-widest">Member Perk</h3>
+                <p class="text-body-md font-body-md text-on-surface font-semibold">Alex, you have 2 nights free at any Boutique stay!</p>
+            </div>
+        </div>
+    </section>
+</main>
+<nav class="fixed bottom-0 w-full z-50 rounded-t-2xl bg-surface/80 backdrop-blur-xl border-t border-outline-variant/30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+    <div class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 pb-safe px-4">
+        <a class="flex flex-col items-center justify-center text-primary font-bold transition-all duration-200 active:scale-90" href="#"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span><span class="font-label-sm text-label-sm">Home</span></a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all duration-200 active:scale-90" href="{% url 'explore_stays' %}"><span class="material-symbols-outlined">search</span><span class="font-label-sm text-label-sm">Search</span></a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all duration-200 active:scale-90" href="#"><span class="material-symbols-outlined">calendar_today</span><span class="font-label-sm text-label-sm">Bookings</span></a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all duration-200 active:scale-90" href="#"><span class="material-symbols-outlined">person</span><span class="font-label-sm text-label-sm">Profile</span></a>
+    </div>
+</nav>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    document.querySelectorAll('nav a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            document.querySelectorAll('nav a').forEach(l => { l.classList.remove('text-primary', 'font-bold'); l.classList.add('text-on-surface-variant'); });
+            this.classList.add('text-primary', 'font-bold');
+            this.classList.remove('text-on-surface-variant');
+        });
+    });
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        if (window.scrollY > 20) header.classList.add('shadow-md');
+        else header.classList.remove('shadow-md');
+    });
+</script>
+{% endblock %}

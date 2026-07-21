@@ -30,4 +30,6 @@ urlpatterns = [
     path("api/services/", include("apps.services.urls")),
     path("api/billing/", include("apps.billing.urls")),
     path("api/feedback/", include("apps.feedback.urls")),
+    # Frontend pages
+    path("", include("frontend.urls")),
 ]

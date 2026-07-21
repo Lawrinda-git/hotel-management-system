@@ -1,0 +1,138 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub Manager Dashboard{% endblock %}
+{% block body_class %}bg-background font-body-md text-on-background selection:bg-secondary-fixed selection:text-on-secondary-fixed{% endblock %}
+{% block content %}
+<div class="flex min-h-screen">
+    <aside class="w-[280px] h-screen sticky top-0 left-0 bg-primary flex flex-col shadow-xl z-50">
+        <div class="px-8 py-10 flex flex-col items-center">
+            <div class="mb-4"><span class="material-symbols-outlined text-secondary-fixed text-4xl">hotel_class</span></div>
+            <h1 class="font-headline-md text-headline-md font-bold text-secondary-fixed">StayHub</h1>
+            <p class="font-label-sm text-label-sm uppercase tracking-widest text-primary-fixed/60 mt-1">Luxury Management</p>
+        </div>
+        <nav class="flex-1 px-4 space-y-2 mt-4">
+            <div class="flex items-center gap-4 px-6 py-4 text-on-primary bg-primary-fixed-variant/20 border-r-4 border-secondary-fixed cursor-pointer"><span class="material-symbols-outlined">dashboard</span><span class="font-label-md text-label-md">Manager</span></div>
+            <a href="{% url 'receptionist_dashboard' %}" class="flex items-center gap-4 px-6 py-4 text-on-primary-fixed hover:text-on-primary hover:bg-primary-fixed-variant/10 transition-colors duration-200 cursor-pointer"><span class="material-symbols-outlined">receipt_long</span><span class="font-label-md text-label-md">Receptionist</span></a>
+            <a href="{% url 'accountant_dashboard' %}" class="flex items-center gap-4 px-6 py-4 text-on-primary-fixed hover:text-on-primary hover:bg-primary-fixed-variant/10 transition-colors duration-200 cursor-pointer"><span class="material-symbols-outlined">account_balance_wallet</span><span class="font-label-md text-label-md">Accountant</span></a>
+            <a href="{% url 'housekeeping_dashboard' %}" class="flex items-center gap-4 px-6 py-4 text-on-primary-fixed hover:text-on-primary hover:bg-primary-fixed-variant/10 transition-colors duration-200 cursor-pointer"><span class="material-symbols-outlined">cleaning_services</span><span class="font-label-md text-label-md">Housekeeping</span></a>
+        </nav>
+        <div class="p-6"><button class="w-full py-4 bg-secondary-container text-on-secondary-container font-label-md text-label-md rounded-lg shadow-lg active:scale-95 transition-transform hover:brightness-105">Book Now</button></div>
+        <div class="mt-auto px-4 pb-8 space-y-2">
+            <div class="flex items-center gap-4 px-6 py-3 text-on-primary-fixed hover:text-on-primary hover:bg-primary-fixed-variant/10 transition-colors duration-200 cursor-pointer"><span class="material-symbols-outlined">settings</span><span class="font-label-md text-label-md">Settings</span></div>
+            <div class="flex items-center gap-4 px-6 py-3 text-on-primary-fixed hover:text-on-primary hover:bg-primary-fixed-variant/10 transition-colors duration-200 cursor-pointer"><span class="material-symbols-outlined">logout</span><span class="font-label-md text-label-md">Logout</span></div>
+        </div>
+    </aside>
+    <main class="flex-1 flex flex-col min-w-0">
+        <header class="w-full h-16 sticky top-0 z-40 bg-surface-container-lowest flex justify-between items-center px-margin-desktop shadow-sm border-b border-outline-variant">
+            <div class="flex items-center gap-8">
+                <h2 class="text-primary font-bold font-label-md uppercase tracking-wider">StayHub Dashboard</h2>
+                <div class="hidden md:flex gap-6">
+                    <span class="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md cursor-pointer">Analytics</span>
+                    <span class="text-on-surface-variant hover:text-primary transition-all font-label-md text-label-md cursor-pointer">Reports</span>
+                    <span class="text-on-surface-variant hover:text-primary transition-all font-label-md text-label-md cursor-pointer">Schedules</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-4">
+                    <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-low p-2 rounded-full transition-all">notifications</span>
+                    <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-low p-2 rounded-full transition-all">settings</span>
+                </div>
+                <button class="bg-primary text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:brightness-110 active:scale-95 transition-all">Create Booking</button>
+                <div class="w-10 h-10 rounded-full bg-surface-container-high border-2 border-primary overflow-hidden">
+                    <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDj2S_kbZJsDFNZEIR2yB27E-J9pwrVGgj5dr5cr0jnx_AMbQGXjIz4XFHGeLDNQkoBccyH500CL-5PJcw1Evi7nM9k1_3F-d4hlxmwhc4l9TqMwonF0dLf9EIP12X4vkWNU5CQTHyV5EU6JX3_OPD37U4nwbFsg4PeWat1tm6VWYdxbB216KQCpe6A5FRf7fblNNf_ST-URyug-r7hSZuS_o7gnQGF6brATVpYGYgD0_lyTJm2-Lx1Z3O_arWSfK_YqaUVmUViFt_s" alt="Admin">
+                </div>
+            </div>
+        </header>
+        <div class="p-margin-desktop space-y-gutter overflow-y-auto max-w-container-max mx-auto w-full">
+            <section class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div><h3 class="font-headline-lg text-headline-lg text-on-surface">Good Morning, Admin</h3><p class="text-on-surface-variant font-body-md mt-1">Your property performance overview for October 2023.</p></div>
+                <div class="flex items-center gap-3 bg-surface-container-low p-2 rounded-xl">
+                    <button class="px-4 py-2 bg-white shadow-sm rounded-lg font-label-md text-label-md text-primary">Daily</button>
+                    <button class="px-4 py-2 font-label-md text-label-md text-on-surface-variant hover:text-primary">Weekly</button>
+                    <button class="px-4 py-2 font-label-md text-label-md text-on-surface-variant hover:text-primary">Monthly</button>
+                </div>
+            </section>
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+                <div class="glass-card p-8 rounded-3xl flex flex-col relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><span class="material-symbols-outlined text-8xl">payments</span></div>
+                    <div class="flex items-center gap-3 mb-6"><div class="w-12 h-12 rounded-2xl bg-secondary-fixed flex items-center justify-center"><span class="material-symbols-outlined text-on-secondary-fixed">trending_up</span></div><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Total Revenue</span></div>
+                    <div class="mt-auto"><h4 class="font-headline-xl text-headline-xl text-primary">$12,450</h4><p class="text-green-600 font-label-sm text-label-sm mt-2 flex items-center gap-1"><span class="material-symbols-outlined text-sm">north_east</span>12.5% from last month</p></div>
+                </div>
+                <div class="glass-card p-8 rounded-3xl flex flex-col relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><span class="material-symbols-outlined text-8xl">king_bed</span></div>
+                    <div class="flex items-center gap-3 mb-6"><div class="w-12 h-12 rounded-2xl bg-primary-fixed flex items-center justify-center"><span class="material-symbols-outlined text-on-primary-fixed">bed</span></div><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Occupancy Rate</span></div>
+                    <div class="mt-auto"><h4 class="font-headline-xl text-headline-xl text-primary">85%</h4><div class="w-full h-2 bg-surface-container-high rounded-full mt-4 overflow-hidden"><div class="h-full bg-primary" style="width: 85%"></div></div></div>
+                </div>
+                <div class="glass-card p-8 rounded-3xl flex flex-col relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><span class="material-symbols-outlined text-8xl">book_online</span></div>
+                    <div class="flex items-center gap-3 mb-6"><div class="w-12 h-12 rounded-2xl bg-tertiary-fixed flex items-center justify-center"><span class="material-symbols-outlined text-on-tertiary-fixed-variant">event_available</span></div><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Total Bookings</span></div>
+                    <div class="mt-auto"><h4 class="font-headline-xl text-headline-xl text-primary">128</h4><p class="text-on-surface-variant font-label-sm text-label-sm mt-2">Active bookings today</p></div>
+                </div>
+            </section>
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+                <div class="lg:col-span-2 bg-surface-container-lowest p-8 rounded-3xl shadow-sm border border-outline-variant">
+                    <div class="flex items-center justify-between mb-8"><div><h5 class="font-headline-md text-headline-md text-on-surface">Revenue Analytics</h5><p class="text-on-surface-variant font-label-sm text-label-sm">Monthly trends and forecasting</p></div>
+                        <div class="flex items-center gap-4"><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-primary"></span><span class="text-on-surface-variant text-label-sm">Actual</span></div><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-secondary-fixed-dim"></span><span class="text-on-surface-variant text-label-sm">Target</span></div></div>
+                    </div>
+                    <div class="h-64 flex items-end justify-between gap-4 px-4">
+                        <div class="flex-1 flex flex-col items-center gap-2 group"><div class="w-full bg-primary/20 rounded-t-lg relative flex items-end justify-center h-32 hover:bg-primary/40 transition-all cursor-pointer"><div class="w-1/2 bg-primary rounded-t-md h-3/4"></div></div><span class="text-label-sm text-on-surface-variant">Jun</span></div>
+                        <div class="flex-1 flex flex-col items-center gap-2 group"><div class="w-full bg-primary/20 rounded-t-lg relative flex items-end justify-center h-48 hover:bg-primary/40 transition-all cursor-pointer"><div class="w-1/2 bg-primary rounded-t-md h-4/5"></div></div><span class="text-label-sm text-on-surface-variant">Jul</span></div>
+                        <div class="flex-1 flex flex-col items-center gap-2 group"><div class="w-full bg-primary/20 rounded-t-lg relative flex items-end justify-center h-40 hover:bg-primary/40 transition-all cursor-pointer"><div class="w-1/2 bg-primary rounded-t-md h-2/3"></div></div><span class="text-label-sm text-on-surface-variant">Aug</span></div>
+                        <div class="flex-1 flex flex-col items-center gap-2 group"><div class="w-full bg-primary/20 rounded-t-lg relative flex items-end justify-center h-56 hover:bg-primary/40 transition-all cursor-pointer"><div class="w-1/2 bg-primary rounded-t-md h-full"></div></div><span class="text-label-sm text-on-surface-variant">Sep</span></div>
+                        <div class="flex-1 flex flex-col items-center gap-2 group"><div class="w-full bg-primary/20 rounded-t-lg relative flex items-end justify-center h-52 hover:bg-primary/40 transition-all cursor-pointer"><div class="w-1/2 bg-primary rounded-t-md h-[90%]"></div></div><span class="text-label-sm text-on-surface-variant">Oct</span></div>
+                    </div>
+                </div>
+                <div class="bg-surface-container-lowest p-8 rounded-3xl shadow-sm border border-outline-variant flex flex-col">
+                    <div class="flex items-center justify-between mb-6"><h5 class="font-headline-md text-headline-md text-on-surface">Room Grid</h5><span class="material-symbols-outlined text-on-surface-variant cursor-pointer">grid_view</span></div>
+                    <div class="grid grid-cols-4 gap-3 flex-1 overflow-y-auto pr-2">
+                        {% for room in '101 102 103 104 105 106 201 202 203 204 205 206'|cut:' '|make_list %}
+                        {% endfor %}
+                        <div class="aspect-square bg-green-100/50 border border-green-200 rounded-xl flex items-center justify-center text-green-700 font-bold hover:scale-105 transition-transform cursor-pointer" title="Available">101</div>
+                        <div class="aspect-square bg-primary-fixed border border-primary/20 rounded-xl flex items-center justify-center text-primary font-bold hover:scale-105 cursor-pointer" title="Occupied">102</div>
+                        <div class="aspect-square bg-primary-fixed border border-primary/20 rounded-xl flex items-center justify-center text-primary font-bold hover:scale-105 cursor-pointer" title="Occupied">103</div>
+                        <div class="aspect-square bg-amber-100/50 border border-amber-200 rounded-xl flex items-center justify-center text-amber-700 font-bold hover:scale-105 cursor-pointer" title="Maintenance">104</div>
+                        <div class="aspect-square bg-green-100/50 border border-green-200 rounded-xl flex items-center justify-center text-green-700 font-bold">105</div>
+                        <div class="aspect-square bg-green-100/50 border border-green-200 rounded-xl flex items-center justify-center text-green-700 font-bold">106</div>
+                        <div class="aspect-square bg-primary-fixed border border-primary/20 rounded-xl flex items-center justify-center text-primary font-bold">201</div>
+                        <div class="aspect-square bg-primary-fixed border border-primary/20 rounded-xl flex items-center justify-center text-primary font-bold">202</div>
+                        <div class="aspect-square bg-green-100/50 border border-green-200 rounded-xl flex items-center justify-center text-green-700 font-bold">203</div>
+                        <div class="aspect-square bg-green-100/50 border border-green-200 rounded-xl flex items-center justify-center text-green-700 font-bold">204</div>
+                        <div class="aspect-square bg-amber-100/50 border border-amber-200 rounded-xl flex items-center justify-center text-amber-700 font-bold">205</div>
+                        <div class="aspect-square bg-green-100/50 border border-green-200 rounded-xl flex items-center justify-center text-green-700 font-bold">206</div>
+                    </div>
+                    <div class="mt-6 flex justify-between pt-4 border-t border-outline-variant">
+                        <div class="flex items-center gap-2"><span class="status-dot bg-green-500" style="width:8px;height:8px;border-radius:50%;display:inline-block"></span><span class="text-label-sm text-on-surface-variant">Available</span></div>
+                        <div class="flex items-center gap-2"><span class="status-dot bg-primary" style="width:8px;height:8px;border-radius:50%;display:inline-block"></span><span class="text-label-sm text-on-surface-variant">Occupied</span></div>
+                        <div class="flex items-center gap-2"><span class="status-dot bg-amber-500" style="width:8px;height:8px;border-radius:50%;display:inline-block"></span><span class="text-label-sm text-on-surface-variant">Service</span></div>
+                    </div>
+                </div>
+            </section>
+            <section class="bg-surface-container-lowest p-8 rounded-3xl shadow-sm border border-outline-variant">
+                <div class="flex items-center justify-between mb-8"><h5 class="font-headline-md text-headline-md text-on-surface">Recent Staff Activity</h5><button class="text-primary font-label-md text-label-md flex items-center gap-2 hover:underline">View All Logs <span class="material-symbols-outlined text-sm">arrow_forward</span></button></div>
+                <div class="overflow-x-auto"><table class="w-full text-left border-collapse">
+                    <thead><tr class="border-b border-outline-variant"><th class="py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Staff Member</th><th class="py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Department</th><th class="py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Action</th><th class="py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Timestamp</th><th class="py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right">Status</th></tr></thead>
+                    <tbody class="divide-y divide-outline-variant">
+                        <tr class="hover:bg-surface-container-low transition-colors group"><td class="py-5"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-primary-fixed-dim text-on-primary-fixed font-bold flex items-center justify-center text-xs">EJ</div><span class="font-body-md text-on-surface font-medium">Elena Jenkins</span></div></td><td class="py-5 text-on-surface-variant font-body-md">Reception</td><td class="py-5 text-on-surface font-body-md">Checked-in guest #7721</td><td class="py-5 text-on-surface-variant font-body-md">10:45 AM</td><td class="py-5 text-right"><span class="px-3 py-1 bg-green-100 text-green-700 rounded-full font-label-sm text-label-sm">Success</span></td></tr>
+                        <tr class="hover:bg-surface-container-low transition-colors group"><td class="py-5"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold flex items-center justify-center text-xs">MK</div><span class="font-body-md text-on-surface font-medium">Marcus Khol</span></div></td><td class="py-5 text-on-surface-variant font-body-md">Housekeeping</td><td class="py-5 text-on-surface font-body-md">Completed Room 104 cleaning</td><td class="py-5 text-on-surface-variant font-body-md">09:12 AM</td><td class="py-5 text-right"><span class="px-3 py-1 bg-green-100 text-green-700 rounded-full font-label-sm text-label-sm">Success</span></td></tr>
+                        <tr class="hover:bg-surface-container-low transition-colors group"><td class="py-5"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-bold flex items-center justify-center text-xs">SW</div><span class="font-body-md text-on-surface font-medium">Sarah Wong</span></div></td><td class="py-5 text-on-surface-variant font-body-md">Accounts</td><td class="py-5 text-on-surface font-body-md">Updated Q3 Revenue Report</td><td class="py-5 text-on-surface-variant font-body-md">08:30 AM</td><td class="py-5 text-right"><span class="px-3 py-1 bg-primary-fixed text-primary rounded-full font-label-sm text-label-sm">Pending</span></td></tr>
+                    </tbody>
+                </table></div>
+            </section>
+        </div>
+    </main>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    document.querySelectorAll('.glass-card').forEach(card => {
+        card.addEventListener('mouseenter', () => { card.style.transform = 'translateY(-4px)'; card.style.transition = 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)'; });
+        card.addEventListener('mouseleave', () => { card.style.transform = 'translateY(0)'; });
+    });
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text'; searchInput.placeholder = 'Search guests or rooms...';
+    searchInput.className = 'bg-surface-container border-none rounded-lg px-4 py-2 font-label-sm text-label-sm focus:ring-2 focus:ring-primary w-64 transition-all duration-300';
+    const navLeft = document.querySelector('header > div:first-child');
+    const sc = document.createElement('div'); sc.className = 'ml-12 hidden xl:block'; sc.appendChild(searchInput);
+    if(navLeft) navLeft.appendChild(sc);
+</script>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub Staff Portal | Login{% endblock %}
+{% block body_class %}overflow-hidden{% endblock %}
+{% block content %}
+<div class="fixed inset-0 z-0">
+    <div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDd9dh9KaAgpYCJ--zHLI0YWcpHQKDYom3X5jTuAEVsfxpV-mkytT796IgHqRL0QeoEVLEfeIM7TybDKthFg2HtLpfTwyqdg5bHVbs-CRamSTgq9sesVWzBNokEIC6VosXYan7rSbw_fmXmiGysbm9au6AOhnMH1WZ1lSNfInN8loijcvzgwhJqxJW-54Xnpkzs-bS5sQWsEnMnoX3zuMDKyZOsvitmAef9VhAfSdpirAEMZannf2QUgv8XnUeTnKJP810PI-FKzK45')"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-primary/60 to-primary/80"></div>
+</div>
+<main class="relative z-10 flex min-h-screen flex-col items-center justify-center p-margin-mobile md:p-margin-desktop">
+    <div class="glass-panel w-full max-w-[480px] rounded-xl shadow-xl overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-700">
+        <div class="pt-10 pb-6 flex flex-col items-center">
+            <div class="bg-primary p-3 rounded-lg mb-4 shadow-lg">
+                <span class="material-symbols-outlined text-secondary-fixed text-4xl" style="font-variation-settings: 'FILL' 1;">hotel</span>
+            </div>
+            <h1 class="font-headline-md text-headline-md text-primary tracking-tight">StayHub</h1>
+            <p class="font-label-md text-label-md text-outline uppercase tracking-[0.2em] mt-1">Luxury Management</p>
+        </div>
+        <div class="px-8 md:px-12 pb-6 text-center">
+            <h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Staff Portal</h2>
+            <p class="font-body-md text-body-md text-on-surface-variant">Welcome Back. Please enter your credentials to access the management dashboard.</p>
+        </div>
+        <form class="px-8 md:px-12 pb-10 space-y-6" method="post" action="{% url 'staff_login' %}">
+            {% csrf_token %}
+            <div class="space-y-2">
+                <label class="block font-label-md text-label-md text-on-surface-variant" for="username">Email Address / Username</label>
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-outline group-focus-within:text-primary transition-colors">
+                        <span class="material-symbols-outlined">person</span>
+                    </div>
+                    <input class="w-full pl-11 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-on-surface font-body-md" id="username" name="username" placeholder="e.g. j.doe@stayhub.com" type="text">
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="block font-label-md text-label-md text-on-surface-variant" for="password">Password</label>
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-outline group-focus-within:text-primary transition-colors">
+                        <span class="material-symbols-outlined">lock</span>
+                    </div>
+                    <input class="w-full pl-11 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-on-surface font-body-md" id="password" name="password" placeholder="••••••••" type="password">
+                    <button class="absolute inset-y-0 right-0 pr-4 flex items-center text-outline hover:text-primary transition-colors" type="button" onclick="toggleStaffPass()">
+                        <span class="material-symbols-outlined" id="staff-pass-icon">visibility</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <input class="h-4 w-4 text-primary focus:ring-primary border-outline-variant rounded" id="remember-me" name="remember-me" type="checkbox">
+                    <label class="ml-2 block font-label-sm text-label-sm text-on-surface-variant cursor-pointer" for="remember-me">Remember me</label>
+                </div>
+                <a class="font-label-sm text-label-sm text-primary hover:text-primary-container font-semibold transition-colors underline-offset-4 hover:underline" href="#">Forgot Password?</a>
+            </div>
+            <button class="w-full flex items-center justify-center gap-2 py-4 px-6 bg-primary text-white rounded font-label-md text-label-md uppercase tracking-wider shadow-lg hover:bg-primary-container active:scale-[0.98] transition-all duration-200" type="submit">
+                <span>Sign In to Dashboard</span>
+                <span class="material-symbols-outlined text-secondary-fixed">chevron_right</span>
+            </button>
+        </form>
+        <div class="h-1.5 w-full bg-gradient-to-r from-primary via-secondary-container to-primary"></div>
+    </div>
+    <footer class="mt-8 text-center text-white/80">
+        <p class="font-label-sm text-label-sm tracking-wide">StayHub Luxury Management © 2024</p>
+        <div class="mt-2 flex gap-4 justify-center">
+            <a class="text-white/60 hover:text-white transition-colors text-xs" href="#">Privacy Policy</a>
+            <span class="text-white/30">•</span>
+            <a class="text-white/60 hover:text-white transition-colors text-xs" href="#">Terms of Service</a>
+            <span class="text-white/30">•</span>
+            <a class="text-white/60 hover:text-white transition-colors text-xs" href="#">Help Center</a>
+        </div>
+    </footer>
+</main>
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-5 overflow-hidden">
+    <div class="absolute top-[10%] left-[5%] w-64 h-64 bg-secondary-fixed/10 blur-[100px] rounded-full"></div>
+    <div class="absolute bottom-[15%] right-[10%] w-96 h-96 bg-primary-fixed/20 blur-[120px] rounded-full"></div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    function toggleStaffPass() {
+        const pass = document.getElementById('password');
+        const icon = document.getElementById('staff-pass-icon');
+        const type = pass.getAttribute('type') === 'password' ? 'text' : 'password';
+        pass.setAttribute('type', type);
+        icon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => { input.parentElement.classList.add('scale-[1.01]'); });
+            input.addEventListener('blur', () => { input.parentElement.classList.remove('scale-[1.01]'); });
+        });
+    });
+</script>
+{% endblock %}

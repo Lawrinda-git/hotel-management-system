@@ -1,0 +1,73 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub | Luxury Awaits{% endblock %}
+{% block body_class %}bg-primary-container m-0 p-0 overflow-hidden h-screen w-screen flex items-center justify-center{% endblock %}
+{% block content %}
+<div class="absolute inset-0 z-0 overflow-hidden bg-primary-container">
+    <div class="floating-orb top-[-10%] left-[-5%]"></div>
+    <div class="floating-orb bottom-[-10%] right-[-5%]" style="animation-delay: -5s;"></div>
+    <div class="absolute inset-0 opacity-20 grayscale brightness-50" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA_WKNfPzaO3aM_dSdbu3CKTxMAkddhQL66DYLYpFcGBatBwfxdDlQ8HGbkQTZ4YXfMWr1S1vTmOmd76HifIqE6jPU7dz7miSc9pLzAJ-5d3gLOgTdUSH4yNc9xoIZSfT9kYQHCXEBd3pIkkjMpDDo0yaMxgZRg9nwn3okhTnkP0JiHSt4rbrd-qZEMEG_-UipO6WlN1AZVRq1jF6B5o7zkns0hz6fkghcEnTNWLfAi5x2mwBZ4Yk0p1EAxBrFZbn7cPkHMQO6zU_bC')"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-primary-container/80 via-primary-container/95 to-primary-container"></div>
+</div>
+<main class="relative z-10 flex flex-col items-center justify-center text-center px-margin-mobile">
+    <div class="fade-in mb-8">
+        <div class="relative inline-block px-12 py-16 glass-shimmer bg-white/5 backdrop-blur-xl rounded-[40px] border border-white/10 shadow-2xl">
+            <div class="mb-4 flex justify-center">
+                <span class="material-symbols-outlined text-[64px] text-secondary-container" style="font-variation-settings: 'FILL' 1;">temple_hindu</span>
+            </div>
+            <h1 class="font-headline-xl text-headline-xl gold-gradient-text tracking-tighter">StayHub</h1>
+            <p class="font-label-md text-label-md text-on-primary-container/70 tracking-[0.3em] uppercase mt-4">Modern Prestige</p>
+        </div>
+    </div>
+    <div class="fade-in" style="animation-delay: 0.5s;">
+        <p class="font-headline-md text-headline-md text-white/90 italic">Refining the art of hospitality.</p>
+    </div>
+    <div class="mt-16 w-48 h-[2px] bg-white/10 relative overflow-hidden rounded-full fade-in" style="animation-delay: 1s;">
+        <div class="absolute top-0 left-0 h-full bg-secondary-container rounded-full w-full -translate-x-full" id="progress-bar"></div>
+    </div>
+    <div class="absolute bottom-12 fade-in w-full text-center" style="animation-delay: 1.5s;">
+        <p class="font-label-sm text-label-sm text-on-primary-container/50">© 2024 STAYHUB GLOBAL HOTELS & RESORTS</p>
+    </div>
+</main>
+<a href="{% url 'signin' %}" class="absolute inset-0 z-20 cursor-pointer"></a>
+{% endblock %}
+{% block extra_style %}
+<style>
+    .glass-shimmer { position: relative; overflow: hidden; }
+    .glass-shimmer::after {
+        content: ""; position: absolute; top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.05) 45%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.05) 55%, transparent 100%);
+        transform: rotate(25deg); animation: shimmer 4s infinite linear;
+    }
+    @keyframes shimmer { 0% { transform: translateX(-100%) rotate(25deg); } 100% { transform: translateX(100%) rotate(25deg); } }
+    .fade-in { animation: fadeIn 1.5s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .gold-gradient-text { background: linear-gradient(to bottom right, #fed65b, #735c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .floating-orb {
+        position: absolute; width: 400px; height: 400px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(30,64,175,0.3) 0%, transparent 70%);
+        filter: blur(60px); z-index: 1; animation: float 10s infinite ease-in-out;
+    }
+    @keyframes float { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(20px,-30px); } }
+</style>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const bar = document.getElementById('progress-bar');
+        bar.style.transition = 'transform 3.5s cubic-bezier(0.65,0,0.35,1)';
+        setTimeout(() => bar.style.transform = 'translateX(0%)', 500);
+        setTimeout(() => { window.location.href = "{% url 'signin' %}"; }, 4500);
+    });
+    document.addEventListener('mousemove', (e) => {
+        const orbs = document.querySelectorAll('.floating-orb');
+        const x = e.clientX / window.innerWidth;
+        const y = e.clientY / window.innerHeight;
+        orbs.forEach((orb, index) => {
+            const speed = (index + 1) * 20;
+            orb.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+        });
+    });
+</script>
+{% endblock %}
