@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-01ky-fhel2(q*!u&v4dj6vc(ivnq*vzxi0p9jtebl#g)_fr7i6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -92,12 +92,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "hotel_db",
-        "USER": "hotel_user",
-        "PASSWORD": "myhotel123",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -156,4 +152,8 @@ REST_FRAMEWORK = {
  
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:8000",
 ]
+CORS_ALLOW_ALL_ORIGINS = True
+
+

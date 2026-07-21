@@ -54,6 +54,7 @@
                 <span>Sign In to Dashboard</span>
                 <span class="material-symbols-outlined text-secondary-fixed">chevron_right</span>
             </button>
+            <p class="font-body-md text-sm text-white/90 min-h-5" id="staff-login-feedback"></p>
         </form>
         <div class="h-1.5 w-full bg-gradient-to-r from-primary via-secondary-container to-primary"></div>
     </div>
@@ -75,6 +76,15 @@
 {% endblock %}
 {% block extra_scripts %}
 <script>
+    function getCookie(name) {
+        const cookieValue = `; ${document.cookie}`;
+        const parts = cookieValue.split(`; ${name}=`);
+        if (parts.length === 2) {
+            return parts.pop().split(';').shift();
+        }
+        return '';
+    }
+
     function toggleStaffPass() {
         const pass = document.getElementById('password');
         const icon = document.getElementById('staff-pass-icon');
@@ -88,6 +98,40 @@
             input.addEventListener('focus', () => { input.parentElement.classList.add('scale-[1.01]'); });
             input.addEventListener('blur', () => { input.parentElement.classList.remove('scale-[1.01]'); });
         });
+    });
+    document.querySelector('form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const feedback = document.getElementById('staff-login-feedback');
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        const original = submitButton.innerHTML;
+        feedback.textContent = 'Authenticating...';
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span>';
+        try {
+            const response = await fetch('{% url "api_login" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value,
+                }),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.detail || 'Login failed.');
+            }
+            feedback.textContent = data.detail;
+            window.location.href = data.redirect_url || '{% url "guest_home" %}';
+        } catch (error) {
+            feedback.textContent = error.message;
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = original;
+        }
     });
 </script>
 {% endblock %}

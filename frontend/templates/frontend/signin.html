@@ -45,6 +45,7 @@
                     <span>Sign In</span>
                     <span class="material-symbols-outlined text-xl">arrow_forward</span>
                 </button>
+                <p class="font-body-md text-sm text-on-surface-variant min-h-5" id="signin-feedback"></p>
             </form>
             <div class="relative my-8">
                 <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-outline-variant/30"></div></div>
@@ -93,6 +94,15 @@
 {% endblock %}
 {% block extra_scripts %}
 <script>
+    function getCookie(name) {
+        const cookieValue = `; ${document.cookie}`;
+        const parts = cookieValue.split(`; ${name}=`);
+        if (parts.length === 2) {
+            return parts.pop().split(';').shift();
+        }
+        return '';
+    }
+
     function togglePassword() {
         const pass = document.getElementById('password');
         const icon = document.getElementById('pass-icon');
@@ -104,23 +114,40 @@
         input.addEventListener('focus', () => { input.parentElement.parentElement.classList.add('scale-[1.02]', 'transition-transform'); });
         input.addEventListener('blur', () => { input.parentElement.parentElement.classList.remove('scale-[1.02]'); });
     });
-    document.getElementById('signin-form').addEventListener('submit', (e) => {
+    document.getElementById('signin-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const feedback = document.getElementById('signin-feedback');
         const btn = e.target.querySelector('button[type="submit"]');
         const original = btn.innerHTML;
+        feedback.textContent = 'Signing you in...';
         btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span>';
         btn.disabled = true;
-        setTimeout(() => {
-            btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span>';
-            btn.classList.replace('bg-secondary-container', 'bg-green-500');
-            btn.classList.add('text-white');
-            setTimeout(() => {
-                btn.innerHTML = original;
-                btn.classList.replace('bg-green-500', 'bg-secondary-container');
-                btn.classList.remove('text-white');
-                btn.disabled = false;
-            }, 2000);
-        }, 1500);
+        try {
+            const response = await fetch('{% url "api_login" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                }),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.detail || 'Sign in failed.');
+            }
+            feedback.textContent = data.detail;
+            window.location.href = data.redirect_url || '{% url "guest_home" %}';
+        } catch (error) {
+            feedback.textContent = error.message;
+            feedback.classList.add('text-error');
+        } finally {
+            btn.innerHTML = original;
+            btn.disabled = false;
+        }
     });
 </script>
 {% endblock %}

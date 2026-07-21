@@ -56,6 +56,7 @@
                 Create Account
                 <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </button>
+            <p class="font-body-md text-sm text-on-surface-variant min-h-5" id="registration-feedback"></p>
         </form>
         <footer class="mt-10 text-center">
             <p class="font-body-md text-body-md text-on-surface-variant">Already a member? <a class="text-primary font-semibold hover:text-on-primary-fixed-variant transition-colors inline-flex items-center gap-1 group" href="{% url 'signin' %}">Sign In <span class="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">login</span></a></p>
@@ -72,6 +73,15 @@
 {% endblock %}
 {% block extra_scripts %}
 <script>
+    function getCookie(name) {
+        const cookieValue = `; ${document.cookie}`;
+        const parts = cookieValue.split(`; ${name}=`);
+        if (parts.length === 2) {
+            return parts.pop().split(';').shift();
+        }
+        return '';
+    }
+
     const inputs = document.querySelectorAll('input');
     inputs.forEach(input => {
         input.addEventListener('focus', () => { const icon = input.closest('.relative').querySelector('.material-symbols-outlined'); if(icon) { icon.style.color = '#00288e'; icon.style.transition = 'color 0.3s ease'; } });
@@ -82,6 +92,51 @@
     confirmPass.addEventListener('input', () => {
         if(confirmPass.value === pass.value && confirmPass.value !== '') { confirmPass.classList.add('border-primary'); confirmPass.classList.remove('border-outline-variant/40'); }
         else { confirmPass.classList.remove('border-primary'); confirmPass.classList.add('border-outline-variant/40'); }
+    });
+    document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const feedback = document.getElementById('registration-feedback');
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        const original = submitButton.innerHTML;
+
+        if (pass.value !== confirmPass.value) {
+            feedback.textContent = 'Passwords do not match.';
+            feedback.classList.add('text-error');
+            return;
+        }
+
+        feedback.classList.remove('text-error');
+        feedback.textContent = 'Creating your account...';
+        submitButton.disabled = true;
+        submitButton.innerHTML = 'Creating...';
+
+        try {
+            const response = await fetch('{% url "api_register" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({
+                    full_name: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                }),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.detail || 'Account creation failed.');
+            }
+            feedback.textContent = data.detail;
+            window.setTimeout(() => { window.location.href = '{% url "signin" %}'; }, 1200);
+        } catch (error) {
+            feedback.textContent = error.message;
+            feedback.classList.add('text-error');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = original;
+        }
     });
 </script>
 {% endblock %}
