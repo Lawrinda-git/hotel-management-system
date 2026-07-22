@@ -226,27 +226,32 @@ def staff_login(request):
 
 
 def admin_signup(request):
+    """Create the first admin account or additional admins with signup key."""
+    first_admin = not Staff.objects.exists()
     if request.method == "POST":
+        # For first admin, skip signup key validation
+        if not first_admin:
+            signup_key = request.POST.get("signup_key") or ""
+            if settings.ADMIN_SIGNUP_KEY and signup_key != settings.ADMIN_SIGNUP_KEY:
+                return render(request, "frontend/admin_signup.html", {"error": "The admin signup key is invalid.", "first_admin": first_admin})
+            if not settings.ADMIN_SIGNUP_KEY and not settings.DEBUG:
+                return render(request, "frontend/admin_signup.html", {"error": "Admin signup is disabled until ADMIN_SIGNUP_KEY is configured.", "first_admin": first_admin})
+        
         full_name = (request.POST.get("full_name") or "").strip()
         email = (request.POST.get("email") or "").strip().lower()
         password = request.POST.get("password") or ""
-        signup_key = request.POST.get("signup_key") or ""
         staff_phone = _phone_value(request.POST.get("country_code"), request.POST.get("staff_phone"))
-        if settings.ADMIN_SIGNUP_KEY and signup_key != settings.ADMIN_SIGNUP_KEY:
-            return render(request, "frontend/admin_signup.html", {"error": "The admin signup key is invalid."})
-        if not settings.ADMIN_SIGNUP_KEY and not settings.DEBUG:
-            return render(request, "frontend/admin_signup.html", {"error": "Admin signup is disabled until ADMIN_SIGNUP_KEY is configured."})
         if not full_name or not email or len(password) < 8 or not staff_phone:
-            return render(request, "frontend/admin_signup.html", {"error": "Enter a name, valid email, password, and phone number."})
+            return render(request, "frontend/admin_signup.html", {"error": "Enter a name, valid email, password, and phone number.", "first_admin": first_admin})
         if Staff.objects.filter(email__iexact=email).exists() or Staff.objects.filter(username__iexact=email).exists():
-            return render(request, "frontend/admin_signup.html", {"error": "An account with that email already exists."})
+            return render(request, "frontend/admin_signup.html", {"error": "An account with that email already exists.", "first_admin": first_admin})
         parts = full_name.split(maxsplit=1)
         Staff.objects.create_superuser(
             username=email, email=email, password=password, first_name=parts[0],
             last_name=parts[1] if len(parts) > 1 else "", staff_name=full_name, staff_phone=staff_phone, role="admin",
         )
         return redirect("staff_login")
-    return render(request, "frontend/admin_signup.html")
+    return render(request, "frontend/admin_signup.html", {"first_admin": first_admin})
 
 
 def logout_view(request):
@@ -260,23 +265,51 @@ def create_account(request):
 
 
 def password_reset(request):
-    """Email a safe reset link without revealing whether an address exists."""
+    """Email a reset link for password reset."""
+    staff_login = request.GET.get("staff_login") == "1"
     if request.method == "POST":
-        form = PasswordResetForm(request.POST)
-        if form.is_valid():
-            try:
-                form.save(
-                    request=request,
-                    use_https=request.is_secure(),
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    email_template_name="frontend/password_reset_email.html",
-                    subject_template_name="frontend/password_reset_subject.txt",
-                )
-            except (smtplib.SMTPException, OSError):
-                # Do not reveal account existence or turn a mail outage into a 500.
-                logger.exception("Unable to send password-reset email")
+        identifier = (request.POST.get("username") or "").strip()
+        
+        if not identifier:
+            return render(request, "frontend/password_reset.html", {"error": "Username or email is required.", "staff_login": staff_login})
+        
+        user = None
+        if "@" in identifier:
+            user = Staff.objects.filter(email__iexact=identifier).first()
+        if user is None:
+            user = Staff.objects.filter(username__iexact=identifier).first()
+        
+        if user is None:
+            # Don't reveal whether the account exists
+            return redirect("password_reset_done")
+        
+        if staff_login and user.role == "guest":
+            return render(request, "frontend/password_reset.html", {"error": "This account is not a staff account.", "staff_login": staff_login})
+        
+        # Use Django's built-in password reset with email
+        from django.contrib.auth.tokens import default_token_generator
+        from django.utils.http import urlsafe_base64_encode
+        from django.utils.encoding import force_bytes
+        
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        reset_url = request.build_absolute_uri(f"/reset/{uid}/{token}/")
+        
+        try:
+            from django.core.mail import send_mail
+            send_mail(
+                "Your StayHub password reset link",
+                f"Click the link to reset your password: {reset_url}",
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+        except Exception:
+            pass  # Silent fail like login
+        
         return redirect("password_reset_done")
-    return render(request, "frontend/password_reset.html")
+    
+    return render(request, "frontend/password_reset.html", {"staff_login": staff_login})
 
 
 def two_factor(request):

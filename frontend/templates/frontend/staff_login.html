@@ -48,7 +48,7 @@
                     <input class="h-4 w-4 text-primary focus:ring-primary border-outline-variant rounded" id="remember-me" name="remember-me" type="checkbox">
                     <label class="ml-2 block font-label-sm text-label-sm text-on-surface-variant cursor-pointer" for="remember-me">Remember me</label>
                 </div>
-                <a class="font-label-sm text-label-sm text-primary hover:text-primary-container font-semibold transition-colors underline-offset-4 hover:underline" href="{% url 'password_reset' %}">Forgot Password?</a>
+                <a class="font-label-sm text-label-sm text-primary hover:text-primary-container font-semibold transition-colors underline-offset-4 hover:underline" href="{% url 'password_reset' %}?staff_login=1">Forgot Password?</a>
             </div>
             <button class="w-full flex items-center justify-center gap-2 py-4 px-6 bg-primary text-white rounded font-label-md text-label-md uppercase tracking-wider shadow-lg hover:bg-primary-container active:scale-[0.98] transition-all duration-200" type="submit">
                 <span>Sign In to Dashboard</span>
@@ -126,8 +126,8 @@
             if (!response.ok) {
                 throw new Error(data.detail || 'Login failed.');
             }
-            feedback.textContent = data.detail;
-            window.location.href = data.redirect_url || '{% url "guest_home" %}';
+             feedback.textContent = data.detail;
+             window.location.href = data.redirect_url || '{% url "manager_dashboard" %}';
         } catch (error) {
             feedback.textContent = error.message;
         } finally {

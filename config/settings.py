@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "apps.services",
     "apps.billing",
     "apps.feedback",
+    "apps.notifications",
     "frontend",
 
 ]
