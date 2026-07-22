@@ -1,8 +1,7 @@
 import json
 from email.utils import parseaddr
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
 
+import requests
 from django.conf import settings
 from django.core.mail.backends.base import BaseEmailBackend
 from django.core.mail.message import sanitize_address
@@ -38,16 +37,15 @@ class BrevoEmailBackend(BaseEmailBackend):
         html_alternatives = [body for mimetype, body in message.alternatives if mimetype == "text/html"]
         if html_alternatives:
             payload["htmlContent"] = html_alternatives[-1]
-        request = Request(
-            self.api_url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"accept": "application/json", "api-key": settings.BREVO_API_KEY, "content-type": "application/json"},
-            method="POST",
-        )
         try:
-            with urlopen(request, timeout=15) as response:
-                if response.status >= 300:
-                    raise SMTPException(f"Brevo API returned HTTP {response.status}")
-        except (HTTPError, URLError, OSError) as exc:
+            response = requests.post(
+                self.api_url,
+                json=payload,
+                headers={"api-key": settings.BREVO_API_KEY},
+                timeout=15,
+            )
+            if response.status_code >= 300:
+                raise SMTPException(f"Brevo API returned HTTP {response.status_code}: {response.text}")
+        except requests.RequestException as exc:
             raise SMTPException(f"Brevo email delivery failed: {exc}") from exc
         return True

@@ -1,0 +1,113 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub | Our Team{% endblock %}
+{% block body_class %}bg-background text-on-surface{% endblock %}
+{% block content %}
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+    <div class="flex items-center justify-between px-margin-mobile h-16 w-full max-w-screen-xl mx-auto">
+        <div class="flex items-center gap-3">
+            <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold tracking-tight">StayHub</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}" class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95" aria-label="Log out">logout</a>
+            {% else %}
+            <a href="{% url 'signin' %}" class="font-label-md text-label-md text-primary font-semibold">Sign In</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+<main class="pt-24 pb-20 px-margin-mobile max-w-screen-xl mx-auto">
+    <section class="text-center mb-16">
+        <h2 class="font-headline-xl text-headline-xl text-primary tracking-tight mb-4">Meet Our Team</h2>
+        <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">The passionate people behind StayHub dedicated to redefining luxury hospitality in Ghana.</p>
+    </section>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-outline-variant/10 hover:shadow-xl transition-all group">
+            <div class="h-64 bg-gradient-to-br from-primary-container/30 to-secondary-container/40 flex items-end justify-center p-6">
+                <div class="w-28 h-28 rounded-full bg-primary/20 border-4 border-white shadow-lg flex items-center justify-center -mb-16">
+                    <span class="material-symbols-outlined text-5xl text-primary" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+                </div>
+            </div>
+            <div class="pt-20 p-6 text-center">
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-1">Lawrinda Adjei-Agyapong</h3>
+                <p class="font-label-md text-label-md text-primary font-semibold mb-3">Founder & CEO</p>
+                <p class="font-body-md text-body-md text-on-surface-variant">Visionary leader shaping the future of luxury hospitality in Ghana with a passion for exceptional guest experiences.</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-outline-variant/10 hover:shadow-xl transition-all group">
+            <div class="h-64 bg-gradient-to-br from-secondary-container/30 to-primary-container/40 flex items-end justify-center p-6">
+                <div class="w-28 h-28 rounded-full bg-secondary/20 border-4 border-white shadow-lg flex items-center justify-center -mb-16">
+                    <span class="material-symbols-outlined text-5xl text-secondary" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+                </div>
+            </div>
+            <div class="pt-20 p-6 text-center">
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-1">Kwame Asante</h3>
+                <p class="font-label-md text-label-md text-primary font-semibold mb-3">Chief Operations Officer</p>
+                <p class="font-body-md text-body-md text-on-surface-variant">Ensuring seamless operations across all StayHub properties with a focus on excellence and efficiency.</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-outline-variant/10 hover:shadow-xl transition-all group">
+            <div class="h-64 bg-gradient-to-br from-primary-container/20 to-tertiary-container/30 flex items-end justify-center p-6">
+                <div class="w-28 h-28 rounded-full bg-tertiary/20 border-4 border-white shadow-lg flex items-center justify-center -mb-16">
+                    <span class="material-symbols-outlined text-5xl text-tertiary" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+                </div>
+            </div>
+            <div class="pt-20 p-6 text-center">
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-1">Abena Osei</h3>
+                <p class="font-label-md text-label-md text-primary font-semibold mb-3">Head of Guest Relations</p>
+                <p class="font-body-md text-body-md text-on-surface-variant">Dedicated to creating memorable experiences for every guest who walks through our doors.</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-outline-variant/10 hover:shadow-xl transition-all group">
+            <div class="h-64 bg-gradient-to-br from-secondary-container/30 to-primary-container/20 flex items-end justify-center p-6">
+                <div class="w-28 h-28 rounded-full bg-primary-container/30 border-4 border-white shadow-lg flex items-center justify-center -mb-16">
+                    <span class="material-symbols-outlined text-5xl text-primary-container" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+                </div>
+            </div>
+            <div class="pt-20 p-6 text-center">
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-1">Nana Yaw Mensah</h3>
+                <p class="font-label-md text-label-md text-primary font-semibold mb-3">Head of Technology</p>
+                <p class="font-body-md text-body-md text-on-surface-variant">Building innovative digital solutions that power the StayHub platform and enhance guest experiences.</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-outline-variant/10 hover:shadow-xl transition-all group">
+            <div class="h-64 bg-gradient-to-br from-tertiary-container/20 to-secondary-container/30 flex items-end justify-center p-6">
+                <div class="w-28 h-28 rounded-full bg-secondary-container/30 border-4 border-white shadow-lg flex items-center justify-center -mb-16">
+                    <span class="material-symbols-outlined text-5xl text-secondary-container" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+                </div>
+            </div>
+            <div class="pt-20 p-6 text-center">
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-1">Efua Sutherland</h3>
+                <p class="font-label-md text-label-md text-primary font-semibold mb-3">Director of Sales & Marketing</p>
+                <p class="font-body-md text-body-md text-on-surface-variant">Driving growth and brand awareness for StayHub across Ghana and the West African region.</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-outline-variant/10 hover:shadow-xl transition-all group">
+            <div class="h-64 bg-gradient-to-br from-primary-container/30 to-secondary-container/30 flex items-end justify-center p-6">
+                <div class="w-28 h-28 rounded-full bg-primary/20 border-4 border-white shadow-lg flex items-center justify-center -mb-16">
+                    <span class="material-symbols-outlined text-5xl text-primary" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+                </div>
+            </div>
+            <div class="pt-20 p-6 text-center">
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-1">Kofi Annan</h3>
+                <p class="font-label-md text-label-md text-primary font-semibold mb-3">Housekeeping Manager</p>
+                <p class="font-body-md text-body-md text-on-surface-variant">Maintaining the highest standards of cleanliness and comfort across all StayHub properties.</p>
+            </div>
+        </div>
+    </div>
+    <section class="text-center bg-surface-container-low rounded-3xl p-12 shadow-sm border border-outline-variant/10">
+        <h3 class="font-headline-lg text-headline-lg text-primary mb-4">Join Our Team</h3>
+        <p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg mx-auto mb-6">We're always looking for talented individuals who share our passion for hospitality excellence.</p>
+        <a href="{% url 'create_account' %}" class="inline-block bg-primary text-white px-8 py-4 rounded-full font-label-md text-label-md hover:opacity-90 transition-all shadow-lg active:scale-95">Get in Touch</a>
+    </section>
+</main>
+<nav class="fixed bottom-0 w-full z-50 rounded-t-2xl bg-surface/80 backdrop-blur-xl border-t border-outline-variant/30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+    <div class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 pb-safe px-4">
+        <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all active:scale-90 duration-200" href="{% url 'guest_home' %}"><span class="material-symbols-outlined">home</span><span class="font-label-sm text-label-sm">Home</span></a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all active:scale-90 duration-200" href="{% url 'explore_stays' %}"><span class="material-symbols-outlined">search</span><span class="font-label-sm text-label-sm">Search</span></a>
+        <a class="flex flex-col items-center justify-center text-primary font-bold hover:bg-surface-variant/50 transition-all active:scale-90 duration-200" href="#"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span><span class="font-label-sm text-label-sm">Team</span></a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all active:scale-90 duration-200" href="{% url 'profile' %}"><span class="material-symbols-outlined">person</span><span class="font-label-sm text-label-sm">Profile</span></a>
+    </div>
+</nav>
+{% endblock %}

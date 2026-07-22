@@ -1,11 +1,12 @@
 {% extends "frontend/base.html" %}
 {% load static %}
-{% block title %}StayHub | Luxury Stays{% endblock %}
+{% block title %}StayHub | Luxury Stays in Ghana{% endblock %}
 {% block body_class %}bg-background text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed{% endblock %}
 {% block content %}
 <header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
     <div class="flex items-center justify-between px-margin-mobile h-16 w-full">
         <div class="flex items-center gap-3">
+            {% if user.is_authenticated %}
             <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container bg-surface-container-high active:scale-95 transition-transform">
                 {% if request.user.profile_picture %}<img class="w-full h-full object-cover" src="{{ request.user.profile_picture.url }}" alt="Profile">{% else %}<span class="flex h-full w-full items-center justify-center bg-primary text-lg font-bold text-white">{{ request.user.first_name|default:request.user.username|first|upper }}</span>{% endif %}
             </div>
@@ -13,9 +14,16 @@
                 <span class="text-label-sm font-label-sm text-on-surface-variant">Welcome back,</span>
                 <span class="text-body-md font-body-md font-bold text-primary">{{ display_name }}</span>
             </div>
+            {% else %}
+            <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold tracking-tight">StayHub</h1>
+            {% endif %}
         </div>
+        {% if user.is_authenticated %}
         <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold tracking-tight">StayHub</h1>
         <a href="{% url 'logout' %}" class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95" aria-label="Log out">logout</a>
+        {% else %}
+        <a href="{% url 'signin' %}" class="font-label-md text-label-md text-primary font-semibold hover:opacity-80 transition-opacity active:scale-95">Sign In</a>
+        {% endif %}
     </div>
 </header>
 <main class="pt-24 pb-32 px-margin-mobile max-w-md mx-auto">
@@ -24,46 +32,46 @@
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                 <span class="material-symbols-outlined text-outline">search</span>
             </div>
-            <input class="w-full pl-12 pr-4 py-4 bg-surface-container-lowest border-none rounded-2xl shadow-sm focus:ring-2 focus:ring-primary text-body-md font-body-md placeholder:text-outline-variant transition-all" placeholder="Where would you like to go?" type="text">
-            <button class="absolute inset-y-2 right-2 px-4 bg-primary text-on-primary rounded-xl font-label-md text-label-md active:scale-95 transition-all">Search</button>
+            <input class="w-full pl-12 pr-4 py-4 bg-surface-container-lowest border-none rounded-2xl shadow-sm focus:ring-2 focus:ring-primary text-body-md font-body-md placeholder:text-outline-variant transition-all" placeholder="Search hotels in Ghana..." type="text">
+            <a href="{% url 'explore_stays' %}" class="absolute inset-y-2 right-2 px-4 bg-primary text-on-primary rounded-xl font-label-md text-label-md active:scale-95 transition-all">Search</a>
         </div>
     </section>
     <section class="mb-10 overflow-hidden">
         <div class="flex justify-between items-end mb-4">
             <h2 class="font-headline-md text-headline-md text-on-surface">Categories</h2>
-            <button class="text-label-md font-label-md text-primary-container">View all</button>
+            <a href="{% url 'explore_stays' %}" class="text-label-md font-label-md text-primary-container">View all</a>
         </div>
         <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
-            <button class="flex flex-col items-center gap-2 group shrink-0">
+            <a href="{% url 'explore_stays' %}" class="flex flex-col items-center gap-2 group shrink-0">
                 <div class="w-16 h-16 rounded-2xl bg-primary text-on-primary flex items-center justify-center shadow-lg group-active:scale-90 transition-all">
                     <span class="material-symbols-outlined text-[28px]">pool</span>
                 </div>
                 <span class="text-label-sm font-label-sm font-semibold">Resorts</span>
-            </button>
-            <button class="flex flex-col items-center gap-2 group shrink-0">
+            </a>
+            <a href="{% url 'explore_stays' %}" class="flex flex-col items-center gap-2 group shrink-0">
                 <div class="w-16 h-16 rounded-2xl bg-surface-container-high text-on-surface-variant flex items-center justify-center shadow-sm group-hover:bg-primary-container group-hover:text-white transition-all">
                     <span class="material-symbols-outlined text-[28px]">villa</span>
                 </div>
                 <span class="text-label-sm font-label-sm">Villas</span>
-            </button>
-            <button class="flex flex-col items-center gap-2 group shrink-0">
+            </a>
+            <a href="{% url 'explore_stays' %}" class="flex flex-col items-center gap-2 group shrink-0">
                 <div class="w-16 h-16 rounded-2xl bg-surface-container-high text-on-surface-variant flex items-center justify-center shadow-sm group-hover:bg-primary-container group-hover:text-white transition-all">
                     <span class="material-symbols-outlined text-[28px]">apartment</span>
                 </div>
                 <span class="text-label-sm font-label-sm">Boutique</span>
-            </button>
-            <button class="flex flex-col items-center gap-2 group shrink-0">
+            </a>
+            <a href="{% url 'explore_stays' %}" class="flex flex-col items-center gap-2 group shrink-0">
                 <div class="w-16 h-16 rounded-2xl bg-surface-container-high text-on-surface-variant flex items-center justify-center shadow-sm group-hover:bg-primary-container group-hover:text-white transition-all">
                     <span class="material-symbols-outlined text-[28px]">cabin</span>
                 </div>
                 <span class="text-label-sm font-label-sm">Cabins</span>
-            </button>
+            </a>
         </div>
     </section>
     <section class="mb-10">
         <div class="flex justify-between items-end mb-6">
             <h2 class="font-headline-md text-headline-md text-on-surface">Featured Escapes</h2>
-            <span class="material-symbols-outlined text-primary-container cursor-pointer">tune</span>
+            <a href="{% url 'explore_stays' %}" class="material-symbols-outlined text-primary-container cursor-pointer">tune</a>
         </div>
         <div class="space-y-6">
             <div class="relative group h-[420px] rounded-2xl overflow-hidden shadow-xl active:scale-[0.98] transition-transform duration-300">
@@ -83,17 +91,17 @@
                         <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                        <span class="text-label-sm font-label-sm ml-1 text-white/90">5.0 (1.2k reviews)</span>
+                        <span class="text-label-sm font-label-sm ml-1 text-white/90">5.0 (2.4k reviews)</span>
                     </div>
-                    <h3 class="font-headline-lg-mobile text-headline-lg-mobile text-white mb-1">Labadi Beach Resort</h3>
+                    <h3 class="font-headline-lg-mobile text-headline-lg-mobile text-white mb-1">La Palm Royal Beach Hotel</h3>
                     <div class="flex items-center gap-2 text-white/80 mb-4">
                         <span class="material-symbols-outlined text-base">location_on</span>
-                        <span class="text-body-md font-body-md">Labadi, Accra</span>
+                        <span class="text-body-md font-body-md">Liberation Road, Accra</span>
                     </div>
                     <div class="flex items-center justify-between">
                         <div class="flex flex-col">
                             <span class="text-label-sm font-label-sm text-white/70">Starting at</span>
-                            <span class="text-headline-md font-headline-md text-secondary-fixed">$850<span class="text-body-md font-body-md text-white/80 ml-1">/night</span></span>
+                            <span class="text-headline-md font-headline-md text-secondary-fixed">GH₵250<span class="text-body-md font-body-md text-white/80 ml-1">/night</span></span>
                         </div>
                         <a href="{% url 'hotel_details' %}" class="bg-secondary-container text-on-secondary-container px-6 py-3 rounded-xl font-label-md text-label-md font-bold shadow-lg active:scale-95 transition-all">Book Now</a>
                     </div>
@@ -107,10 +115,10 @@
                     </div>
                     <div>
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-label-md font-label-md text-on-surface line-clamp-1">Hotel L'Artiste</span>
+                            <span class="text-label-md font-label-md text-on-surface line-clamp-1">Kempinski Hotel</span>
                             <div class="flex items-center gap-0.5 text-secondary"><span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span><span class="text-label-sm font-label-sm">4.9</span></div>
                         </div>
-                        <span class="text-label-sm font-label-sm text-on-surface-variant">Paris, France</span>
+                        <span class="text-label-sm font-label-sm text-on-surface-variant">Accra, Ghana</span>
                     </div>
                 </div>
                 <div class="flex flex-col gap-3 group active:scale-[0.97] transition-all">
@@ -120,10 +128,10 @@
                     </div>
                     <div>
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-label-md font-label-md text-on-surface line-clamp-1">Villa Como Mist</span>
+                            <span class="text-label-md font-label-md text-on-surface line-clamp-1">Royal Senchi Resort</span>
                             <div class="flex items-center gap-0.5 text-secondary"><span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span><span class="text-label-sm font-label-sm">4.8</span></div>
                         </div>
-                        <span class="text-label-sm font-label-sm text-on-surface-variant">Lake Como, Italy</span>
+                        <span class="text-label-sm font-label-sm text-on-surface-variant">Senchi, Eastern Region</span>
                     </div>
                 </div>
             </div>
@@ -136,22 +144,22 @@
             </div>
             <div>
                 <h3 class="text-label-md font-label-md font-bold text-primary-container uppercase tracking-widest">Member Perk</h3>
-                <p class="text-body-md font-body-md text-on-surface font-semibold">{{ display_name }}, explore member offers tailored for your next stay.</p>
+    <p class="text-body-md font-body-md text-on-surface font-semibold">{% if display_name %}{{ display_name }}, {% endif %}explore member offers tailored for your next stay in Ghana.</p>
             </div>
         </div>
     </section>
 </main>
 <nav class="fixed bottom-0 w-full z-50 rounded-t-2xl bg-surface/80 backdrop-blur-xl border-t border-outline-variant/30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
     <div class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 pb-safe px-4">
-        <a class="flex flex-col items-center justify-center text-primary font-bold transition-all duration-200 active:scale-90" href="#"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span><span class="font-label-sm text-label-sm">Home</span></a>
+        <a class="flex flex-col items-center justify-center text-primary font-bold transition-all duration-200 active:scale-90" href="{% url 'guest_home' %}"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span><span class="font-label-sm text-label-sm">Home</span></a>
         <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all duration-200 active:scale-90" href="{% url 'explore_stays' %}"><span class="material-symbols-outlined">search</span><span class="font-label-sm text-label-sm">Search</span></a>
-        <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all duration-200 active:scale-90" href="#"><span class="material-symbols-outlined">calendar_today</span><span class="font-label-sm text-label-sm">Bookings</span></a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all duration-200 active:scale-90" href="{% url 'booking' %}"><span class="material-symbols-outlined">calendar_today</span><span class="font-label-sm text-label-sm">Bookings</span></a>
         <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all duration-200 active:scale-90" href="{% url 'profile' %}"><span class="material-symbols-outlined">person</span><span class="font-label-sm text-label-sm">Profile</span></a>
     </div>
 </nav>
 {% endblock %}
 {% block extra_scripts %}
-<script>
+    <script>
     document.querySelectorAll('nav a').forEach(link => {
         link.addEventListener('click', function(e) {
             document.querySelectorAll('nav a').forEach(l => { l.classList.remove('text-primary', 'font-bold'); l.classList.add('text-on-surface-variant'); });
@@ -164,5 +172,5 @@
         if (window.scrollY > 20) header.classList.add('shadow-md');
         else header.classList.remove('shadow-md');
     });
-</script>
+    </script>
 {% endblock %}

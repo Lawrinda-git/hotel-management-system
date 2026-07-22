@@ -5,12 +5,11 @@ import secrets
 import smtplib
 import time
 from decimal import Decimal
-from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlparse
-from urllib.request import Request, urlopen
 from datetime import datetime
 
 import jwt
+import requests
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
@@ -77,7 +76,7 @@ def _begin_two_factor(request, user):
                 [user.email],
                 fail_silently=False,
             )
-    except (smtplib.SMTPException, OSError, HTTPError, URLError, ValueError):
+    except (smtplib.SMTPException, OSError, requests.RequestException, ValueError):
         logger.exception("Unable to send two-factor %s to %s", channel, user.email)
         for key in ("pending_login_user_id", "pending_login_code", "pending_login_expires_at"):
             request.session.pop(key, None)
@@ -89,26 +88,21 @@ def _begin_two_factor(request, user):
 def _send_verification_sms(phone_number, code):
     if not settings.BREVO_API_KEY:
         raise ValueError("BREVO_API_KEY is not configured")
-    payload = json.dumps({
+    payload = {
         "sender": getattr(settings, "BREVO_SMS_SENDER", "StayHub"),
         "recipient": phone_number,
         "content": f"Your StayHub verification code is {code}. It expires in 10 minutes.",
         "type": "transactional",
         "unicodeEnabled": True,
-    }).encode("utf-8")
-    request = Request(
+    }
+    response = requests.post(
         "https://api.brevo.com/v3/transactionalSMS/send",
-        data=payload,
-        headers={
-            "accept": "application/json",
-            "api-key": settings.BREVO_API_KEY,
-            "content-type": "application/json",
-        },
-        method="POST",
+        json=payload,
+        headers={"api-key": settings.BREVO_API_KEY},
+        timeout=15,
     )
-    with urlopen(request, timeout=15) as response:
-        if response.status >= 300:
-            raise ValueError(f"Brevo SMS API returned HTTP {response.status}")
+    if response.status_code >= 300:
+        raise ValueError(f"Brevo SMS API returned HTTP {response.status_code}: {response.text}")
 
 
 def _complete_or_challenge_login(request, user):
@@ -363,13 +357,19 @@ def google_callback(request):
     redirect_uri = request.session.pop("google_oauth_redirect_uri", None) or _google_redirect_uri(request)
     staff_login_flow = request.session.pop("google_oauth_staff", False)
     try:
-        data = urlencode({
-            "code": request.GET["code"], "client_id": settings.GOOGLE_OAUTH_CLIENT_ID,
-            "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET,
-            "redirect_uri": redirect_uri, "grant_type": "authorization_code",
-        }).encode()
-        token_request = Request("https://oauth2.googleapis.com/token", data=data, method="POST")
-        token_data = json.loads(urlopen(token_request, timeout=10).read().decode())
+        token_response = requests.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": request.GET["code"],
+                "client_id": settings.GOOGLE_OAUTH_CLIENT_ID,
+                "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET,
+                "redirect_uri": redirect_uri,
+                "grant_type": "authorization_code",
+            },
+            timeout=10,
+        )
+        token_response.raise_for_status()
+        token_data = token_response.json()
         claims = jwt.decode(token_data["id_token"], options={"verify_signature": False})
         if claims.get("aud") != settings.GOOGLE_OAUTH_CLIENT_ID or claims.get("iss") not in {"accounts.google.com", "https://accounts.google.com"} or not claims.get("email_verified"):
             raise ValueError("Invalid Google identity token")
@@ -450,17 +450,36 @@ def guest_home(request):
 
 def explore_stays(request):
     """Room booking / explore stays page."""
-    return render(request, "frontend/explore_stays.html")
+    name = request.user.get_full_name().strip() if request.user.is_authenticated else "Guest"
+    name = name or (request.user.staff_name if request.user.is_authenticated else "Guest")
+    return render(request, "frontend/explore_stays.html", {"display_name": name})
 
 
 def hotel_details(request):
     """Detailed view of a single hotel."""
-    return render(request, "frontend/hotel_details.html")
+    name = request.user.get_full_name().strip() if request.user.is_authenticated else "Guest"
+    name = name or (request.user.staff_name if request.user.is_authenticated else "Guest")
+    return render(request, "frontend/hotel_details.html", {"display_name": name})
 
 
 def booking(request):
     """Booking configuration / reservation page."""
-    return render(request, "frontend/booking.html")
+    name = request.user.get_full_name().strip() if request.user.is_authenticated else "Guest"
+    name = name or (request.user.staff_name if request.user.is_authenticated else "Guest")
+    user_email = request.user.email if request.user.is_authenticated else ""
+    user_phone = request.user.staff_phone if request.user.is_authenticated and hasattr(request.user, 'staff_phone') else ""
+    user_name = request.user.staff_name if request.user.is_authenticated and hasattr(request.user, 'staff_name') else name
+    return render(request, "frontend/booking.html", {
+        "display_name": name,
+        "user_email": user_email,
+        "user_phone": user_phone,
+        "user_name": user_name,
+    })
+
+
+def team(request):
+    """Team / About page showing the StayHub team."""
+    return render(request, "frontend/team.html")
 
 
 @require_http_methods(["GET"])

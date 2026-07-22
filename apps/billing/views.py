@@ -3,10 +3,8 @@ import hmac
 import json
 import logging
 from decimal import Decimal
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
 
+import requests
 from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
@@ -29,33 +27,34 @@ def _initialize_paystack_transaction(invoice, request):
 
 	guest = invoice.reservation.guest
 	amount_kobo = int(Decimal(invoice.balance_due) * 100)
-	payload = urlencode({
+	payload = {
 		"email": guest.guest_email,
 		"amount": str(amount_kobo),
 		"reference": f"inv-{invoice.id}-{invoice.reservation_id}",
 		"callback_url": settings.PAYSTACK_RETURN_URL,
-		"metadata": json.dumps({
+		"metadata": {
 			"invoice_id": invoice.id,
 			"reservation_id": invoice.reservation_id,
 			"guest_name": guest.guest_name,
 			"guest_phone": guest.guest_phone,
-		}),
-	}).encode("utf-8")
-	request_obj = Request(
+		},
+	}
+	response = requests.post(
 		"https://api.paystack.co/transaction/initialize",
-		data=payload,
+		json=payload,
 		headers={
 			"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
-			"Content-Type": "application/x-www-form-urlencoded",
-			"Accept": "application/json",
 		},
-		method="POST",
+		timeout=20,
 	)
-	with urlopen(request_obj, timeout=20) as response:
-		data = json.loads(response.read().decode("utf-8"))
-		if not data.get("status"):
-			raise ValueError(data.get("message") or "Paystack initialization failed")
-		return data["data"]
+	if not response.ok:
+		raise ValueError(
+			f"Paystack API returned {response.status_code}: {response.text}"
+		)
+	data = response.json()
+	if not data.get("status"):
+		raise ValueError(data.get("message") or "Paystack initialization failed")
+	return data["data"]
 
 
 @require_http_methods(["POST"])
@@ -72,7 +71,7 @@ def create_paystack_checkout(request):
 	invoice = get_object_or_404(Invoice.objects.select_related("reservation", "reservation__guest"), pk=invoice_id)
 	try:
 		data = _initialize_paystack_transaction(invoice, request)
-	except (ValueError, HTTPError, URLError, OSError) as exc:
+	except (ValueError, requests.RequestException, OSError) as exc:
 		logger.exception("Unable to initialize Paystack payment for invoice %s", invoice.id)
 		return JsonResponse({"detail": f"Paystack checkout failed: {exc}"}, status=503)
 

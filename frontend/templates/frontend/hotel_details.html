@@ -1,6 +1,6 @@
-{% extends "frontend/base.html" %}
+ {% extends "frontend/base.html" %}
 {% load static %}
-{% block title %}StayHub | Luxury Hotel Details{% endblock %}
+{% block title %}StayHub | Ghanaian Luxury Hotel{% endblock %}
 {% block body_class %}bg-surface text-on-surface selection:bg-secondary-container/30{% endblock %}
 {% block content %}
 <nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm flex items-center justify-between px-margin-mobile h-16 w-full">
@@ -39,18 +39,18 @@
     <section class="px-margin-mobile mt-8">
         <div class="flex justify-between items-start">
             <div>
-                <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold mb-1">Azure Grand Resort</h2>
-                <div class="flex items-center text-on-surface-variant gap-1"><span class="material-symbols-outlined text-primary text-body-md">location_on</span><span class="text-body-md font-body-md">Santorini, Greece</span></div>
+                <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold mb-1">La Palm Royal Beach Hotel</h2>
+                <div class="flex items-center text-on-surface-variant gap-1"><span class="material-symbols-outlined text-primary text-body-md">location_on</span><span class="text-body-md font-body-md">Liberation Road, Accra, Ghana</span></div>
             </div>
             <div class="text-right">
                 <p class="text-on-surface-variant text-label-sm font-label-sm uppercase tracking-widest">Starting from</p>
-                <p class="text-primary font-headline-md text-headline-md font-bold">$450<span class="text-label-md">/night</span></p>
+                <p class="text-primary font-headline-md text-headline-md font-bold">GH₵250<span class="text-label-md">/night</span></p>
             </div>
         </div>
     </section>
     <section class="px-margin-mobile mt-8">
         <h3 class="font-headline-md text-headline-md text-primary mb-3">About</h3>
-        <p class="text-on-surface-variant font-body-md leading-relaxed">Experience unparalleled luxury at the Azure Grand Resort. Nestled on the cliffs of Santorini, our property combines the heritage of Greek architecture with modern prestige. Enjoy curated experiences, from private caldera view dinners to rejuvenating spa treatments in our glass-walled sanctuary.</p>
+        <p class="text-on-surface-variant font-body-md leading-relaxed">Experience unparalleled luxury at La Palm Royal Beach Hotel. Nestled along the pristine coastline of Accra, our property combines Ghanaian heritage with modern prestige. Enjoy curated experiences, from private beachfront dinners to rejuvenating spa treatments overlooking the Atlantic Ocean.</p>
     </section>
     <section class="px-margin-mobile mt-10">
         <h3 class="font-headline-md text-headline-md text-primary mb-4">Amenities</h3>
@@ -75,18 +75,18 @@
             <a href="{% url 'booking' %}" class="block bg-white border border-outline-variant/30 rounded-2xl p-4 flex gap-4 items-center shadow-sm active:scale-[0.98] transition-transform">
                 <div class="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0"><img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9tsLdiKxrrrcA6pvfWmcnPMSoRuEPuNuAT6dvssr5uztaYqqb8xHiTm7_XGLoQf4hgDsY6BXlmVKqnq0xAMZJMHH4D346TbhQcpiM_HmNJ7u-y53Yh70qQqCuTBxfldtUEER-HyRJc3d5beTujy9qx7JSjiGvsiuxYJKTnQ0O3kIgpbbbHr1-GjP1LS6bmNugzoiSyWa8x1lp_IqoYF6_PxPQkMCbiuTkNbhxlS4B1WWJqFbUdoac0BDQZWYT6tCokRcVWZfNLxWj" alt="Room"></div>
                 <div class="flex-grow">
-                    <h4 class="font-label-md text-label-md text-on-surface mb-1">Deluxe King Suite</h4>
-                    <div class="flex items-center gap-2 text-on-surface-variant text-label-sm mb-2"><span class="material-symbols-outlined text-sm">bed</span> 1 King Bed <span class="material-symbols-outlined text-sm">square_foot</span> 45m²</div>
-                    <p class="text-primary font-bold text-body-md">$450 <span class="font-normal text-on-surface-variant text-label-sm">/night</span></p>
+                    <h4 class="font-label-md text-label-md text-on-surface mb-1">Deluxe Room</h4>
+                    <div class="flex items-center gap-2 text-on-surface-variant text-label-sm mb-2"><span class="material-symbols-outlined text-sm">bed</span> 1 King Bed <span class="material-symbols-outlined text-sm">square_foot</span> 40m²</div>
+                    <p class="text-primary font-bold text-body-md">GH₵400 <span class="font-normal text-on-surface-variant text-label-sm">/night</span></p>
                 </div>
                 <span class="material-symbols-outlined text-primary-container">arrow_forward_ios</span>
             </a>
             <a href="{% url 'booking' %}" class="block bg-white border border-outline-variant/30 rounded-2xl p-4 flex gap-4 items-center shadow-sm active:scale-[0.98] transition-transform">
                 <div class="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0"><img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzmpL7w-splG0AwYxh_o1Jg5nX4GWXNtVf0zND8PZSQRnI3YLeknAfnt8uKle-GAYPf8sMZykggBg-u3hABhABFt-NfZomBY8SX-rdo3IvlbYqWwZLolkt5U6G0-jPbbLgskBFsTok52_ye2KtQ3LhGsRhMKy_8FLbMvvQzHeXFbIApdLifgZkGWVcXPfxmEMgqOzulMt6fZvaDuRHX5E1yinkS2gF8vnzTmrf5TFulGWhgo9MMmu1yk4rIC3gdXJNWCsi9OQqSvCT" alt="Villa"></div>
                 <div class="flex-grow">
-                    <h4 class="font-label-md text-label-md text-on-surface mb-1">Caldera View Villa</h4>
-                    <div class="flex items-center gap-2 text-on-surface-variant text-label-sm mb-2"><span class="material-symbols-outlined text-sm">bed</span> 2 Queen Beds <span class="material-symbols-outlined text-sm">pool</span> Private Pool</div>
-                    <p class="text-primary font-bold text-body-md">$820 <span class="font-normal text-on-surface-variant text-label-sm">/night</span></p>
+                    <h4 class="font-label-md text-label-md text-on-surface mb-1">Ocean View Suite</h4>
+                    <div class="flex items-center gap-2 text-on-surface-variant text-label-sm mb-2"><span class="material-symbols-outlined text-sm">bed</span> 1 King Bed <span class="material-symbols-outlined text-sm">pool</span> Ocean View</div>
+                    <p class="text-primary font-bold text-body-md">GH₵650 <span class="font-normal text-on-surface-variant text-label-sm">/night</span></p>
                 </div>
                 <span class="material-symbols-outlined text-primary-container">arrow_forward_ios</span>
             </a>
@@ -96,7 +96,7 @@
 <div class="fixed bottom-0 left-0 w-full glass-effect h-24 flex items-center justify-between px-6 pb-safe border-t border-outline-variant/10 shadow-[0_-8px_30px_rgb(0,0,0,0.04)] z-[60]">
     <div class="flex flex-col">
         <span class="text-label-sm text-on-surface-variant">Total Price</span>
-        <span class="text-headline-md font-bold text-primary">$450 <span class="text-label-sm font-medium">/night</span></span>
+        <span class="text-headline-md font-bold text-primary">GH₵250 <span class="text-label-sm font-medium">/night</span></span>
     </div>
     <a href="{% url 'booking' %}" class="bg-primary text-on-primary px-10 py-4 rounded-xl font-label-md flex items-center gap-2 shadow-lg hover:opacity-90 active:scale-95 transition-all">Book Now <span class="material-symbols-outlined text-sm">calendar_month</span></a>
 </div>

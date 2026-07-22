@@ -29,6 +29,7 @@ urlpatterns = [
     path("home/", views.guest_home, name="guest_home"),
     path("explore/", views.explore_stays, name="explore_stays"),
     path("hotel-details/", views.hotel_details, name="hotel_details"),
+    path("team/", views.team, name="team"),
     path("booking/", views.booking, name="booking"),
     path("api/booking/options/", views.booking_options, name="booking_options"),
     path("api/booking/create/", views.create_booking, name="create_booking"),

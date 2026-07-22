@@ -1,6 +1,6 @@
-{% extends "frontend/base.html" %}
+cre{% extends "frontend/base.html" %}
 {% load static %}
-{% block title %}StayHub | Discover Your Next Stay{% endblock %}
+{% block title %}StayHub | Discover Ghanaian Luxury Stays{% endblock %}
 {% block body_class %}bg-surface text-on-surface font-body-md overflow-x-hidden{% endblock %}
 {% block content %}
 <header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
@@ -21,7 +21,7 @@
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
                 <h2 class="font-headline-xl text-headline-xl text-primary tracking-tight mb-2">Explore Stays</h2>
-                <p class="text-on-surface-variant font-body-lg text-body-lg">240+ luxury hotels found in London, UK</p>
+                <p class="text-on-surface-variant font-body-lg text-body-lg">Discover luxury accommodations across Ghana</p>
             </div>
             <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2 -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0">
                 <button class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full font-label-md text-label-md shadow-md active:scale-95 transition-all"><span class="material-symbols-outlined text-[18px]">tune</span><span>Filters</span></button>
@@ -43,10 +43,10 @@
             </div>
             <div class="p-6">
                 <div class="flex justify-between items-start mb-2">
-                    <h3 class="font-headline-md text-headline-md text-on-surface">The Grand Regency</h3>
-                    <div class="flex items-baseline gap-1"><span class="text-primary font-bold text-headline-md">$450</span><span class="text-on-surface-variant text-label-sm font-label-sm">/night</span></div>
+                    <h3 class="font-headline-md text-headline-md text-on-surface">La Palm Royal Beach Hotel</h3>
+                    <div class="flex items-baseline gap-1"><span class="text-primary font-bold text-headline-md">GH₵250</span><span class="text-on-surface-variant text-label-sm font-label-sm">/night</span></div>
                 </div>
-                <p class="flex items-center gap-1 text-on-surface-variant mb-6"><span class="material-symbols-outlined text-[18px]">location_on</span><span class="text-body-md font-body-md">Mayfair, London</span></p>
+                <p class="flex items-center gap-1 text-on-surface-variant mb-6"><span class="material-symbols-outlined text-[18px]">location_on</span><span class="text-body-md font-body-md">Liberation Road, Accra</span></p>
                 <div class="flex items-center justify-between">
                     <div class="flex gap-2">
                         <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">wifi</span></div>
@@ -68,10 +68,10 @@
             </div>
             <div class="p-6">
                 <div class="flex justify-between items-start mb-2">
-                    <h3 class="font-headline-md text-headline-md text-on-surface">The Azure Boutique</h3>
-                    <div class="flex items-baseline gap-1"><span class="text-primary font-bold text-headline-md">$320</span><span class="text-on-surface-variant text-label-sm font-label-sm">/night</span></div>
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Kempinski Hotel Gold Coast City</h3>
+                    <div class="flex items-baseline gap-1"><span class="text-primary font-bold text-headline-md">GH₵400</span><span class="text-on-surface-variant text-label-sm font-label-sm">/night</span></div>
                 </div>
-                <p class="flex items-center gap-1 text-on-surface-variant mb-6"><span class="material-symbols-outlined text-[18px]">location_on</span><span class="text-body-md font-body-md">Soho, London</span></p>
+                <p class="flex items-center gap-1 text-on-surface-variant mb-6"><span class="material-symbols-outlined text-[18px]">location_on</span><span class="text-body-md font-body-md">Gamel Abdul Nasser Avenue, Accra</span></p>
                 <div class="flex items-center justify-between">
                     <div class="flex gap-2">
                         <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">restaurant</span></div>
@@ -92,14 +92,14 @@
             </div>
             <div class="p-6">
                 <div class="flex justify-between items-start mb-2">
-                    <h3 class="font-headline-md text-headline-md text-on-surface">Luxe Living Suites</h3>
-                    <div class="flex items-baseline gap-1"><span class="text-primary font-bold text-headline-md">$285</span><span class="text-on-surface-variant text-label-sm font-label-sm">/night</span></div>
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Royal Senchi Resort</h3>
+                    <div class="flex items-baseline gap-1"><span class="text-primary font-bold text-headline-md">GH₵350</span><span class="text-on-surface-variant text-label-sm font-label-sm">/night</span></div>
                 </div>
-                <p class="flex items-center gap-1 text-on-surface-variant mb-6"><span class="material-symbols-outlined text-[18px]">location_on</span><span class="text-body-md font-body-md">Canary Wharf, London</span></p>
+                <p class="flex items-center gap-1 text-on-surface-variant mb-6"><span class="material-symbols-outlined text-[18px]">location_on</span><span class="text-body-md font-body-md">Senchi, Eastern Region</span></p>
                 <div class="flex items-center justify-between">
                     <div class="flex gap-2">
                         <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">fitness_center</span></div>
-                        <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">tv</span></div>
+                        <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">cabin</span></div>
                     </div>
                     <a href="{% url 'hotel_details' %}" class="bg-primary text-white px-6 py-3 rounded-xl font-label-md text-label-md hover:bg-primary-container transition-colors active:scale-95">View Hotel</a>
                 </div>
@@ -116,14 +116,14 @@
             </div>
             <div class="p-6">
                 <div class="flex justify-between items-start mb-2">
-                    <h3 class="font-headline-md text-headline-md text-on-surface">The Heritage Grand</h3>
-                    <div class="flex items-baseline gap-1"><span class="text-primary font-bold text-headline-md">$550</span><span class="text-on-surface-variant text-label-sm font-label-sm">/night</span></div>
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Busua Beach Resort</h3>
+                    <div class="flex items-baseline gap-1"><span class="text-primary font-bold text-headline-md">GH₵250</span><span class="text-on-surface-variant text-label-sm font-label-sm">/night</span></div>
                 </div>
-                <p class="flex items-center gap-1 text-on-surface-variant mb-6"><span class="material-symbols-outlined text-[18px]">location_on</span><span class="text-body-md font-body-md">Kensington, London</span></p>
+                <p class="flex items-center gap-1 text-on-surface-variant mb-6"><span class="material-symbols-outlined text-[18px]">location_on</span><span class="text-body-md font-body-md">Busua, Western Region</span></p>
                 <div class="flex items-center justify-between">
                     <div class="flex gap-2">
                         <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">concierge</span></div>
-                        <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">wine_bar</span></div>
+                        <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">beach_access</span></div>
                     </div>
                     <a href="{% url 'hotel_details' %}" class="bg-primary text-white px-6 py-3 rounded-xl font-label-md text-label-md hover:bg-primary-container transition-colors active:scale-95">View Hotel</a>
                 </div>
@@ -134,12 +134,12 @@
                 <span class="material-symbols-outlined text-primary text-3xl">loyalty</span>
             </div>
             <h4 class="font-headline-lg text-headline-lg text-primary mb-2">StayHub Rewards</h4>
-            <p class="text-on-surface-variant max-w-md mx-auto font-body-lg text-body-lg mb-6">Join our exclusive members club to unlock 15% off your first booking and access to secret luxury listings.</p>
-            <button class="bg-primary text-white px-8 py-3.5 rounded-full font-label-md text-label-md hover:opacity-90 transition-all shadow-lg active:scale-95">Join for Free</button>
+            <p class="text-on-surface-variant max-w-md mx-auto font-body-lg text-body-lg mb-6">Join our exclusive members club to unlock 15% off your first booking at any Ghanaian hotel.</p>
+            <a href="{% url 'create_account' %}" class="bg-primary text-white px-8 py-3.5 rounded-full font-label-md text-label-md hover:opacity-90 transition-all shadow-lg active:scale-95">Join for Free</a>
         </div>
     </div>
     <div class="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 md:bottom-12">
-        <button class="flex items-center gap-2 bg-on-surface text-surface-container-lowest px-6 py-3 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all">
+        <button class="flex items-center gap-2 bg-on-surface text-surface-container-lowest px-6 py-3 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all" onclick="window.open('https://www.google.com/maps/search/?api=1&query=Accra%2C+Ghana', '_blank', 'noopener')">
             <span class="material-symbols-outlined">map</span>
             <span class="font-label-md text-label-md">Show Map</span>
         </button>
@@ -149,8 +149,8 @@
     <div class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 pb-safe px-4">
         <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all active:scale-90 duration-200" href="{% url 'guest_home' %}"><span class="material-symbols-outlined">home</span><span class="font-label-sm text-label-sm">Home</span></a>
         <a class="flex flex-col items-center justify-center text-primary font-bold hover:bg-surface-variant/50 transition-all active:scale-90 duration-200" href="#"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">search</span><span class="font-label-sm text-label-sm">Search</span></a>
-        <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all active:scale-90 duration-200" href="#"><span class="material-symbols-outlined">calendar_today</span><span class="font-label-sm text-label-sm">Bookings</span></a>
-        <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all active:scale-90 duration-200" href="#"><span class="material-symbols-outlined">person</span><span class="font-label-sm text-label-sm">Profile</span></a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all active:scale-90 duration-200" href="{% url 'booking' %}"><span class="material-symbols-outlined">calendar_today</span><span class="font-label-sm text-label-sm">Bookings</span></a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all active:scale-90 duration-200" href="{% url 'profile' %}"><span class="material-symbols-outlined">person</span><span class="font-label-sm text-label-sm">Profile</span></a>
     </div>
 </nav>
 {% endblock %}
