@@ -1,10 +1,16 @@
 {% extends "frontend/base.html" %}
 {% block title %}StayHub | Profile{% endblock %}
-{% block body_class %}bg-background min-h-screen px-5 py-10{% endblock %}
+{% block body_class %}bg-surface-container min-h-screen px-5 py-10{% endblock %}
 {% block content %}
-<main class="mx-auto max-w-xl">
-  <a href="{% url 'guest_home' %}" class="text-primary">← Back to StayHub</a>
-  <section class="mt-6 rounded-3xl bg-surface-container-lowest p-8 shadow-xl">
+<div class="fixed top-0 left-0 w-full h-16 bg-surface-container-lowest z-50 flex items-center justify-center border-b border-outline-variant shadow-sm">
+    <div class="max-w-md w-full flex items-center justify-between px-4">
+        <a href="{% url 'guest_home' %}" class="text-primary font-label-md">← Back</a>
+        <span class="font-label-md text-on-surface-variant">Profile Settings</span>
+        <a href="{% url 'booking' %}" class="text-primary font-label-md">Bookings</a>
+    </div>
+</div>
+<main class="mx-auto max-w-md pt-20 pb-16">
+  <section class="rounded-3xl bg-surface-container-lowest p-8 shadow-xl border border-outline-variant">
     <h1 class="font-headline-lg text-primary">Your profile</h1>
     <p class="mt-2 text-on-surface-variant">Update your details and choose your own profile picture.</p>
     {% if profile_error %}<p class="mt-4 rounded-xl bg-error-container px-4 py-3 text-sm text-on-error-container">{{ profile_error }}</p>{% endif %}

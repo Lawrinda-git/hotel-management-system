@@ -39,8 +39,14 @@
                 <button class="material-symbols-outlined p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant transition-all">notifications</button>
                 <button class="material-symbols-outlined p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant transition-all">settings</button>
                 <button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md hover:bg-primary-container transition-all">Create Booking</button>
-                <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-secondary/50">
-                    <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6KHgZaDkrl8W90WoIxDvy4EYaQQZb4Z58nl8W3Whpngx139wuN2iNNLSsI50PQ_sg8tWDIuwiQbmK7NepFBIzP9W_4P2YxS5TREWp2-gJT9GnoT7RGhBkDbZmJ9Jk_uKWL5kBPXj1uIowXrNexroSt1tCos3slVzc9k3mJWVknEUPjJsrhonfSPbSGzX7cwKVEmwEUXRzpRg5b-mABiZtyl-hiqD_CcQkGWhgqoUmnBRut-kZ6WdVXjUg2uUBo0V8nAOK-glm4bn9" alt="Staff">
+                <div class="w-10 h-10 rounded-full bg-surface-container-high border-2 border-secondary/50 overflow-hidden flex items-center justify-center">
+                    {% if request.user.profile_picture %}
+                        <img src="{{ request.user.profile_picture.url }}" alt="Profile" class="w-full h-full object-cover">
+                    {% else %}
+                        <span class="text-sm font-bold text-on-surface-variant">
+                            {{ request.user.staff_name|default:"U"|first|upper }}
+                        </span>
+                    {% endif %}
                 </div>
             </div>
         </div>

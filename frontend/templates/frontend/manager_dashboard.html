@@ -24,28 +24,36 @@
     </aside>
     <main class="flex-1 flex flex-col min-w-0">
         <header class="w-full h-16 sticky top-0 z-40 bg-surface-container-lowest flex justify-between items-center px-margin-desktop shadow-sm border-b border-outline-variant">
-            <div class="flex items-center gap-8">
+            <div class="flex items-center gap-4">
+                <button id="menuToggle" class="material-symbols-outlined text-on-surface-variant p-2 hover:bg-surface-container-low rounded-lg transition-all">menu</button>
                 <h2 class="text-primary font-bold font-label-md uppercase tracking-wider">StayHub Dashboard</h2>
-                <div class="hidden md:flex gap-6">
-                    <span class="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md cursor-pointer">Analytics</span>
-                    <span class="text-on-surface-variant hover:text-primary transition-all font-label-md text-label-md cursor-pointer">Reports</span>
-                    <span class="text-on-surface-variant hover:text-primary transition-all font-label-md text-label-md cursor-pointer">Schedules</span>
-                </div>
             </div>
-            <div class="flex items-center gap-6">
-                <div class="flex items-center gap-4">
-                    <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-low p-2 rounded-full transition-all">notifications</span>
-                    <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-low p-2 rounded-full transition-all">settings</span>
+            <div class="flex items-center gap-2">
+                <div class="relative">
+                    <button id="notificationBtn" class="material-symbols-outlined text-on-surface-variant p-2 hover:bg-surface-container-low rounded-lg transition-all relative">
+                        notifications
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+                    </button>
+                    <div id="notificationPopup" class="hidden absolute right-0 top-12 w-80 bg-surface-container-lowest rounded-xl shadow-2xl border border-outline-variant p-4 z-50">
+                        <h4 class="font-label-md text-label-md font-bold text-on-surface mb-3">Notifications</h4>
+                        <div class="space-y-2">
+                            <div class="p-3 bg-primary/5 rounded-lg border-l-4 border-primary">
+                                <p class="text-sm text-on-surface font-medium">New booking received</p>
+                                <p class="text-xs text-on-surface-variant mt-1">Room 201 - Royal Suite</p>
+                            </div>
+                            <div class="p-3 bg-surface-container-low rounded-lg">
+                                <p class="text-sm text-on-surface font-medium">Payment confirmed</p>
+                                <p class="text-xs text-on-surface-variant mt-1">Invoice #1234 - GH₵450</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button class="bg-primary text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:brightness-110 active:scale-95 transition-all">Create Booking</button>
-                <div class="w-10 h-10 rounded-full bg-surface-container-high border-2 border-primary overflow-hidden">
-                    <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDj2S_kbZJsDFNZEIR2yB27E-J9pwrVGgj5dr5cr0jnx_AMbQGXjIz4XFHGeLDNQkoBccyH500CL-5PJcw1Evi7nM9k1_3F-d4hlxmwhc4l9TqMwonF0dLf9EIP12X4vkWNU5CQTHyV5EU6JX3_OPD37U4nwbFsg4PeWat1tm6VWYdxbB216KQCpe6A5FRf7fblNNf_ST-URyug-r7hSZuS_o7gnQGF6brATVpYGYgD0_lyTJm2-Lx1Z3O_arWSfK_YqaUVmUViFt_s" alt="Admin">
-                </div>
+                <a href="{% url 'logout' %}" class="material-symbols-outlined text-on-surface-variant p-2 hover:bg-surface-container-low rounded-lg transition-all" title="Logout">logout</a>
             </div>
         </header>
         <div class="p-margin-desktop space-y-gutter overflow-y-auto max-w-container-max mx-auto w-full">
             <section class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div><h3 class="font-headline-lg text-headline-lg text-on-surface">Good Morning, Admin</h3><p class="text-on-surface-variant font-body-md mt-1">Your property performance overview for October 2023.</p></div>
+                <div><h3 class="font-headline-lg text-headline-lg text-on-surface">Good Morning, {{ request.user.staff_name|default:"Admin" }}</h3><p class="text-on-surface-variant font-body-md mt-1">System Overview Dashboard</p></div>
                 <div class="flex items-center gap-3 bg-surface-container-low p-2 rounded-xl">
                     <button class="px-4 py-2 bg-white shadow-sm rounded-lg font-label-md text-label-md text-primary">Daily</button>
                     <button class="px-4 py-2 font-label-md text-label-md text-on-surface-variant hover:text-primary">Weekly</button>
@@ -55,18 +63,18 @@
             <section class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
                 <div class="glass-card p-8 rounded-3xl flex flex-col relative overflow-hidden group">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><span class="material-symbols-outlined text-8xl">payments</span></div>
-                    <div class="flex items-center gap-3 mb-6"><div class="w-12 h-12 rounded-2xl bg-secondary-fixed flex items-center justify-center"><span class="material-symbols-outlined text-on-secondary-fixed">trending_up</span></div><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Total Revenue</span></div>
-                    <div class="mt-auto"><h4 class="font-headline-xl text-headline-xl text-primary">$12,450</h4><p class="text-green-600 font-label-sm text-label-sm mt-2 flex items-center gap-1"><span class="material-symbols-outlined text-sm">north_east</span>12.5% from last month</p></div>
+                    <div class="flex items-center gap-3 mb-6"><div class="w-12 h-12 rounded-2xl bg-secondary-fixed flex items-center justify-center"><span class="material-symbols-outlined text-on-secondary-fixed">people</span></div><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Total Staff</span></div>
+                    <div class="mt-auto"><h4 class="font-headline-xl text-headline-xl text-primary">{{ total_staff|default:0 }}</h4><p class="text-green-600 font-label-sm text-label-sm mt-2 flex items-center gap-1">Registered staff members</p></div>
                 </div>
                 <div class="glass-card p-8 rounded-3xl flex flex-col relative overflow-hidden group">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><span class="material-symbols-outlined text-8xl">king_bed</span></div>
-                    <div class="flex items-center gap-3 mb-6"><div class="w-12 h-12 rounded-2xl bg-primary-fixed flex items-center justify-center"><span class="material-symbols-outlined text-on-primary-fixed">bed</span></div><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Occupancy Rate</span></div>
-                    <div class="mt-auto"><h4 class="font-headline-xl text-headline-xl text-primary">85%</h4><div class="w-full h-2 bg-surface-container-high rounded-full mt-4 overflow-hidden"><div class="h-full bg-primary" style="width: 85%"></div></div></div>
+                    <div class="flex items-center gap-3 mb-6"><div class="w-12 h-12 rounded-2xl bg-primary-fixed flex items-center justify-center"><span class="material-symbols-outlined text-on-primary-fixed">meeting_room</span></div><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Total Rooms</span></div>
+                    <div class="mt-auto"><h4 class="font-headline-xl text-headline-xl text-primary">{{ total_rooms|default:0 }}</h4><p class="text-on-surface-variant font-label-sm text-label-sm mt-2">{{ available_rooms|default:0 }} available</p></div>
                 </div>
                 <div class="glass-card p-8 rounded-3xl flex flex-col relative overflow-hidden group">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><span class="material-symbols-outlined text-8xl">book_online</span></div>
-                    <div class="flex items-center gap-3 mb-6"><div class="w-12 h-12 rounded-2xl bg-tertiary-fixed flex items-center justify-center"><span class="material-symbols-outlined text-on-tertiary-fixed-variant">event_available</span></div><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Total Bookings</span></div>
-                    <div class="mt-auto"><h4 class="font-headline-xl text-headline-xl text-primary">128</h4><p class="text-on-surface-variant font-label-sm text-label-sm mt-2">Active bookings today</p></div>
+                    <div class="flex items-center gap-3 mb-6"><div class="w-12 h-12 rounded-2xl bg-tertiary-fixed flex items-center justify-center"><span class="material-symbols-outlined text-on-tertiary-fixed-variant">confirmed</span></div><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Reservations</span></div>
+                    <div class="mt-auto"><h4 class="font-headline-xl text-headline-xl text-primary">{{ total_reservations|default:0 }}</h4><p class="text-on-surface-variant font-label-sm text-label-sm mt-2">Total reservations</p></div>
                 </div>
             </section>
             <section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
@@ -134,5 +142,40 @@
     const navLeft = document.querySelector('header > div:first-child');
     const sc = document.createElement('div'); sc.className = 'ml-12 hidden xl:block'; sc.appendChild(searchInput);
     if(navLeft) navLeft.appendChild(sc);
+    
+    // Menu toggle functionality
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.querySelector('aside');
+    let sidebarOpen = true;
+    
+    if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', () => {
+            sidebarOpen = !sidebarOpen;
+            if (sidebarOpen) {
+                sidebar.style.transform = 'translateX(0)';
+                sidebar.style.marginLeft = '0';
+            } else {
+                sidebar.style.transform = 'translateX(-100%)';
+                sidebar.style.marginLeft = '-280px';
+            }
+        });
+    }
+    
+    // Notification popup functionality
+    const notificationBtn = document.getElementById('notificationBtn');
+    const notificationPopup = document.getElementById('notificationPopup');
+    
+    if (notificationBtn && notificationPopup) {
+        notificationBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notificationPopup.classList.toggle('hidden');
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!notificationPopup.contains(e.target) && e.target !== notificationBtn) {
+                notificationPopup.classList.add('hidden');
+            }
+        });
+    }
 </script>
 {% endblock %}

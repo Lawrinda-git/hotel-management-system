@@ -1,0 +1,11 @@
+{% extends "frontend/base.html" %}
+{% block title %}Access Denied{% endblock %}
+{% block body_class %}bg-surface-container min-h-screen flex items-center justify-center{% endblock %}
+{% block content %}
+<div class="text-center p-8">
+    <span class="material-symbols-outlined text-error text-6xl mb-4">gpp_mismatch</span>
+    <h1 class="font-headline-lg text-headline-lg text-error mb-2">Access Denied</h1>
+    <p class="text-on-surface-variant mb-6">You need {{ required_role }} role to access this page.</p>
+    <a href="{% url 'signin' %}" class="bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md inline-block">Sign In as Different User</a>
+</div>
+{% endblock %}

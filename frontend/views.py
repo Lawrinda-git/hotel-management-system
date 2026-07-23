@@ -106,13 +106,12 @@ def _send_verification_sms(phone_number, code):
 
 
 def _complete_or_challenge_login(request, user):
-    request.session["pending_login_user_id"] = user.id
-    request.session.pop("pending_login_channel", None)
+    """Login the user directly - 2FA is optional and configured in profile."""
+    login(request, user)
     return JsonResponse({
-        "detail": "Choose how you want to receive your verification code.",
-        "verification_method_required": True,
-        "redirect_url": "/verification-method/",
-    }, status=202)
+        "detail": "Signed in successfully.",
+        "redirect_url": _redirect_for_role(user.role),
+    })
 
 
 def _redirect_for_role(role):
@@ -422,9 +421,8 @@ def google_callback(request):
                 user.save(update_fields=["password"])
     except Exception:
         return redirect("staff_login" if staff_login_flow else "signin")
-    request.session["pending_login_user_id"] = user.id
-    request.session.pop("pending_login_channel", None)
-    return redirect("verification_method")
+    login(request, user)
+    return redirect(_redirect_for_role(user.role))
 
 
 @require_http_methods(["POST"])
@@ -475,7 +473,19 @@ def api_register(request):
 
 
 def guest_home(request):
-    """Main customer home/explore page after login."""
+    """Main customer home/explore page after login. Redirect staff to their dashboards."""
+    if request.user.is_authenticated:
+        role = (request.user.role or "").lower()
+        if role == "admin":
+            return redirect("manager_dashboard")
+        elif role == "manager":
+            return redirect("manager_dashboard")
+        elif role == "receptionist":
+            return redirect("receptionist_dashboard")
+        elif role == "accountant":
+            return redirect("accountant_dashboard")
+        elif role == "housekeeping":
+            return redirect("housekeeping_dashboard")
     name = request.user.get_full_name().strip() if request.user.is_authenticated else "Guest"
     name = name or (request.user.staff_name if request.user.is_authenticated else "Guest")
     return render(request, "frontend/guest_home.html", {"display_name": name})
@@ -655,25 +665,52 @@ def create_booking(request):
 
 # ─── Staff Dashboard Pages ──────────────────────────────────────
 
-@login_required(login_url="staff_login")
+def _role_required(*allowed_roles):
+    """Decorator to restrict access based on user role."""
+    def decorator(view_func):
+        @login_required(login_url="staff_login")
+        def _wrapped_view(request, *args, **kwargs):
+            if request.user.role and request.user.role.lower() not in [r.lower() for r in allowed_roles]:
+                return render(request, "frontend/access_denied.html", {
+                    "required_role": allowed_roles[0].title() if len(allowed_roles) == 1 else "Admin/Manager",
+                })
+            return view_func(request, *args, **kwargs)
+        return _wrapped_view
+    return decorator
+
+
+@_role_required("admin", "manager")
 def manager_dashboard(request):
     """Manager/Admin dashboard view."""
-    return render(request, "frontend/manager_dashboard.html")
+    from apps.rooms.models import Room, Maintenance
+    from apps.reservations.models import Reservation
+    from apps.accounts.models import Staff
+    
+    context = {
+        "total_staff": Staff.objects.count(),
+        "total_rooms": Room.objects.count(),
+        "available_rooms": Room.objects.filter(status=Room.RoomStatus.AVAILABLE).count(),
+        "occupied_rooms": Room.objects.filter(status=Room.RoomStatus.OCCUPIED).count(),
+        "maintenance_rooms": Room.objects.filter(status=Room.RoomStatus.MAINTENANCE).count(),
+        "total_reservations": Reservation.objects.count(),
+        "recent_maintenance": Maintenance.objects.select_related("room", "room__hotel").order_by("-report_date")[:5],
+    }
+    return render(request, "frontend/manager_dashboard.html", context)
 
 
-@login_required(login_url="staff_login")
+@_role_required("receptionist")
 def receptionist_dashboard(request):
     """Receptionist operations dashboard."""
     return render(request, "frontend/receptionist_dashboard.html")
 
 
-@login_required(login_url="staff_login")
+@_role_required("accountant")
 def accountant_dashboard(request):
     """Accountant/financial dashboard."""
     return render(request, "frontend/accountant_dashboard.html")
 
 
-@login_required(login_url="staff_login")
+@_role_required("housekeeping")
 def housekeeping_dashboard(request):
     """Housekeeping operations dashboard."""
     return render(request, "frontend/housekeeping_dashboard.html")
