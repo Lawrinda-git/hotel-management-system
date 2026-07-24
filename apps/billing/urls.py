@@ -2,7 +2,7 @@ from rest_framework.routers import DefaultRouter
 
 from django.urls import path
 
-from .views import InvoiceViewSet, PaymentViewSet, create_paystack_checkout, paystack_webhook
+from .views import InvoiceViewSet, PaymentViewSet, create_paystack_checkout, paystack_webhook, verify_paystack_payment
 
 
 router = DefaultRouter()
@@ -13,4 +13,5 @@ urlpatterns = router.urls
 urlpatterns += [
 	path("paystack/checkout/", create_paystack_checkout, name="paystack_checkout"),
 	path("paystack/webhook/", paystack_webhook, name="paystack_webhook"),
+	path("paystack/verify/<str:reference>/", verify_paystack_payment, name="paystack_verify"),
 ]

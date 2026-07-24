@@ -14,6 +14,7 @@ from django.views.decorators.http import require_http_methods
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet
 
+from apps.common.mixins import BranchScopedQuerysetMixin
 from .models import Invoice, Payment
 from .serializers import InvoiceSerializer, PaymentSerializer
 
@@ -55,6 +56,44 @@ def _initialize_paystack_transaction(invoice, request):
 	if not data.get("status"):
 		raise ValueError(data.get("message") or "Paystack initialization failed")
 	return data["data"]
+
+
+@require_http_methods(["GET"])
+def verify_paystack_payment(request, reference):
+    """Verify a Paystack payment by reference."""
+    if not settings.PAYSTACK_SECRET_KEY:
+        return JsonResponse({"detail": "Paystack is not configured."}, status=503)
+    
+    try:
+        response = requests.get(
+            f"https://api.paystack.co/transaction/verify/{reference}",
+            headers={
+                "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+            },
+            timeout=20,
+        )
+        if not response.ok:
+            return JsonResponse({"detail": f"Paystack API returned {response.status_code}"}, status=502)
+        
+        data = response.json()
+        if not data.get("status"):
+            return JsonResponse({"detail": data.get("message") or "Verification failed"}, status=400)
+        
+        payment_data = data.get("data", {})
+        status = payment_data.get("status")
+        amount = Decimal(str(payment_data.get("amount", 0))) / Decimal("100")
+        paid_at = payment_data.get("paid_at")
+        
+        return JsonResponse({
+            "detail": "Payment verified.",
+            "reference": reference,
+            "status": status,
+            "amount": str(amount),
+            "paid_at": paid_at,
+            "gateway_response": payment_data.get("gateway_response"),
+        })
+    except requests.RequestException as exc:
+        return JsonResponse({"detail": f"Unable to verify payment: {exc}"}, status=503)
 
 
 @require_http_methods(["POST"])
@@ -143,14 +182,14 @@ def paystack_webhook(request):
 	return HttpResponse(status=200)
 
 
-class InvoiceViewSet(ModelViewSet):
+class InvoiceViewSet(BranchScopedQuerysetMixin, ModelViewSet):
 	queryset = Invoice.objects.select_related("reservation", "reservation__guest").all()
 	serializer_class = InvoiceSerializer
 	filter_backends = [DjangoFilterBackend]
 	filterset_fields = ["reservation", "status", "issue_date", "total_amount"]
 
 
-class PaymentViewSet(ModelViewSet):
+class PaymentViewSet(BranchScopedQuerysetMixin, ModelViewSet):
 	queryset = Payment.objects.select_related("invoice", "invoice__reservation", "invoice__reservation__guest").all()
 	serializer_class = PaymentSerializer
 	filter_backends = [DjangoFilterBackend]

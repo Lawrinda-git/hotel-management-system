@@ -685,15 +685,42 @@ def manager_dashboard(request):
     from apps.rooms.models import Room, Maintenance
     from apps.reservations.models import Reservation
     from apps.accounts.models import Staff
+    from apps.common.mixins import MANAGER_ROLES
+    
+    user = request.user
+    role = (user.role or "").lower()
+    is_manager_admin = role in MANAGER_ROLES
+    
+    # Branch scoping for dashboard counts
+    staff_qs = Staff.objects.all()
+    room_qs = Room.objects.all()
+    reservation_qs = Reservation.objects.all()
+    maintenance_qs = Maintenance.objects.select_related("room", "room__hotel")
+    
+    if not is_manager_admin and user.hotel_id:
+        staff_qs = staff_qs.filter(hotel_id=user.hotel_id)
+        room_qs = room_qs.filter(hotel_id=user.hotel_id)
+        reservation_qs = reservation_qs.filter(hotel_id=user.hotel_id)
+        maintenance_qs = maintenance_qs.filter(room__hotel_id=user.hotel_id)
+    
+    # For managers/admins, optionally scope to a specific branch if they have one
+    if is_manager_admin and user.hotel_id:
+        # Even managers might be assigned to a specific branch; show them
+        # their branch data, plus an option to see all via a query param
+        if request.GET.get("scope") != "all":
+            staff_qs = staff_qs.filter(hotel_id=user.hotel_id)
+            room_qs = room_qs.filter(hotel_id=user.hotel_id)
+            reservation_qs = reservation_qs.filter(hotel_id=user.hotel_id)
+            maintenance_qs = maintenance_qs.filter(room__hotel_id=user.hotel_id)
     
     context = {
-        "total_staff": Staff.objects.count(),
-        "total_rooms": Room.objects.count(),
-        "available_rooms": Room.objects.filter(status=Room.RoomStatus.AVAILABLE).count(),
-        "occupied_rooms": Room.objects.filter(status=Room.RoomStatus.OCCUPIED).count(),
-        "maintenance_rooms": Room.objects.filter(status=Room.RoomStatus.MAINTENANCE).count(),
-        "total_reservations": Reservation.objects.count(),
-        "recent_maintenance": Maintenance.objects.select_related("room", "room__hotel").order_by("-report_date")[:5],
+        "total_staff": staff_qs.count(),
+        "total_rooms": room_qs.count(),
+        "available_rooms": room_qs.filter(status=Room.RoomStatus.AVAILABLE).count(),
+        "occupied_rooms": room_qs.filter(status=Room.RoomStatus.OCCUPIED).count(),
+        "maintenance_rooms": room_qs.filter(status=Room.RoomStatus.MAINTENANCE).count(),
+        "total_reservations": reservation_qs.count(),
+        "recent_maintenance": maintenance_qs.order_by("-report_date")[:5],
     }
     return render(request, "frontend/manager_dashboard.html", context)
 
