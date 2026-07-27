@@ -130,6 +130,11 @@ def splash(request):
     return render(request, "frontend/splash.html")
 
 
+def landing(request):
+    """Hero landing page between splash and signin."""
+    return render(request, "frontend/landing.html")
+
+
 def signin(request):
     """Customer sign-in page."""
     return render(request, "frontend/signin.html")
@@ -495,14 +500,35 @@ def explore_stays(request):
     """Room booking / explore stays page."""
     name = request.user.get_full_name().strip() if request.user.is_authenticated else "Guest"
     name = name or (request.user.staff_name if request.user.is_authenticated else "Guest")
-    return render(request, "frontend/explore_stays.html", {"display_name": name})
+    category = request.GET.get("category", "")
+    search_query = request.GET.get("q", "")
+    return render(request, "frontend/explore_stays.html", {
+        "display_name": name,
+        "category": category,
+        "search_query": search_query,
+    })
 
 
 def hotel_details(request):
     """Detailed view of a single hotel."""
     name = request.user.get_full_name().strip() if request.user.is_authenticated else "Guest"
     name = name or (request.user.staff_name if request.user.is_authenticated else "Guest")
-    return render(request, "frontend/hotel_details.html", {"display_name": name})
+    hotel_id = request.GET.get("hotel", "1")
+    # Map hotel IDs to names
+    hotels = {
+        "1": {"name": "La Palm Royal Beach Hotel", "location": "Liberation Road, Accra", "rating": "5.0", "price": "GH₵250"},
+        "2": {"name": "Kempinski Hotel Gold Coast City", "location": "Gamel Abdul Nasser Avenue, Accra", "rating": "4.9", "price": "GH₵400"},
+        "3": {"name": "Royal Senchi Resort", "location": "Senchi, Eastern Region", "rating": "4.8", "price": "GH₵350"},
+    }
+    hotel_info = hotels.get(hotel_id, hotels["1"])
+    return render(request, "frontend/hotel_details.html", {
+        "display_name": name,
+        "hotel_id": hotel_id,
+        "hotel_name": hotel_info["name"],
+        "hotel_location": hotel_info["location"],
+        "hotel_rating": hotel_info["rating"],
+        "hotel_price": hotel_info["price"],
+    })
 
 
 def booking(request):

@@ -1,0 +1,98 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub | Discover Your Next Escape{% endblock %}
+{% block body_class %}bg-background text-on-background min-h-screen overflow-x-hidden font-body-md{% endblock %}
+{% block content %}
+<!-- Hero Section / Welcome Screen -->
+<main class="relative min-h-screen w-full flex flex-col justify-end items-center overflow-hidden">
+    <!-- Background Image Container -->
+    <div class="absolute inset-0 z-0 h-full w-full">
+        <div class="h-full w-full bg-cover bg-center" style="background-image: url('{% static 'frontend/img/9c4720aa8db2c6e372d09e379baa9aeb.jpg' %}')"></div>
+        <!-- Dark Blue Gradient Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent"></div>
+    </div>
+
+    <!-- Top Branding Anchor -->
+    <header class="fixed top-0 w-full z-50 flex items-center justify-between px-margin-mobile h-16 md:px-margin-desktop">
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-white font-bold tracking-tight md:font-headline-lg md:text-headline-lg">StayHub</h1>
+        <button class="text-white opacity-80 hover:opacity-100 transition-opacity" onclick="document.getElementById('app-toast').textContent='Welcome to StayHub';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+            <span class="material-symbols-outlined text-3xl">help_outline</span>
+        </button>
+    </header>
+
+    <!-- Content Canvas -->
+    <section class="relative z-10 w-full max-w-screen-xl px-margin-mobile pb-24 md:px-margin-desktop md:pb-32 flex flex-col items-center md:items-start text-center md:text-left">
+        <!-- Welcome Text -->
+        <div class="space-y-4 max-w-2xl mb-12 animate-fade-in-up">
+            <p class="font-label-md text-label-md text-secondary-fixed tracking-[0.2em] uppercase">Premier Destinations</p>
+            <h2 class="font-headline-xl text-headline-xl text-secondary-container leading-tight">
+                Discover Your Next Escape
+            </h2>
+            <p class="font-body-lg text-body-lg text-white/80 max-w-lg">
+                Experience world-class hospitality in handpicked locations. Your journey into curated luxury begins with a single tap.
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col md:flex-row gap-gutter w-full md:w-auto items-center">
+            <!-- Sign In (Gold) -->
+            <a href="{% url 'signin' %}" class="w-full md:w-56 py-4 px-8 bg-secondary-container text-primary font-label-md text-label-md rounded-xl shadow-xl hover:bg-secondary-fixed transition-all active:scale-95 flex items-center justify-center gap-2 group">
+                Sign In
+                <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </a>
+            <!-- Create Account (White Outline) -->
+            <a href="{% url 'create_account' %}" class="w-full md:w-56 py-4 px-8 border-[1.5px] border-white/60 text-white font-label-md text-label-md rounded-xl glass-panel hover:bg-white/10 transition-all active:scale-95 flex items-center justify-center">
+                Create Account
+            </a>
+        </div>
+
+        <!-- Atmospheric Micro-detail -->
+        <div class="mt-16 flex items-center gap-6 opacity-60">
+            <div class="flex -space-x-3">
+                <img class="w-8 h-8 rounded-full border-2 border-primary bg-surface shadow-sm" src="{% static 'frontend/img/3190ecccb0c4c71f84397ff8e344103b.jpg' %}" alt="Traveler">
+                <img class="w-8 h-8 rounded-full border-2 border-primary bg-surface shadow-sm" src="{% static 'frontend/img/6ab2fef0cb8c1a5dd91a1314aeaeff57.jpg' %}" alt="Traveler">
+                <img class="w-8 h-8 rounded-full border-2 border-primary bg-surface shadow-sm" src="{% static 'frontend/img/a70d8d5aa518a788aa6aa870c85331b9.jpg' %}" alt="Traveler">
+            </div>
+            <p class="text-white text-label-sm font-label-sm">Joined by 12k+ travelers this month</p>
+        </div>
+    </section>
+
+    <!-- Bottom Decorative Indicator -->
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+        <div class="w-8 h-1 bg-secondary-container rounded-full"></div>
+        <div class="w-2 h-1 bg-white/40 rounded-full"></div>
+        <div class="w-2 h-1 bg-white/40 rounded-full"></div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_style %}
+<style>
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up {
+        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Simple subtle parallax effect on mouse move for desktop
+    document.addEventListener('mousemove', function(e) {
+        var bg = document.querySelector('[style*="background-image"]');
+        if (bg && window.innerWidth > 768) {
+            var moveX = (e.clientX - window.innerWidth / 2) * 0.005;
+            var moveY = (e.clientY - window.innerHeight / 2) * 0.005;
+            bg.style.transform = 'scale(1.05) translate(' + moveX + 'px, ' + moveY + 'px)';
+        }
+    });
+</script>
+{% endblock %}

@@ -6,7 +6,7 @@
 <div class="absolute inset-0 z-0 overflow-hidden bg-primary-container">
     <div class="floating-orb top-[-10%] left-[-5%]"></div>
     <div class="floating-orb bottom-[-10%] right-[-5%]" style="animation-delay: -5s;"></div>
-    <div class="absolute inset-0 opacity-20 grayscale brightness-50" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA_WKNfPzaO3aM_dSdbu3CKTxMAkddhQL66DYLYpFcGBatBwfxdDlQ8HGbkQTZ4YXfMWr1S1vTmOmd76HifIqE6jPU7dz7miSc9pLzAJ-5d3gLOgTdUSH4yNc9xoIZSfT9kYQHCXEBd3pIkkjMpDDo0yaMxgZRg9nwn3okhTnkP0JiHSt4rbrd-qZEMEG_-UipO6WlN1AZVRq1jF6B5o7zkns0hz6fkghcEnTNWLfAi5x2mwBZ4Yk0p1EAxBrFZbn7cPkHMQO6zU_bC')"></div>
+    <div class="absolute inset-0 opacity-20 grayscale brightness-50" style="background-image: url('{% static 'frontend/img/f0e09cd1f4b22f2601643612dc07d9d8.jpg' %}')"></div>
     <div class="absolute inset-0 bg-gradient-to-b from-primary-container/80 via-primary-container/95 to-primary-container"></div>
 </div>
 <main class="relative z-10 flex flex-col items-center justify-center text-center px-margin-mobile">
@@ -58,7 +58,7 @@
         const bar = document.getElementById('progress-bar');
         bar.style.transition = 'transform 3.5s cubic-bezier(0.65,0,0.35,1)';
         setTimeout(() => bar.style.transform = 'translateX(0%)', 500);
-        setTimeout(() => { window.location.href = "{% url 'signin' %}"; }, 4500);
+        setTimeout(function() { window.location.href = "{% url 'landing' %}"; }, 4500);
     });
     document.addEventListener('mousemove', (e) => {
         const orbs = document.querySelectorAll('.floating-orb');

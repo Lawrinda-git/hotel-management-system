@@ -92,7 +92,7 @@
                     <p class="text-center mt-6 text-xs text-on-surface-variant flex items-center justify-center gap-2"><span class="material-symbols-outlined text-sm">lock</span> Secure encrypted checkout</p>
                 </div>
                 <div class="rounded-2xl overflow-hidden h-32 relative group">
-                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDDe5cmZbuuHG_KpZUsB7Visq5rARrvTMQn-j_gZsAQkLyEaMKfitGSFYZWysoJf5o9a42KqbDiAIqsuFC_eWbzN57uSwQs721yaciSKzJovJdp5rKl7DpjIzvu_LTfe07vzmLyNEFLo4QNgDwqKBZ2hdnRqHn0xXy9M2CCFVw00EsUa2Sn_O5rowXgIOqjyYpmi74xt4b2I061HTwEQhO_RuC0SKVStkz9avxHiVBT7kPicE45SMVe_LksYoYGxkghCty0D_ROZTy4')"></div>
+                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('{% static 'frontend/img/1c11e7409c960eda7f3c05c73e0293bf.jpg' %}')"></div>
                     <div class="absolute inset-0 bg-primary/10"></div>
                     <div class="absolute inset-0 flex items-center justify-center"><span class="bg-white/90 px-4 py-2 rounded-full text-xs font-bold text-primary shadow-sm">View Location</span></div>
                 </div>
@@ -100,18 +100,36 @@
         </div>
     </div>
 </main>
-<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-20 pb-safe px-4 bg-surface/80 backdrop-blur-xl border-t border-outline-variant/30 z-50">
-    <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all p-2 rounded-lg" href="{% url 'guest_home' %}"><span class="material-symbols-outlined">home</span><span class="font-label-sm text-label-sm">Home</span></a>
-    <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all p-2 rounded-lg" href="{% url 'explore_stays' %}"><span class="material-symbols-outlined">search</span><span class="font-label-sm text-label-sm">Search</span></a>
-    <a class="flex flex-col items-center justify-center text-primary font-bold transition-all p-2 rounded-lg" href="#"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span><span class="font-label-sm text-label-sm">Bookings</span></a>
-    <a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all p-2 rounded-lg" href="#"><span class="material-symbols-outlined">person</span><span class="font-label-sm text-label-sm">Profile</span></a>
+
+<!-- ===== BOTTOM NAVIGATION ===== -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]" role="navigation" aria-label="Main navigation">
+    <div class="w-full flex justify-around items-center h-16 pb-safe max-w-container-max mx-auto">
+        <a class="nav-link flex flex-col items-center justify-center gap-0.5 text-on-surface-variant transition-all duration-200 active:scale-90" href="{% url 'guest_home' %}" data-nav="home">
+            <span class="material-symbols-outlined">home</span>
+            <span class="font-label-sm text-label-sm">Home</span>
+        </a>
+        <a class="nav-link flex flex-col items-center justify-center gap-0.5 text-on-surface-variant transition-all duration-200 active:scale-90" href="{% url 'explore_stays' %}" data-nav="search">
+            <span class="material-symbols-outlined">search</span>
+            <span class="font-label-sm text-label-sm">Search</span>
+        </a>
+        <a class="nav-link flex flex-col items-center justify-center gap-0.5 text-primary font-bold transition-all duration-200 active:scale-90" href="{% url 'booking' %}" data-nav="bookings">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+            <span class="font-label-sm text-label-sm">Bookings</span>
+        </a>
+        <a class="nav-link flex flex-col items-center justify-center gap-0.5 text-on-surface-variant transition-all duration-200 active:scale-90" href="{% url 'profile' %}" data-nav="profile">
+            <span class="material-symbols-outlined">person</span>
+            <span class="font-label-sm text-label-sm">Profile</span>
+        </a>
+    </div>
 </nav>
 {% endblock %}
+
 {% block extra_style %}
 <style>
     .date-picker-custom::-webkit-calendar-picker-indicator { filter: invert(13%) sepia(85%) saturate(3635%) hue-rotate(224deg) brightness(92%) contrast(101%); cursor: pointer; }
 </style>
 {% endblock %}
+
 {% block extra_scripts %}
 <script>
     function getCookie(name) {

@@ -1,15 +1,22 @@
-# Guest Home Page Optimization Checklist
+# Full Optimization Plan
 
-## Analysis Complete
-- [x] Read current guest_home.html
-- [x] Read base.html for design system context
-- [x] Identify layout and UX issues
+## Phase 1: New Landing Page
+- [x] Create `landing.html` with the hero design (between splash and signin)
+- [x] Add `landing` view in views.py
+- [x] Add `landing` URL in urls.py
+- [x] Update splash auto-redirect to go to landing instead of signin
 
-## Optimization Tasks
-- [ ] **Header Restructure**: Fix duplicate branding, improve layout consistency between auth states, add smooth scroll shadow transition
-- [ ] **Search Bar Enhancement**: Make it more prominent with better visual hierarchy, add micro-interactions, improve placeholder text
-- [ ] **Categories Redesign**: Improve visual design with better icons, spacing, hover states, and accessibility
-- [ ] **Featured Escapes Restructure**: Better card hierarchy, improved spacing, more professional hero card, better secondary card layout
-- [ ] **Member Perk Integration**: Better visual integration with the page flow, improved styling
-- [ ] **Bottom Navigation Polish**: Cleaner active states, better visual feedback, improved spacing
-- [ ] **Overall Polish**: Consistent spacing rhythm, smooth animations, professional typography hierarchy
+## Phase 2: Fix Guest Home Page
+- [x] Add hotel ID params to hotel detail links (differentiate La Palm, Kempinski, Royal Senchi)
+- [x] Add category filter params to category links
+- [x] Replace "View all" link with dropdown menu
+- [x] Make search bar functional (navigate with query param)
+
+## Phase 3: Fix Views
+- [x] Update `hotel_details` view to accept hotel ID param
+- [x] Update `explore_stays` view to accept category and search params
+
+## Phase 4: Fix Bottom Nav on Mobile
+- [x] Fix explore_stays.html bottom nav (solid bg, consistent with guest_home)
+- [x] Fix booking.html bottom nav (add if missing)
+- [x] Fix profile.html bottom nav (add if missing)

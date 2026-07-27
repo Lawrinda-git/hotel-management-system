@@ -62,11 +62,11 @@
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                 <span class="material-symbols-outlined text-outline group-focus-within:text-primary transition-colors">search</span>
             </div>
-            <input class="w-full pl-12 pr-36 py-4 bg-surface-container-lowest border-2 border-outline-variant/40 rounded-2xl shadow-sm focus:ring-4 focus:ring-primary/10 focus:border-primary text-body-md font-body-md placeholder:text-outline-variant transition-all outline-none" placeholder="Search by hotel, location, or destination..." type="text" aria-label="Search hotels">
-            <a href="{% url 'explore_stays' %}" class="absolute inset-y-2 right-2 px-6 bg-primary text-on-primary rounded-xl font-label-md text-label-md font-semibold inline-flex items-center gap-1.5 active:scale-95 transition-all shadow-sm hover:shadow-md">
+            <input id="search-input" class="w-full pl-12 pr-36 py-4 bg-surface-container-lowest border-2 border-outline-variant/40 rounded-2xl shadow-sm focus:ring-4 focus:ring-primary/10 focus:border-primary text-body-md font-body-md placeholder:text-outline-variant transition-all outline-none" placeholder="Search by hotel, location, or destination..." type="text" aria-label="Search hotels">
+            <button id="search-button" class="absolute inset-y-2 right-2 px-6 bg-primary text-on-primary rounded-xl font-label-md text-label-md font-semibold inline-flex items-center gap-1.5 active:scale-95 transition-all shadow-sm hover:shadow-md">
                 <span>Search</span>
                 <span class="material-symbols-outlined text-lg">arrow_forward</span>
-            </a>
+            </button>
         </div>
     </section>
 
@@ -74,31 +74,47 @@
     <section class="mb-10">
         <div class="flex justify-between items-center mb-5">
             <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Categories</h2>
-            <a href="{% url 'explore_stays' %}" class="text-label-md font-label-md text-primary font-semibold inline-flex items-center gap-1 hover:gap-2 transition-all">
-                <span>View all</span>
-                <span class="material-symbols-outlined text-lg">chevron_right</span>
-            </a>
+            <div class="relative" id="categories-dropdown">
+                <button id="categories-toggle" class="text-label-md font-label-md text-primary font-semibold inline-flex items-center gap-1 hover:gap-2 transition-all cursor-pointer">
+                    <span>View all</span>
+                    <span class="material-symbols-outlined text-lg">expand_more</span>
+                </button>
+                <div id="categories-menu" class="hidden absolute right-0 mt-2 w-48 bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/30 z-50 overflow-hidden">
+                    <a href="{% url 'explore_stays' %}?category=resorts" class="flex items-center gap-3 px-4 py-3 hover:bg-surface-variant/60 transition-colors text-body-md font-body-md text-on-surface">
+                        <span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings:'FILL'1;">pool</span> Resorts
+                    </a>
+                    <a href="{% url 'explore_stays' %}?category=villas" class="flex items-center gap-3 px-4 py-3 hover:bg-surface-variant/60 transition-colors text-body-md font-body-md text-on-surface">
+                        <span class="material-symbols-outlined text-primary text-lg">villa</span> Villas
+                    </a>
+                    <a href="{% url 'explore_stays' %}?category=boutique" class="flex items-center gap-3 px-4 py-3 hover:bg-surface-variant/60 transition-colors text-body-md font-body-md text-on-surface">
+                        <span class="material-symbols-outlined text-primary text-lg">apartment</span> Boutique
+                    </a>
+                    <a href="{% url 'explore_stays' %}?category=cabins" class="flex items-center gap-3 px-4 py-3 hover:bg-surface-variant/60 transition-colors text-body-md font-body-md text-on-surface">
+                        <span class="material-symbols-outlined text-primary text-lg">cabin</span> Cabins
+                    </a>
+                </div>
+            </div>
         </div>
         <div class="grid grid-cols-4 gap-4">
-            <a href="{% url 'explore_stays' %}" class="flex flex-col items-center gap-2 group">
+            <a href="{% url 'explore_stays' %}?category=resorts" class="flex flex-col items-center gap-2 group">
                 <div class="w-16 h-16 rounded-2xl bg-primary text-on-primary flex items-center justify-center shadow-md group-hover:shadow-lg group-active:scale-90 transition-all">
                     <span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">pool</span>
                 </div>
                 <span class="text-label-sm font-label-sm font-semibold text-center text-on-surface">Resorts</span>
             </a>
-            <a href="{% url 'explore_stays' %}" class="flex flex-col items-center gap-2 group">
+            <a href="{% url 'explore_stays' %}?category=villas" class="flex flex-col items-center gap-2 group">
                 <div class="w-16 h-16 rounded-2xl bg-surface-container-high text-on-surface-variant flex items-center justify-center shadow-sm group-hover:bg-primary-container group-hover:text-white group-hover:shadow-md group-active:scale-90 transition-all">
                     <span class="material-symbols-outlined text-[28px]">villa</span>
                 </div>
                 <span class="text-label-sm font-label-sm text-center text-on-surface">Villas</span>
             </a>
-            <a href="{% url 'explore_stays' %}" class="flex flex-col items-center gap-2 group">
+            <a href="{% url 'explore_stays' %}?category=boutique" class="flex flex-col items-center gap-2 group">
                 <div class="w-16 h-16 rounded-2xl bg-surface-container-high text-on-surface-variant flex items-center justify-center shadow-sm group-hover:bg-primary-container group-hover:text-white group-hover:shadow-md group-active:scale-90 transition-all">
                     <span class="material-symbols-outlined text-[28px]">apartment</span>
                 </div>
                 <span class="text-label-sm font-label-sm text-center text-on-surface">Boutique</span>
             </a>
-            <a href="{% url 'explore_stays' %}" class="flex flex-col items-center gap-2 group">
+            <a href="{% url 'explore_stays' %}?category=cabins" class="flex flex-col items-center gap-2 group">
                 <div class="w-16 h-16 rounded-2xl bg-surface-container-high text-on-surface-variant flex items-center justify-center shadow-sm group-hover:bg-primary-container group-hover:text-white group-hover:shadow-md group-active:scale-90 transition-all">
                     <span class="material-symbols-outlined text-[28px]">cabin</span>
                 </div>
@@ -120,9 +136,9 @@
         </div>
 
         <div class="space-y-5">
-            <!-- Hero Featured Card -->
-            <a href="{% url 'hotel_details' %}" class="block relative h-[400px] rounded-2xl overflow-hidden shadow-xl active:scale-[0.98] transition-all duration-300 group cursor-pointer">
-                <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBv9qq86T5kUsAPmYrq1yScwKOjXgaVznCpqofK0ySoEH5idrBwUbj_17Wss0vTLCr49sVcBN5NzoICOah2up9se0-ttTpwb_aGikfupoX1fHpS9Ut2AQFIT4dXZ8IAFxmn6V2KMXK3sZ08zlvAL3baMHJRn9HOdypbJR3VWMIinyGLJ8eWRLnohzkAY83r29xKjJnEgS2LWZ_XEe9yhJCBgKbTWRng9qctDjZoE3E7b3fmvUsL9fS0Tu5LB-ctl3-SXPcYfUS66M8k')"></div>
+            <!-- Hero Featured Card - La Palm Royal Beach Hotel (ID: 1) -->
+            <a href="{% url 'hotel_details' %}?hotel=1" class="block relative h-[400px] rounded-2xl overflow-hidden shadow-xl active:scale-[0.98] transition-all duration-300 group cursor-pointer">
+                <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('{% static 'frontend/img/008833018260f8f9343a80c63b5be476.jpg' %}')"></div>
                 <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent"></div>
 
                 <!-- Badge -->
@@ -132,7 +148,7 @@
                 </div>
 
                 <!-- Favorite Button -->
-                <button class="absolute top-4 right-4 w-10 h-10 rounded-full glass-card flex items-center justify-center text-on-surface hover:bg-white/80 active:scale-90 transition-all shadow-sm" aria-label="Add to favorites" onclick="event.stopPropagation();var t=document.getElementById('app-toast');if(t){t.textContent='Added to favorites';t.classList.remove('hidden');setTimeout(function(){t.classList.add('hidden');},3200);}">
+                <button class="favorite-btn absolute top-4 right-4 w-10 h-10 rounded-full glass-card flex items-center justify-center text-on-surface hover:bg-white/80 active:scale-90 transition-all shadow-sm" aria-label="Add to favorites">
                     <span class="material-symbols-outlined">favorite</span>
                 </button>
 
@@ -165,11 +181,11 @@
 
             <!-- Secondary Cards Grid -->
             <div class="grid grid-cols-2 gap-3">
-                <a href="{% url 'hotel_details' %}" class="flex flex-col gap-2 group active:scale-[0.97] transition-all">
+                <a href="{% url 'hotel_details' %}?hotel=2" class="flex flex-col gap-2 group active:scale-[0.97] transition-all">
                     <div class="relative h-44 rounded-2xl overflow-hidden shadow-md">
-                        <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBOAAHTFAZis7mNk8MIB_SltOI-I-Lnmmg8-Sj8xxQtdNNVIF0S4SJ6NYs8yOr0TlDhG_ebLbN0CJMYptgBMa8nofg_guIAH1QWsZNjxDNKfk9YtetRrjSHsJKoXeUy1h4ZDo1HdtuAhomhBs4_YwXt3AlOr-7GneCbl-E-AABv9nYcvqlNhn1dCpaKGDH7TaWDM-HOaQSLWqh-cQb0UsDEv2zYOlLBWv3Zk3vtAs227BAuRconGozJtQPy8pjRamEfmebtLnGSXPNY')"></div>
+                        <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style="background-image: url('{% static 'frontend/img/444178f5be487edacbe9534e2c02eb51.jpg' %}')"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                        <button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full glass-card flex items-center justify-center text-on-surface active:scale-90 transition-all" aria-label="Add to favorites" onclick="event.stopPropagation();var t=document.getElementById('app-toast');if(t){t.textContent='Added to favorites';t.classList.remove('hidden');setTimeout(function(){t.classList.add('hidden');},3200);}">
+                        <button class="favorite-btn absolute top-2.5 right-2.5 w-8 h-8 rounded-full glass-card flex items-center justify-center text-on-surface active:scale-90 transition-all" aria-label="Add to favorites">
                             <span class="material-symbols-outlined text-sm">favorite</span>
                         </button>
                         <div class="absolute bottom-2.5 left-3 flex items-center gap-1 text-white">
@@ -179,19 +195,19 @@
                     </div>
                     <div class="px-0.5">
                         <div class="flex items-center justify-between mb-0.5">
-                            <span class="text-label-md font-label-md text-on-surface font-semibold line-clamp-1">Kempinski Hotel</span>
+                            <span class="text-label-md font-label-md text-on-surface font-semibold line-clamp-1">Kempinski Hotel Gold Coast City</span>
                         </div>
                         <span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
                             <span class="material-symbols-outlined text-xs">location_on</span>
-                            Accra, Ghana
+                            Gamel Abdul Nasser Avenue, Accra
                         </span>
                     </div>
                 </a>
-                <a href="{% url 'hotel_details' %}" class="flex flex-col gap-2 group active:scale-[0.97] transition-all">
+                <a href="{% url 'hotel_details' %}?hotel=3" class="flex flex-col gap-2 group active:scale-[0.97] transition-all">
                     <div class="relative h-44 rounded-2xl overflow-hidden shadow-md">
-                        <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC8tsIij3Rt5R8pLZM4AG7G4PA5yvR7W1rCNo9whLOhC_MfPX2T8gpoI8gkMI7Nyr-CwhpdTLpfDbCwO7DyitpznsgEFW2bchvggWli7eAegFi3aUC5visBA0XRv5L4UDn1leScldzd7g-gW8WR79SOiGPhZc_PB3-aMNEQegkQ4IwMh77KgR__dx9oQpLSOpMqRVS5OwOrm9J-P59ux1Om6-1XH8WKtk1MIpdVb_o_VfxFterb8lAQ-rCVH_Be7VvW9owTzxg3kh8g')"></div>
+                        <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style="background-image: url('{% static 'frontend/img/acb50fa45400182975c5ad13e56831a3.jpg' %}')"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                        <button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full glass-card flex items-center justify-center text-on-surface active:scale-90 transition-all" aria-label="Add to favorites" onclick="event.stopPropagation();var t=document.getElementById('app-toast');if(t){t.textContent='Added to favorites';t.classList.remove('hidden');setTimeout(function(){t.classList.add('hidden');},3200);}">
+                        <button class="favorite-btn absolute top-2.5 right-2.5 w-8 h-8 rounded-full glass-card flex items-center justify-center text-on-surface active:scale-90 transition-all" aria-label="Add to favorites">
                             <span class="material-symbols-outlined text-sm">favorite</span>
                         </button>
                         <div class="absolute bottom-2.5 left-3 flex items-center gap-1 text-white">
@@ -263,20 +279,54 @@
 {% block extra_scripts %}
 <script>
 (function() {
-    // === Header scroll shadow ===
+    // Search functionality
+    var searchInput = document.getElementById('search-input');
+    var searchButton = document.getElementById('search-button');
+    function doSearch() {
+        var v = searchInput.value.trim();
+        if (v) window.location.href = '{% url 'explore_stays' %}?q=' + encodeURIComponent(v);
+    }
+    if (searchButton) searchButton.addEventListener('click', doSearch);
+    if (searchInput) searchInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
+
+    // Categories dropdown
+    var categoriesToggle = document.getElementById('categories-toggle');
+    var categoriesMenu = document.getElementById('categories-menu');
+    if (categoriesToggle && categoriesMenu) {
+        categoriesToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            categoriesMenu.classList.toggle('hidden');
+        });
+        document.addEventListener('click', function(e) {
+            if (!categoriesToggle.contains(e.target) && !categoriesMenu.contains(e.target)) {
+                categoriesMenu.classList.add('hidden');
+            }
+        });
+    }
+
+    // Favorite buttons toast
+    document.querySelectorAll('.favorite-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var toast = document.getElementById('app-toast');
+            if (toast) {
+                toast.textContent = 'Added to favorites';
+                toast.classList.remove('hidden');
+                setTimeout(function() { toast.classList.add('hidden'); }, 3200);
+            }
+        });
+    });
+
+    // Header scroll shadow
     var header = document.querySelector('header');
     window.addEventListener('scroll', function() {
-        if (window.scrollY > 16) {
-            header.classList.add('shadow-md');
-        } else {
-            header.classList.remove('shadow-md');
-        }
+        if (window.scrollY > 16) header.classList.add('shadow-md');
+        else header.classList.remove('shadow-md');
     }, { passive: true });
 
-    // === Bottom nav active state ===
+    // Bottom nav active state
     var navLinks = document.querySelectorAll('.nav-link');
     var currentPath = window.location.pathname;
-
     navLinks.forEach(function(link) {
         var href = link.getAttribute('href');
         var icon = link.querySelector('.material-symbols-outlined');

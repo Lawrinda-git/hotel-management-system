@@ -7,6 +7,7 @@ urlpatterns = [
     # Public / Customer Pages
     path("", views.splash, name="splash"),
     path("splash/", views.splash, name="splash_page"),
+    path("landing/", views.landing, name="landing"),
     path("signin/", views.signin, name="signin"),
     path("api/health/database/", views.database_health, name="database_health"),
     path("profile/", views.profile, name="profile"),
