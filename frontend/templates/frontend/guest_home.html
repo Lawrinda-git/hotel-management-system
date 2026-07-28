@@ -1,18 +1,18 @@
 {% extends "frontend/base.html" %}
 {% load static %}
 {% block title %}StayHub | Luxury Stays in Ghana{% endblock %}
-{% block body_class %}bg-background text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed{% endblock %}
+{% block body_class %}bg-background text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed pb-16{% endblock %}
 {% block content %}
 <!-- ===== HEADER ===== -->
 <header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md transition-shadow duration-300">
     <div class="flex items-center justify-between px-margin-mobile h-16 w-full max-w-container-max mx-auto">
         <div class="flex items-center gap-3">
             {% if user.is_authenticated %}
-            <a href="{% url 'profile' %}" class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container bg-surface-container-high active:scale-95 transition-transform shrink-0">
+            <a href="{% url 'profile' %}" class="avatar avatar-initials ring-2 ring-primary-container active:scale-95 transition-transform shrink-0">
                 {% if request.user.profile_picture %}
-                <img class="w-full h-full object-cover" src="{{ request.user.profile_picture.url }}" alt="Profile">
+                <img class="w-full h-full object-cover rounded-full" src="{{ request.user.profile_picture.url }}" alt="Profile">
                 {% else %}
-                <span class="flex h-full w-full items-center justify-center bg-primary text-lg font-bold text-white">{{ request.user.first_name|default:request.user.username|first|upper }}</span>
+                <span>{{ request.user.first_name|default:request.user.username|first|upper }}</span>
                 {% endif %}
             </a>
             <div class="flex flex-col leading-tight">
@@ -31,15 +31,15 @@
 
         <div class="flex items-center gap-2">
             {% if user.is_authenticated %}
-            <a href="{% url 'guest_home' %}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-label-sm font-label-sm text-primary hover:bg-primary/5 transition-colors mr-1" aria-label="StayHub Home">
+            <a href="{% url 'guest_home' %}" class="btn btn-ghost btn-sm" aria-label="StayHub Home">
                 <span class="material-symbols-outlined text-lg">hotel</span>
                 <span class="hidden sm:inline font-semibold">StayHub</span>
             </a>
-            <a href="{% url 'logout' %}" class="w-9 h-9 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-variant/60 transition-colors active:scale-95" aria-label="Log out">
+            <a href="{% url 'logout' %}" class="btn btn-icon btn-ghost" aria-label="Log out">
                 <span class="material-symbols-outlined">logout</span>
             </a>
             {% else %}
-            <a href="{% url 'signin' %}" class="inline-flex items-center gap-1.5 px-5 py-2 bg-primary text-on-primary rounded-xl font-label-md text-label-md font-semibold shadow-sm hover:shadow-md active:scale-95 transition-all">
+            <a href="{% url 'signin' %}" class="btn btn-primary btn-sm">
                 <span>Sign In</span>
                 <span class="material-symbols-outlined text-lg">arrow_forward</span>
             </a>
@@ -49,7 +49,7 @@
 </header>
 
 <!-- ===== MAIN CONTENT ===== -->
-<main class="pt-20 pb-32 px-margin-mobile max-w-container-max mx-auto">
+<main class="pt-20 pb-8 px-margin-mobile max-w-container-max mx-auto">
     <!-- Hero Search Section -->
     <section class="mb-8 pt-4">
         <div class="mb-5">
@@ -58,12 +58,10 @@
             </h2>
             <p class="text-body-md font-body-md text-on-surface-variant mt-1">Handpicked hotels for an unforgettable experience</p>
         </div>
-        <div class="relative group">
-            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                <span class="material-symbols-outlined text-outline group-focus-within:text-primary transition-colors">search</span>
-            </div>
-            <input id="search-input" class="w-full pl-12 pr-36 py-4 bg-surface-container-lowest border-2 border-outline-variant/40 rounded-2xl shadow-sm focus:ring-4 focus:ring-primary/10 focus:border-primary text-body-md font-body-md placeholder:text-outline-variant transition-all outline-none" placeholder="Search by hotel, location, or destination..." type="text" aria-label="Search hotels">
-            <button id="search-button" class="absolute inset-y-2 right-2 px-6 bg-primary text-on-primary rounded-xl font-label-md text-label-md font-semibold inline-flex items-center gap-1.5 active:scale-95 transition-all shadow-sm hover:shadow-md">
+        <div class="search-bar relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline pointer-events-none">search</span>
+            <input id="search-input" class="input w-full pl-12 pr-36 py-4 !rounded-2xl" placeholder="Search by hotel, location, or destination..." type="text" aria-label="Search hotels">
+            <button id="search-button" class="btn btn-primary absolute inset-y-2 right-2">
                 <span>Search</span>
                 <span class="material-symbols-outlined text-lg">arrow_forward</span>
             </button>
@@ -74,23 +72,23 @@
     <section class="mb-10">
         <div class="flex justify-between items-center mb-5">
             <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Categories</h2>
-            <div class="relative" id="categories-dropdown">
-                <button id="categories-toggle" class="text-label-md font-label-md text-primary font-semibold inline-flex items-center gap-1 hover:gap-2 transition-all cursor-pointer">
+            <div class="dropdown">
+                <button class="btn btn-ghost btn-sm" data-dropdown-toggle="categories-menu">
                     <span>View all</span>
                     <span class="material-symbols-outlined text-lg">expand_more</span>
                 </button>
-                <div id="categories-menu" class="hidden absolute right-0 mt-2 w-48 bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/30 z-50 overflow-hidden">
-                    <a href="{% url 'explore_stays' %}?category=resorts" class="flex items-center gap-3 px-4 py-3 hover:bg-surface-variant/60 transition-colors text-body-md font-body-md text-on-surface">
-                        <span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings:'FILL'1;">pool</span> Resorts
+                <div class="dropdown-menu" id="categories-menu">
+                    <a class="dropdown-item" href="{% url 'explore_stays' %}?category=resorts">
+                        <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL'1;">pool</span> Resorts
                     </a>
-                    <a href="{% url 'explore_stays' %}?category=villas" class="flex items-center gap-3 px-4 py-3 hover:bg-surface-variant/60 transition-colors text-body-md font-body-md text-on-surface">
-                        <span class="material-symbols-outlined text-primary text-lg">villa</span> Villas
+                    <a class="dropdown-item" href="{% url 'explore_stays' %}?category=villas">
+                        <span class="material-symbols-outlined text-primary">villa</span> Villas
                     </a>
-                    <a href="{% url 'explore_stays' %}?category=boutique" class="flex items-center gap-3 px-4 py-3 hover:bg-surface-variant/60 transition-colors text-body-md font-body-md text-on-surface">
-                        <span class="material-symbols-outlined text-primary text-lg">apartment</span> Boutique
+                    <a class="dropdown-item" href="{% url 'explore_stays' %}?category=boutique">
+                        <span class="material-symbols-outlined text-primary">apartment</span> Boutique
                     </a>
-                    <a href="{% url 'explore_stays' %}?category=cabins" class="flex items-center gap-3 px-4 py-3 hover:bg-surface-variant/60 transition-colors text-body-md font-body-md text-on-surface">
-                        <span class="material-symbols-outlined text-primary text-lg">cabin</span> Cabins
+                    <a class="dropdown-item" href="{% url 'explore_stays' %}?category=cabins">
+                        <span class="material-symbols-outlined text-primary">cabin</span> Cabins
                     </a>
                 </div>
             </div>
@@ -130,7 +128,7 @@
                 <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Featured Escapes</h2>
                 <p class="text-body-md font-body-md text-on-surface-variant mt-0.5">Curated selections for your perfect getaway</p>
             </div>
-            <a href="{% url 'explore_stays' %}" class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-white active:scale-90 transition-all shadow-sm" aria-label="Filter and sort">
+            <a href="{% url 'explore_stays' %}" class="btn btn-icon btn-ghost" aria-label="Filter and sort">
                 <span class="material-symbols-outlined">tune</span>
             </a>
         </div>
@@ -142,13 +140,13 @@
                 <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent"></div>
 
                 <!-- Badge -->
-                <div class="absolute top-4 left-4 glass-card px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-white/20 shadow-sm">
+                <div class="card-glass absolute top-4 left-4 px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-white/20 shadow-sm">
                     <span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">stars</span>
                     <span class="text-label-sm font-label-sm text-on-secondary-fixed-variant tracking-wider uppercase font-semibold">Platinum Collection</span>
                 </div>
 
                 <!-- Favorite Button -->
-                <button class="favorite-btn absolute top-4 right-4 w-10 h-10 rounded-full glass-card flex items-center justify-center text-on-surface hover:bg-white/80 active:scale-90 transition-all shadow-sm" aria-label="Add to favorites">
+                <button class="favorite-btn absolute top-4 right-4 w-10 h-10 rounded-full card-glass flex items-center justify-center text-on-surface hover:bg-white/80 active:scale-90 transition-all shadow-sm" aria-label="Add to favorites">
                     <span class="material-symbols-outlined">favorite</span>
                 </button>
 
@@ -169,7 +167,7 @@
                         <span class="text-body-md font-body-md">Liberation Road, Accra</span>
                     </div>
                     <div class="flex items-center gap-3 flex-wrap">
-                        <span class="inline-flex items-center gap-2 bg-secondary-container text-on-secondary-container px-5 py-2.5 rounded-xl font-label-md text-label-md font-bold shadow-lg active:scale-95 hover:shadow-xl transition-all">
+                        <span class="btn btn-secondary inline-flex items-center gap-2 shadow-lg">
                             <span>Book Now</span>
                             <span class="material-symbols-outlined text-lg">arrow_forward</span>
                         </span>
@@ -185,7 +183,7 @@
                     <div class="relative h-44 rounded-2xl overflow-hidden shadow-md">
                         <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style="background-image: url('{% static 'frontend/img/444178f5be487edacbe9534e2c02eb51.jpg' %}')"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                        <button class="favorite-btn absolute top-2.5 right-2.5 w-8 h-8 rounded-full glass-card flex items-center justify-center text-on-surface active:scale-90 transition-all" aria-label="Add to favorites">
+                        <button class="favorite-btn absolute top-2.5 right-2.5 w-8 h-8 rounded-full card-glass flex items-center justify-center text-on-surface active:scale-90 transition-all" aria-label="Add to favorites">
                             <span class="material-symbols-outlined text-sm">favorite</span>
                         </button>
                         <div class="absolute bottom-2.5 left-3 flex items-center gap-1 text-white">
@@ -207,7 +205,7 @@
                     <div class="relative h-44 rounded-2xl overflow-hidden shadow-md">
                         <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style="background-image: url('{% static 'frontend/img/acb50fa45400182975c5ad13e56831a3.jpg' %}')"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                        <button class="favorite-btn absolute top-2.5 right-2.5 w-8 h-8 rounded-full glass-card flex items-center justify-center text-on-surface active:scale-90 transition-all" aria-label="Add to favorites">
+                        <button class="favorite-btn absolute top-2.5 right-2.5 w-8 h-8 rounded-full card-glass flex items-center justify-center text-on-surface active:scale-90 transition-all" aria-label="Add to favorites">
                             <span class="material-symbols-outlined text-sm">favorite</span>
                         </button>
                         <div class="absolute bottom-2.5 left-3 flex items-center gap-1 text-white">
@@ -231,7 +229,7 @@
 
     <!-- Member Perk Banner -->
     <section class="mb-10">
-        <div class="relative bg-gradient-to-br from-primary-container/10 via-primary-container/5 to-secondary-container/10 p-6 rounded-2xl border border-primary-container/20 overflow-hidden">
+        <div class="card relative bg-gradient-to-br from-primary-container/10 via-primary-container/5 to-secondary-container/10 p-6 rounded-2xl border border-primary-container/20 overflow-hidden">
             <div class="absolute -top-6 -right-6 w-24 h-24 bg-secondary-container/20 rounded-full blur-xl"></div>
             <div class="absolute -bottom-4 -left-4 w-16 h-16 bg-primary-container/10 rounded-full blur-lg"></div>
 
@@ -240,12 +238,12 @@
                     <span class="material-symbols-outlined text-on-secondary-container text-3xl" style="font-variation-settings: 'FILL' 1;">loyalty</span>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <h3 class="text-label-sm font-label-sm font-bold text-primary-container uppercase tracking-widest mb-1">Member Perk</h3>
+                    <h3 class="badge badge-secondary mb-1">Member Perk</h3>
                     <p class="text-body-md font-body-md text-on-surface font-semibold">
                         {% if display_name %}{{ display_name }}, {% endif %}explore member offers tailored for your next stay in Ghana.
                     </p>
                 </div>
-                <a href="{% url 'explore_stays' %}" class="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white active:scale-90 transition-all" aria-label="View member offers">
+                <a href="{% url 'explore_stays' %}" class="btn btn-icon btn-ghost" aria-label="View member offers">
                     <span class="material-symbols-outlined">arrow_forward</span>
                 </a>
             </div>
@@ -254,26 +252,7 @@
 </main>
 
 <!-- ===== BOTTOM NAVIGATION ===== -->
-<nav class="fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]" role="navigation" aria-label="Main navigation">
-    <div class="w-full flex justify-around items-center h-16 pb-safe max-w-container-max mx-auto">
-        <a class="nav-link flex flex-col items-center justify-center gap-0.5 text-primary font-bold transition-all duration-200 active:scale-90" href="{% url 'guest_home' %}" data-nav="home">
-            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
-            <span class="font-label-sm text-label-sm">Home</span>
-        </a>
-        <a class="nav-link flex flex-col items-center justify-center gap-0.5 text-on-surface-variant transition-all duration-200 active:scale-90" href="{% url 'explore_stays' %}" data-nav="search">
-            <span class="material-symbols-outlined">search</span>
-            <span class="font-label-sm text-label-sm">Search</span>
-        </a>
-        <a class="nav-link flex flex-col items-center justify-center gap-0.5 text-on-surface-variant transition-all duration-200 active:scale-90" href="{% url 'booking' %}" data-nav="bookings">
-            <span class="material-symbols-outlined">calendar_today</span>
-            <span class="font-label-sm text-label-sm">Bookings</span>
-        </a>
-        <a class="nav-link flex flex-col items-center justify-center gap-0.5 text-on-surface-variant transition-all duration-200 active:scale-90" href="{% url 'profile' %}" data-nav="profile">
-            <span class="material-symbols-outlined">person</span>
-            <span class="font-label-sm text-label-sm">Profile</span>
-        </a>
-    </div>
-</nav>
+{% include "frontend/components/_guest_nav.html" %}
 {% endblock %}
 
 {% block extra_scripts %}
@@ -289,56 +268,21 @@
     if (searchButton) searchButton.addEventListener('click', doSearch);
     if (searchInput) searchInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
 
-    // Categories dropdown
-    var categoriesToggle = document.getElementById('categories-toggle');
-    var categoriesMenu = document.getElementById('categories-menu');
-    if (categoriesToggle && categoriesMenu) {
-        categoriesToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            categoriesMenu.classList.toggle('hidden');
-        });
-        document.addEventListener('click', function(e) {
-            if (!categoriesToggle.contains(e.target) && !categoriesMenu.contains(e.target)) {
-                categoriesMenu.classList.add('hidden');
-            }
-        });
-    }
-
     // Favorite buttons toast
     document.querySelectorAll('.favorite-btn').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
-            var toast = document.getElementById('app-toast');
-            if (toast) {
-                toast.textContent = 'Added to favorites';
-                toast.classList.remove('hidden');
-                setTimeout(function() { toast.classList.add('hidden'); }, 3200);
+            if (window.StayHub) {
+                window.StayHub.Toast.info('Added to favorites');
+            } else {
+                var toast = document.getElementById('app-toast');
+                if (toast) {
+                    toast.textContent = 'Added to favorites';
+                    toast.classList.remove('hidden');
+                    setTimeout(function() { toast.classList.add('hidden'); }, 3200);
+                }
             }
         });
-    });
-
-    // Header scroll shadow
-    var header = document.querySelector('header');
-    window.addEventListener('scroll', function() {
-        if (window.scrollY > 16) header.classList.add('shadow-md');
-        else header.classList.remove('shadow-md');
-    }, { passive: true });
-
-    // Bottom nav active state
-    var navLinks = document.querySelectorAll('.nav-link');
-    var currentPath = window.location.pathname;
-    navLinks.forEach(function(link) {
-        var href = link.getAttribute('href');
-        var icon = link.querySelector('.material-symbols-outlined');
-        if (href && currentPath === href) {
-            link.classList.add('text-primary', 'font-bold');
-            link.classList.remove('text-on-surface-variant');
-            if (icon) icon.style.setProperty('font-variation-settings', '"FILL" 1');
-        } else {
-            link.classList.remove('text-primary', 'font-bold');
-            link.classList.add('text-on-surface-variant');
-            if (icon) icon.style.setProperty('font-variation-settings', '"FILL" 0');
-        }
     });
 })();
 </script>

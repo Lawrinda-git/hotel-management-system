@@ -1,0 +1,41 @@
+{% comment %}
+  StayHub – Guest Bottom Navigation
+  
+  Usage (in base.html or any guest page):
+    {% include "frontend/components/_guest_nav.html" %}
+  
+  The nav-link with href matching current URL will be auto-highlighted by main.js
+{% endcomment %}
+<nav class="bottom-nav" role="navigation" aria-label="Main navigation">
+    <div class="bottom-nav-inner">
+        <a class="nav-link" href="{% url 'guest_home' %}" data-nav="home">
+            <span class="material-symbols-outlined">home</span>
+            <span>Home</span>
+        </a>
+        <a class="nav-link" href="{% url 'explore_stays' %}" data-nav="search">
+            <span class="material-symbols-outlined">search</span>
+            <span>Search</span>
+        </a>
+        <a class="nav-link" href="{% url 'booking' %}" data-nav="bookings">
+            <span class="material-symbols-outlined">calendar_today</span>
+            <span>Bookings</span>
+        </a>
+        <a class="nav-link" href="{% url 'profile' %}" data-nav="profile">
+            <span class="material-symbols-outlined">person</span>
+            <span>Profile</span>
+        </a>
+    </div>
+</nav>
+</content_output>
+<task_progress>
+- [x] Explore current frontend structure
+- [x] Analyze existing templates and static files
+- [x] Identify gaps and areas for improvement
+- [x] Create comprehensive frontend improvement plan
+- [x] Refine plan with role-based navigation, dark mode, branding, and backend integration phases
+- [x] Phase 0: Create CSS component files
+- [x] Phase 0: Create JS utilities
+- [ ] Phase 0: Create reusable component partials
+- [ ] Phase 0: Upgrade base.html with design system
+- [ ] Phase 0: Create design system showcase page
+</project.ts></project.ts></task_node></task_node>

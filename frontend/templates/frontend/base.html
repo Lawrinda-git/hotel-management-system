@@ -5,33 +5,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}StayHub | Luxury Stays{% endblock %}</title>
+
+<!-- Preconnect to font origins -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&family=Noto+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <!-- Material Symbols -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+<!-- Design System CSS -->
+<link rel="stylesheet" href="{% static 'frontend/css/base.css' %}">
+<link rel="stylesheet" href="{% static 'frontend/css/components.css' %}">
+
 {% block extra_head %}{% endblock %}
-<style>
-    .material-symbols-outlined {
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    }
-    .glass-card {
-        background: rgba(255, 255, 255, 0.6);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-    .glass-panel {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-    }
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    {% block extra_style %}{% endblock %}
-</style>
+
 {% block tailwind_config %}
 <script>
     tailwind.config = {
@@ -127,66 +120,15 @@
 {% endblock %}
 </head>
 <body class="bg-surface font-body-md text-on-surface antialiased {% block body_class %}{% endblock %}">
+
 {% block content %}{% endblock %}
+
+<!-- Toast container (used by main.js) -->
 <div id="app-toast" class="fixed bottom-6 left-1/2 z-[100] hidden max-w-sm -translate-x-1/2 rounded-xl bg-on-surface px-5 py-3 text-center text-sm font-medium text-surface shadow-2xl" role="status" aria-live="polite"></div>
-<script>
-(() => {
-    const toast = document.getElementById('app-toast');
-    let timer;
-    const notify = (message) => {
-        toast.textContent = message;
-        toast.classList.remove('hidden');
-        clearTimeout(timer);
-        timer = setTimeout(() => toast.classList.add('hidden'), 3200);
-    };
 
-    document.addEventListener('click', (event) => {
-        const control = event.target.closest('a, button');
-        if (!control) return;
-        const label = control.textContent.replace(/\s+/g, ' ').trim().toLowerCase();
-        const icon = control.querySelector('.material-symbols-outlined')?.textContent.trim();
+<!-- Design System JS -->
+<script src="{% static 'frontend/js/main.js' %}"></script>
 
-        if (control.tagName === 'A' && control.getAttribute('href') === '#') {
-            event.preventDefault();
-            if (label.includes('booking')) window.location.assign('{% url "booking" %}');
-            else if (label.includes('profile')) notify('Profile settings are available after signing in.');
-            else notify('This section is selected.');
-            return;
-        }
-        if (control.tagName !== 'BUTTON') return;
-        if (label.includes('create booking') || label.includes('book now') || label.includes('reserve')) {
-            window.location.assign('{% url "booking" %}');
-        } else if (label.includes('join for free')) {
-            window.location.assign('{% url "create_account" %}');
-        } else if (label.includes('show map') || label.includes('view location')) {
-            window.open('https://www.google.com/maps/search/?api=1&query=London%2C%20United%20Kingdom', '_blank', 'noopener');
-        } else if (label.includes('export') || icon === 'download') {
-            const rows = [...document.querySelectorAll('table tr')].map(row => [...row.cells].map(cell => '"' + cell.innerText.replaceAll('"', '""').trim() + '"').join(','));
-            if (!rows.length) { notify('There is no report data to export.'); return; }
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(new Blob([rows.join('\n')], {type: 'text/csv'}));
-            link.download = 'stayhub-report.csv';
-            link.click();
-            URL.revokeObjectURL(link.href);
-            notify('Report download started.');
-        } else if (icon === 'notifications' || label === 'notifications') {
-            notify('You have no new notifications.');
-        } else if (label.includes('approve')) {
-            control.disabled = true;
-            control.textContent = 'Approved';
-            control.classList.add('opacity-70', 'cursor-not-allowed');
-            notify('Request approved.');
-        } else if (label.includes('check in') || label.includes('check out')) {
-            control.disabled = true;
-            control.textContent = label.includes('in') ? 'Checked In' : 'Checked Out';
-            control.classList.add('opacity-70', 'cursor-not-allowed');
-            notify('Guest status updated.');
-        } else if (label.includes('details') || label.includes('manage') || icon === 'receipt' || icon === 'send') {
-            notify('Details opened for review.');
-        }
-    });
-})();
-</script>
 {% block extra_scripts %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,169 @@
+{% comment %}
+  StayHub – Staff Sidebar Navigation (for Manager/Accountant/Admin)
+  
+  Usage:
+    {% include "frontend/components/_staff_sidebar.html" with role="manager" %}
+  
+  Roles: manager, accountant, admin, receptionist, housekeeping
+  Admin sees everything. Manager/Accountant see their sections.
+  Receptionist/Housekeeping use bottom nav instead (single-screen focused).
+{% endcomment %}
+<aside class="sidebar hide-mobile" role="navigation" aria-label="Staff navigation">
+    <div class="sidebar-header">
+        {% if request.user.profile_picture %}
+        <img src="{{ request.user.profile_picture.url }}" alt="{{ request.user.get_full_name }}" class="avatar">
+        {% else %}
+        <div class="avatar avatar-initials">{{ request.user.first_name|default:request.user.username|first|upper }}</div>
+        {% endif %}
+        <div>
+            <p class="font-label-md text-label-md" style="color: var(--color-on-surface); font-weight: 600;">{{ display_name|default:request.user.get_full_name }}</p>
+            <p class="font-label-sm text-label-sm" style="color: var(--color-on-surface-variant);">{{ role|title }}</p>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        {% if role == 'admin' or role == 'manager' %}
+        <div class="sidebar-section">
+            <p class="sidebar-section-title">Overview</p>
+            <a class="sidebar-link {% if active == 'dashboard' %}active{% endif %}" href="{% url 'manager_dashboard' %}">
+                <span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+            <a class="sidebar-link {% if active == 'bookings' %}active{% endif %}" href="#">
+                <span class="material-symbols-outlined">calendar_today</span>
+                Bookings
+            </a>
+            <a class="sidebar-link {% if active == 'rooms' %}active{% endif %}" href="#">
+                <span class="material-symbols-outlined">meeting_room</span>
+                Rooms
+            </a>
+            <a class="sidebar-link {% if active == 'guests' %}active{% endif %}" href="#">
+                <span class="material-symbols-outlined">groups</span>
+                Guests
+            </a>
+        </div>
+        {% endif %}
+
+        {% if role == 'admin' or role == 'manager' or role == 'accountant' %}
+        <div class="sidebar-section">
+            <p class="sidebar-section-title">Finance</p>
+            {% if role == 'admin' or role == 'accountant' %}
+            <a class="sidebar-link {% if active == 'invoices' %}active{% endif %}" href="#">
+                <span class="material-symbols-outlined">receipt_long</span>
+                Invoices
+            </a>
+            <a class="sidebar-link {% if active == 'payments' %}active{% endif %}" href="#">
+                <span class="material-symbols-outlined">payments</span>
+                Payments
+            </a>
+            {% endif %}
+            {% if role == 'admin' or role == 'manager' %}
+            <a class="sidebar-link {% if active == 'reports' %}active{% endif %}" href="#">
+                <span class="material-symbols-outlined">bar_chart</span>
+                Reports
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if role == 'admin' or role == 'manager' %}
+        <div class="sidebar-section">
+            <p class="sidebar-section-title">Staff</p>
+            <a class="sidebar-link {% if active == 'team' %}active{% endif %}" href="{% url 'team' %}">
+                <span class="material-symbols-outlined">badge</span>
+                Team
+            </a>
+            <a class="sidebar-link {% if active == 'housekeeping' %}active{% endif %}" href="{% url 'housekeeping_dashboard' %}">
+                <span class="material-symbols-outlined">cleaning_services</span>
+                Housekeeping
+            </a>
+        </div>
+        {% endif %}
+
+        {% if role == 'admin' %}
+        <div class="sidebar-section">
+            <p class="sidebar-section-title">Administration</p>
+            <a class="sidebar-link {% if active == 'settings' %}active{% endif %}" href="#">
+                <span class="material-symbols-outlined">settings</span>
+                Settings
+            </a>
+            <a class="sidebar-link {% if active == 'branding' %}active{% endif %}" href="#">
+                <span class="material-symbols-outlined">palette</span>
+                Branding
+            </a>
+            <a class="sidebar-link {% if active == 'users' %}active{% endif %}" href="#">
+                <span class="material-symbols-outlined">manage_accounts</span>
+                Users
+            </a>
+        </div>
+        {% endif %}
+    </nav>
+
+    <div class="sidebar-footer">
+        <a class="sidebar-link" href="{% url 'profile' %}" style="margin-bottom: 4px;">
+            <span class="material-symbols-outlined">person</span>
+            Profile
+        </a>
+        <a class="sidebar-link" href="{% url 'logout' %}">
+            <span class="material-symbols-outlined">logout</span>
+            Sign Out
+        </a>
+    </div>
+</aside>
+
+<!-- Mobile bottom nav for staff who use sidebar on desktop -->
+<nav class="bottom-nav hide-desktop" role="navigation" aria-label="Staff navigation">
+    <div class="bottom-nav-inner">
+        <a class="nav-link {% if active == 'dashboard' %}active{% endif %}" href="{% if role == 'accountant' %}#{% else %}{% url 'manager_dashboard' %}{% endif %}">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span>Home</span>
+        </a>
+        <a class="nav-link {% if active == 'bookings' %}active{% endif %}" href="#">
+            <span class="material-symbols-outlined">calendar_today</span>
+            <span>Bookings</span>
+        </a>
+        <a class="nav-link {% if active == 'profile' %}active{% endif %}" href="{% url 'profile' %}">
+            <span class="material-symbols-outlined">person</span>
+            <span>Profile</span>
+        </a>
+    </div>
+</nav>
+</content_output>
+<task_progress>
+- [x] Explore current frontend structure
+- [x] Analyze existing templates and static files
+- [x] Identify gaps and areas for improvement
+- [x] Create comprehensive frontend improvement plan
+- [x] Refine plan with role-based navigation, dark mode, branding, and backend integration phases
+- [x] Phase 0: Create CSS component files
+- [x] Phase 0: Create JS utilities
+- [ ] Phase 0: Create reusable component partials
+- [ ] Phase 0: Upgrade base.html with design system
+- [ ] Phase 0: Create design system showcase page
+</project.ts></project.ts></task_node></task_node>
+
+</final_file_content>
+
+IMPORTANT: For any future changes to this file, use the final_file_content shown above as your reference. This content reflects the current state of the file, including any auto-formatting (e.g., if you used single quotes but the formatter converted them to double quotes). Always base your SEARCH/REPLACE operations on this final version to ensure accuracy.
+
+<environment_details>
+# Visual Studio Code Visible Files
+frontend/templates/frontend/components/_staff_sidebar.html
+
+# Visual Studio Code Open Tabs
+.gitignore
+frontend/static/frontend/css/base.css
+frontend/static/frontend/css/components.css
+frontend/static/frontend/js/main.js
+frontend/templates/frontend/components/_guest_nav.html
+frontend/templates/frontend/components/_staff_sidebar.html
+
+# Current Time
+7/28/2026, 12:07:48 PM (UTC, UTC+0:00)
+
+# Context Window Usage
+71,068 / 1,048.576K tokens used (7%)
+
+# Current Mode
+ACT MODE
+</｜｜DSML｜｜>

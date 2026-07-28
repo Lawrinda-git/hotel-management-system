@@ -1,7 +1,7 @@
 {% extends "frontend/base.html" %}
 {% load static %}
 {% block title %}StayHub | Book Your Luxury Stay{% endblock %}
-{% block body_class %}bg-background text-on-surface{% endblock %}
+{% block body_class %}bg-background text-on-surface pb-16{% endblock %}
 {% block content %}
 <header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
     <div class="flex items-center justify-between px-margin-mobile h-16 w-full max-w-screen-xl mx-auto">
@@ -102,26 +102,7 @@
 </main>
 
 <!-- ===== BOTTOM NAVIGATION ===== -->
-<nav class="fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]" role="navigation" aria-label="Main navigation">
-    <div class="w-full flex justify-around items-center h-16 pb-safe max-w-container-max mx-auto">
-        <a class="nav-link flex flex-col items-center justify-center gap-0.5 text-on-surface-variant transition-all duration-200 active:scale-90" href="{% url 'guest_home' %}" data-nav="home">
-            <span class="material-symbols-outlined">home</span>
-            <span class="font-label-sm text-label-sm">Home</span>
-        </a>
-        <a class="nav-link flex flex-col items-center justify-center gap-0.5 text-on-surface-variant transition-all duration-200 active:scale-90" href="{% url 'explore_stays' %}" data-nav="search">
-            <span class="material-symbols-outlined">search</span>
-            <span class="font-label-sm text-label-sm">Search</span>
-        </a>
-        <a class="nav-link flex flex-col items-center justify-center gap-0.5 text-primary font-bold transition-all duration-200 active:scale-90" href="{% url 'booking' %}" data-nav="bookings">
-            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
-            <span class="font-label-sm text-label-sm">Bookings</span>
-        </a>
-        <a class="nav-link flex flex-col items-center justify-center gap-0.5 text-on-surface-variant transition-all duration-200 active:scale-90" href="{% url 'profile' %}" data-nav="profile">
-            <span class="material-symbols-outlined">person</span>
-            <span class="font-label-sm text-label-sm">Profile</span>
-        </a>
-    </div>
-</nav>
+{% include "frontend/components/_guest_nav.html" %}
 {% endblock %}
 
 {% block extra_style %}

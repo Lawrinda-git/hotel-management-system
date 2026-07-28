@@ -1,0 +1,156 @@
+{% comment %}
+  StayHub – Dark Mode Toggle Component
+  Usage: {% include "frontend/components/_dark_mode_toggle.html" %}
+  Requires main.js for DarkMode functionality.
+  
+  Place this wherever you want the toggle to appear (e.g., profile page).
+  The toggle is a styled switch that syncs with localStorage.
+{% endcomment %}
+<label class="toggle dark-mode-toggle-wrapper">
+    <span class="toggle-label">Dark Mode</span>
+    <span class="toggle">
+        <input type="checkbox" class="toggle-input dark-mode-toggle" 
+               {% if request.COOKIES.dark_mode or request.session.dark_mode %}checked{% endif %}>
+        <span class="toggle-track">
+            <span class="toggle-thumb"></span>
+        </span>
+    </span>
+</label>
+
+<script>
+    // Ensure the toggle reflects the current state on page load
+    (function() {
+        var isDark = document.documentElement.classList.contains('dark');
+        var toggle = document.querySelector('.dark-mode-toggle');
+        if (toggle) {
+            toggle.checked = isDark;
+        }
+    })();
+</script>
+</content_output>
+<task_progress>
+- [x] Explore current frontend structure
+- [x] Analyze existing templates and static files
+- [x] Identify gaps and areas for improvement
+- [x] Create comprehensive frontend improvement plan
+- [x] Refine plan with role-based navigation, dark mode, branding, and backend integration phases
+- [x] Phase 0: Create CSS component files
+- [x] Phase 0: Create JS utilities
+- [ ] Phase 0: Create reusable component partials
+- [ ] Phase 0: Upgrade base.html with design system
+- [ ] Phase 0: Create design system showcase page
+</project.ts></project.ts></task_node></task_node>
+
+</final_file_content>
+
+IMPORTANT: For any future changes to this file, use the final_file_content shown above as your reference. This content reflects the current state of the file, including any auto-formatting (e.g., if you used single quotes but the formatter converted them to double quotes). Always base your SEARCH/REPLACE operations on this final version to ensure accuracy.
+
+<environment_details>
+# Visual Studio Code Visible Files
+frontend/templates/frontend/components/_dark_mode_toggle.html
+
+# Visual Studio Code Open Tabs
+.gitignore
+frontend/static/frontend/css/base.css
+frontend/static/frontend/css/components.css
+frontend/static/frontend/js/main.js
+frontend/templates/frontend/components/_guest_nav.html
+frontend/templates/frontend/components/_staff_sidebar.html
+frontend/templates/frontend/components/_dark_mode_toggle.html
+
+# Current Time
+7/28/2026, 12:08:38 PM (UTC, UTC+0:00)
+
+# Context Window Usage
+74,805 / 1,048.576K tokens used (7%)
+
+# Current Mode
+ACT MODE
+</environment_details>Now let me create the focused staff bottom nav for receptionist and housekeeping roles.
+
+<write_to_file>
+<path>frontend/templates/frontend/components/_staff_bottom_nav.html</path>
+<content>{% comment %}
+  StayHub – Focused Staff Bottom Navigation
+  For receptionists and housekeeping workers who see only their screen.
+  
+  Usage:
+    Receptionist: {% include "frontend/components/_staff_bottom_nav.html" with role="receptionist" %}
+    Housekeeping: {% include "frontend/components/_staff_bottom_nav.html" with role="housekeeping" %}
+{% endcomment %}
+<nav class="bottom-nav" role="navigation" aria-label="{{ role|title }} navigation">
+    <div class="bottom-nav-inner">
+        {% if role == 'receptionist' %}
+        <a class="nav-link {% if active == 'dashboard' %}active{% endif %}" href="{% url 'receptionist_dashboard' %}" data-nav="dashboard">
+            <span class="material-symbols-outlined">home</span>
+            <span>Home</span>
+        </a>
+        <a class="nav-link {% if active == 'bookings' %}active{% endif %}" href="#" data-nav="bookings">
+            <span class="material-symbols-outlined">calendar_today</span>
+            <span>Bookings</span>
+        </a>
+        <a class="nav-link {% if active == 'guests' %}active{% endif %}" href="#" data-nav="guests">
+            <span class="material-symbols-outlined">groups</span>
+            <span>Guests</span>
+        </a>
+        <a class="nav-link {% if active == 'profile' %}active{% endif %}" href="{% url 'profile' %}" data-nav="profile">
+            <span class="material-symbols-outlined">person</span>
+            <span>Profile</span>
+        </a>
+        {% elif role == 'housekeeping' %}
+        <a class="nav-link {% if active == 'tasks' %}active{% endif %}" href="{% url 'housekeeping_dashboard' %}" data-nav="tasks">
+            <span class="material-symbols-outlined">assignment</span>
+            <span>My Tasks</span>
+        </a>
+        <a class="nav-link {% if active == 'rooms' %}active{% endif %}" href="#" data-nav="rooms">
+            <span class="material-symbols-outlined">meeting_room</span>
+            <span>Rooms</span>
+        </a>
+        <a class="nav-link {% if active == 'profile' %}active{% endif %}" href="{% url 'profile' %}" data-nav="profile">
+            <span class="material-symbols-outlined">person</span>
+            <span>Profile</span>
+        </a>
+        {% endif %}
+    </div>
+</nav>
+</content_output>
+<task_progress>
+- [x] Explore current frontend structure
+- [x] Analyze existing templates and static files
+- [x] Identify gaps and areas for improvement
+- [x] Create comprehensive frontend improvement plan
+- [x] Refine plan with role-based navigation, dark mode, branding, and backend integration phases
+- [x] Phase 0: Create CSS component files
+- [x] Phase 0: Create JS utilities
+- [ ] Phase 0: Create reusable component partials
+- [ ] Phase 0: Upgrade base.html with design system
+- [ ] Phase 0: Create design system showcase page
+</project.ts></project.ts></task_node></task_node>
+
+</final_file_content>
+
+IMPORTANT: For any future changes to this file, use the final_file_content shown above as your reference. This content reflects the current state of the file, including any auto-formatting (e.g., if you used single quotes but the formatter converted them to double quotes). Always base your SEARCH/REPLACE operations on this final version to ensure accuracy.
+
+<environment_details>
+# Visual Studio Code Visible Files
+frontend/templates/frontend/components/_staff_bottom_nav.html
+
+# Visual Studio Code Open Tabs
+.gitignore
+frontend/static/frontend/css/base.css
+frontend/static/frontend/css/components.css
+frontend/static/frontend/js/main.js
+frontend/templates/frontend/components/_guest_nav.html
+frontend/templates/frontend/components/_staff_sidebar.html
+frontend/templates/frontend/components/_dark_mode_toggle.html
+frontend/templates/frontend/components/_staff_bottom_nav.html
+
+# Current Time
+7/28/2026, 12:09:01 PM (UTC, UTC+0:00)
+
+# Context Window Usage
+76,143 / 1,048.576K tokens used (7%)
+
+# Current Mode
+ACT MODE
+</environment_details>
