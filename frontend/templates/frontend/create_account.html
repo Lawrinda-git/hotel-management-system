@@ -1,131 +1,193 @@
 {% extends "frontend/base.html" %}
 {% load static %}
 {% block title %}Join StayHub - Modern Luxury Stays{% endblock %}
-{% block body_class %}bg-surface text-on-surface min-h-screen flex items-center justify-center selection:bg-secondary-container selection:text-on-secondary-container{% endblock %}
+{% block body_class %}bg-background text-on-surface min-h-screen flex items-center justify-center{% endblock %}
 {% block content %}
-<div class="fixed inset-0 z-0">
-    <div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-surface to-secondary/5"></div>
-    <div class="absolute inset-0 opacity-40 mix-blend-overlay pointer-events-none" style="background-image: url('{% static 'frontend/img/deaa0b832a5ea00b7f005de61e17b779.jpg' %}')"></div>
-</div>
-<main class="relative z-10 w-full max-w-[480px] px-margin-mobile md:px-0 py-12">
-    <div class="glass-panel border border-outline-variant/30 rounded-xl shadow-2xl p-8 md:p-12">
-        <header class="text-center mb-10">
-            <div class="inline-flex items-center justify-center mb-6">
-                <span class="material-symbols-outlined text-primary text-[40px] leading-none">travel_explore</span>
+<main class="w-full max-w-[480px] px-4 py-12">
+    <div class="bg-surface-container-lowest rounded-2xl p-6 md:p-10 shadow-xl border border-outline-variant/20">
+        <header class="text-center mb-8">
+            <div class="inline-flex items-center justify-center mb-4">
+                <div class="h-14 w-14 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-white text-3xl" style="font-variation-settings: 'FILL' 1;">travel_explore</span>
+                </div>
             </div>
-            <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary tracking-tight mb-2">Join StayHub</h1>
-            <p class="font-body-md text-body-md text-on-surface-variant">Experience the art of modern hospitality.</p>
+            <h1 class="text-2xl md:text-3xl font-bold text-on-surface tracking-tight mb-2">Join StayHub</h1>
+            <p class="text-base text-on-surface-variant">Experience the art of modern hospitality.</p>
         </header>
-        <form class="space-y-6" id="registrationForm" method="post" action="{% url 'create_account' %}">
+
+        <form class="space-y-4 md:space-y-5" id="registrationForm" method="post" action="{% url 'create_account' %}">
             {% csrf_token %}
-            <div class="space-y-2">
-                <label class="block font-label-md text-label-md text-on-surface ml-1" for="fullName">Full Name</label>
-                <div class="relative group input-focus-ring rounded-lg overflow-hidden transition-all duration-300">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">person</span>
-                    <input class="w-full bg-surface-container-lowest border border-outline-variant/40 py-3.5 pl-12 pr-4 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary transition-colors placeholder:text-outline/50" id="fullName" name="fullName" placeholder="Alexander Sterling" required type="text">
+            <!-- Full Name -->
+            <div>
+                <label class="block text-sm font-semibold text-primary mb-1.5 ml-1" for="fullName">Full Name</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-xl pointer-events-none">person</span>
+                    <input class="w-full h-12 pl-12 pr-4 bg-surface rounded-xl border border-outline-variant/40 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all text-base" id="fullName" name="fullName" placeholder="Alexander Sterling" required type="text">
                 </div>
             </div>
-            <div class="space-y-2">
-                <label class="block font-label-md text-label-md text-on-surface ml-1" for="email">Email Address</label>
-                <div class="relative group input-focus-ring rounded-lg overflow-hidden transition-all duration-300">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">alternate_email</span>
-                    <input class="w-full bg-surface-container-lowest border border-outline-variant/40 py-3.5 pl-12 pr-4 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary transition-colors placeholder:text-outline/50" id="email" name="email" placeholder="alex@stayhub.com" required type="email">
+
+            <!-- Email -->
+            <div>
+                <label class="block text-sm font-semibold text-primary mb-1.5 ml-1" for="email">Email Address</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-xl pointer-events-none">alternate_email</span>
+                    <input class="w-full h-12 pl-12 pr-4 bg-surface rounded-xl border border-outline-variant/40 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all text-base" id="email" name="email" placeholder="alex@stayhub.com" required type="email">
                 </div>
             </div>
-            <div class="space-y-2">
-                <label class="block font-label-md text-label-md text-on-surface ml-1" for="phone">Phone Number</label>
-                <div class="relative group input-focus-ring rounded-lg overflow-hidden transition-all duration-300">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">call</span>
-                    <div class="flex gap-2"><select id="country-code" class="w-28 bg-surface-container-lowest border border-outline-variant/40 py-3.5 px-2 rounded-lg" aria-label="Country code"><option selected>+233</option><option>+234</option><option>+254</option><option>+27</option><option>+44</option><option>+1</option></select><input class="min-w-0 flex-1 bg-surface-container-lowest border border-outline-variant/40 py-3.5 px-4 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary transition-colors placeholder:text-outline/50" id="phone" name="phone" placeholder="24 123 4567" required type="tel"></div>
+
+            <!-- Phone -->
+            <div>
+                <label class="block text-sm font-semibold text-primary mb-1.5 ml-1" for="phone">Phone Number</label>
+                <div class="flex gap-2">
+                    <select id="country-code" class="h-12 w-24 md:w-28 bg-surface rounded-xl border border-outline-variant/40 px-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none" aria-label="Country code">
+                        <option selected>+233</option><option>+234</option><option>+254</option><option>+27</option><option>+44</option><option>+1</option>
+                    </select>
+                    <input class="flex-1 h-12 bg-surface rounded-xl border border-outline-variant/40 px-4 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all text-base" id="phone" name="phone" placeholder="24 123 4567" required type="tel">
                 </div>
-                <p class="text-sm text-on-surface-variant ml-1">Required if you want SMS verification later.</p>
+                <p class="text-xs text-on-surface-variant mt-1 ml-1">Required if you want SMS verification later.</p>
             </div>
+
+            <!-- Password & Confirm -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label class="block font-label-md text-label-md text-on-surface ml-1" for="password">Password</label>
-                    <div class="relative group input-focus-ring rounded-lg overflow-hidden">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">lock</span>
-                        <input class="w-full bg-surface-container-lowest border border-outline-variant/40 py-3.5 pl-12 pr-4 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary transition-colors placeholder:text-outline/50" id="password" name="password" placeholder="••••••••" required type="password">
+                <div>
+                    <label class="block text-sm font-semibold text-primary mb-1.5 ml-1" for="password">Password</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-xl pointer-events-none">lock</span>
+                        <input class="w-full h-12 pl-12 pr-12 bg-surface rounded-xl border border-outline-variant/40 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all text-base" id="password" name="password" placeholder="••••••••" required type="password">
+                        <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors" onclick="togglePassVisibility('password', 'pass-icon')">
+                            <span class="material-symbols-outlined text-xl" id="pass-icon">visibility</span>
+                        </button>
                     </div>
                 </div>
-                <div class="space-y-2">
-                    <label class="block font-label-md text-label-md text-on-surface ml-1" for="confirmPassword">Confirm</label>
-                    <div class="relative group input-focus-ring rounded-lg overflow-hidden">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">verified_user</span>
-                        <input class="w-full bg-surface-container-lowest border border-outline-variant/40 py-3.5 pl-12 pr-4 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary transition-colors placeholder:text-outline/50" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required type="password">
+                <div>
+                    <label class="block text-sm font-semibold text-primary mb-1.5 ml-1" for="confirmPassword">Confirm</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-xl pointer-events-none">verified_user</span>
+                        <input class="w-full h-12 pl-12 pr-12 bg-surface rounded-xl border border-outline-variant/40 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all text-base" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required type="password">
+                        <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors" onclick="togglePassVisibility('confirmPassword', 'confirm-pass-icon')">
+                            <span class="material-symbols-outlined text-xl" id="confirm-pass-icon">visibility</span>
+                        </button>
                     </div>
                 </div>
             </div>
-            <div class="flex items-center space-x-3 py-2">
-                <input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" id="terms" type="checkbox">
-                <label class="font-label-sm text-label-sm text-on-surface-variant leading-tight" for="terms">I agree to the <a class="text-primary hover:underline font-semibold" href="#">Terms of Service</a> and <a class="text-primary hover:underline font-semibold" href="#">Privacy Policy</a></label>
+
+            <!-- Match indicator -->
+            <p id="password-match" class="text-xs text-on-surface-variant ml-1 hidden flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">check_circle</span>
+                Passwords match
+            </p>
+
+            <!-- Terms -->
+            <div class="flex items-start gap-3 py-1">
+                <input class="mt-0.5 w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20 shrink-0 cursor-pointer" id="terms" type="checkbox">
+                <label class="text-sm text-on-surface-variant leading-relaxed cursor-pointer" for="terms">
+                    I agree to the <a class="text-primary hover:underline font-semibold" href="#" onclick="event.preventDefault(); StayHub.Toast.info('Terms of Service');">Terms of Service</a> and <a class="text-primary hover:underline font-semibold" href="#" onclick="event.preventDefault(); StayHub.Toast.info('Privacy Policy');">Privacy Policy</a>
+                </label>
             </div>
-            <button class="w-full bg-secondary-container hover:bg-secondary-fixed-dim text-on-secondary-fixed font-label-md text-label-md py-4 rounded-lg shadow-lg shadow-secondary-container/20 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 group" type="submit">
-                Create Account
-                <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+
+            <!-- Submit -->
+            <button class="btn btn-secondary w-full h-12 justify-center shadow-lg text-base" type="submit" id="register-btn">
+                <span>Create Account</span>
+                <span class="material-symbols-outlined text-lg">arrow_forward</span>
             </button>
-            <p class="font-body-md text-sm text-on-surface-variant min-h-5" id="registration-feedback"></p>
+            <p class="text-sm text-center min-h-5" id="registration-feedback"></p>
         </form>
-        <footer class="mt-10 text-center">
-            <p class="font-body-md text-body-md text-on-surface-variant">Already a member? <a class="text-primary font-semibold hover:text-on-primary-fixed-variant transition-colors inline-flex items-center gap-1 group" href="{% url 'signin' %}">Sign In <span class="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">login</span></a></p>
+
+        <footer class="mt-8 text-center">
+            <p class="text-base text-on-surface-variant">
+                Already a member?
+                <a class="text-primary font-semibold hover:underline inline-flex items-center gap-1" href="{% url 'signin' %}">
+                    Sign In <span class="material-symbols-outlined text-base">login</span>
+                </a>
+            </p>
         </footer>
     </div>
-    <div class="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-4 text-outline-variant opacity-60">
-        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">security</span><span class="font-label-sm text-label-sm">Secure Connection</span></div>
-        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">verified</span><span class="font-label-sm text-label-sm">Verified Experience</span></div>
+
+    <div class="mt-6 flex flex-wrap justify-center gap-x-8 gap-y-3 text-outline opacity-60">
+        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-lg">security</span><span class="text-xs">Secure Connection</span></div>
+        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-lg">verified</span><span class="text-xs">Verified Experience</span></div>
     </div>
 </main>
-{% endblock %}
-{% block extra_style %}
-<style>.input-focus-ring:focus-within { box-shadow: 0 0 0 2px rgba(0,40,142,0.1); }</style>
 {% endblock %}
 {% block extra_scripts %}
 <script>
     function getCookie(name) {
         const cookieValue = `; ${document.cookie}`;
         const parts = cookieValue.split(`; ${name}=`);
-        if (parts.length === 2) {
-            return parts.pop().split(';').shift();
-        }
+        if (parts.length === 2) return parts.pop().split(';').shift();
         return '';
     }
 
-    const inputs = document.querySelectorAll('input');
-    inputs.forEach(input => {
-        input.addEventListener('focus', () => { const icon = input.closest('.relative').querySelector('.material-symbols-outlined'); if(icon) { icon.style.color = '#00288e'; icon.style.transition = 'color 0.3s ease'; } });
-        input.addEventListener('blur', () => { const icon = input.closest('.relative').querySelector('.material-symbols-outlined'); if(icon) icon.style.color = '#757684'; });
-    });
+    // Password visibility toggle
+    function togglePassVisibility(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (input && icon) {
+            const isPass = input.getAttribute('type') === 'password';
+            input.setAttribute('type', isPass ? 'text' : 'password');
+            icon.textContent = isPass ? 'visibility_off' : 'visibility';
+        }
+    }
+
+    // Password match checker
     const pass = document.getElementById('password');
     const confirmPass = document.getElementById('confirmPassword');
-    confirmPass.addEventListener('input', () => {
-        if(confirmPass.value === pass.value && confirmPass.value !== '') { confirmPass.classList.add('border-primary'); confirmPass.classList.remove('border-outline-variant/40'); }
-        else { confirmPass.classList.remove('border-primary'); confirmPass.classList.add('border-outline-variant/40'); }
-    });
+    const matchIndicator = document.getElementById('password-match');
+
+    function checkMatch() {
+        if (confirmPass.value === '' || pass.value === '') {
+            matchIndicator.classList.add('hidden');
+            confirmPass.style.borderColor = '';
+            return;
+        }
+        if (confirmPass.value === pass.value) {
+            matchIndicator.classList.remove('hidden');
+            matchIndicator.className = 'text-xs text-primary ml-1 flex items-center gap-1';
+            matchIndicator.innerHTML = '<span class="material-symbols-outlined text-sm" style="font-size: 14px;">check_circle</span> Passwords match';
+            confirmPass.style.borderColor = 'var(--color-primary)';
+        } else {
+            matchIndicator.classList.remove('hidden');
+            matchIndicator.className = 'text-xs text-error ml-1 flex items-center gap-1';
+            matchIndicator.innerHTML = '<span class="material-symbols-outlined text-sm" style="font-size: 14px;">cancel</span> Passwords do not match';
+            confirmPass.style.borderColor = 'var(--color-error)';
+        }
+    }
+    confirmPass.addEventListener('input', checkMatch);
+    pass.addEventListener('input', checkMatch);
+
+    // Form submission
     document.getElementById('registrationForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const feedback = document.getElementById('registration-feedback');
-        const submitButton = e.target.querySelector('button[type="submit"]');
-        const original = submitButton.innerHTML;
+        const btn = document.getElementById('register-btn');
+        const original = btn.innerHTML;
 
         if (pass.value !== confirmPass.value) {
             feedback.textContent = 'Passwords do not match.';
-            feedback.classList.add('text-error');
+            feedback.className = 'text-sm text-center min-h-5 text-error';
+            return;
+        }
+        if (pass.value.length < 6) {
+            feedback.textContent = 'Password must be at least 6 characters.';
+            feedback.className = 'text-sm text-center min-h-5 text-error';
+            return;
+        }
+        if (!document.getElementById('terms').checked) {
+            feedback.textContent = 'Please agree to the Terms of Service and Privacy Policy.';
+            feedback.className = 'text-sm text-center min-h-5 text-error';
+            document.getElementById('terms').focus();
             return;
         }
 
-        feedback.classList.remove('text-error');
+        feedback.className = 'text-sm text-center min-h-5 text-on-surface-variant';
         feedback.textContent = 'Creating your account...';
-        submitButton.disabled = true;
-        submitButton.innerHTML = 'Creating...';
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size: 18px;">progress_activity</span> Creating...';
 
         try {
             const response = await fetch('{% url "api_register" %}', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': getCookie('csrftoken'),
-                },
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
                 body: JSON.stringify({
                     full_name: document.getElementById('fullName').value,
                     email: document.getElementById('email').value,
@@ -135,17 +197,15 @@
                 }),
             });
             const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.detail || 'Account creation failed.');
-            }
-            feedback.textContent = data.detail;
-            window.setTimeout(() => { window.location.href = '{% url "signin" %}'; }, 1200);
+            if (!response.ok) throw new Error(data.detail || 'Account creation failed.');
+            feedback.textContent = data.detail + ' Redirecting to sign in...';
+            feedback.className = 'text-sm text-center min-h-5 text-primary';
+            window.setTimeout(() => { window.location.href = '{% url "signin" %}'; }, 1500);
         } catch (error) {
             feedback.textContent = error.message;
-            feedback.classList.add('text-error');
-        } finally {
-            submitButton.disabled = false;
-            submitButton.innerHTML = original;
+            feedback.className = 'text-sm text-center min-h-5 text-error';
+            btn.disabled = false;
+            btn.innerHTML = original;
         }
     });
 </script>

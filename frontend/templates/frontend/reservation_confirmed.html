@@ -1,0 +1,163 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub | Booking Confirmed{% endblock %}
+{% block body_class %}bg-background text-on-surface pb-16{% endblock %}
+{% block content %}
+<main class="px-4 py-12 max-w-lg mx-auto">
+    <!-- Success Icon -->
+    <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-secondary/20 mb-4 animate-bounce">
+            <span class="material-symbols-outlined text-secondary" style="font-size: 40px; font-variation-settings: 'FILL' 1;">check_circle</span>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-bold text-on-surface mb-1">Booking Confirmed!</h1>
+        <p class="text-base text-on-surface-variant">Your reservation has been successfully created.</p>
+    </div>
+
+    <!-- Reservation Details Card -->
+    <div class="card card-body space-y-5">
+        <div class="flex items-center justify-between pb-4 border-b border-outline-variant/20">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md">
+                    <span class="material-symbols-outlined text-white">confirmation_number</span>
+                </div>
+                <div>
+                    <p class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Reservation ID</p>
+                    <p class="font-headline-md text-headline-md text-primary font-bold">#{{ reservation_id|default:"---" }}</p>
+                </div>
+            </div>
+            <span class="badge badge-success">Confirmed</span>
+        </div>
+
+        <!-- Hotel & Room -->
+        <div class="flex gap-4">
+            <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-primary-container/20 to-secondary-container/30 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-primary" style="font-size: 32px;">hotel</span>
+            </div>
+            <div>
+                <p class="font-label-md text-label-md text-on-surface font-semibold">{{ hotel_name|default:"StayHub Hotel" }}</p>
+                <p class="text-sm text-on-surface-variant" id="reservation-room">{{ room_type|default:"Room" }}{% if room_number %} • Room {{ room_number }}{% endif %}</p>
+            </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-surface-container rounded-xl p-3">
+                <p class="text-xs text-on-surface-variant mb-1">Check-in</p>
+                <p class="text-sm font-semibold text-on-surface" id="reservation-checkin">-</p>
+            </div>
+            <div class="bg-surface-container rounded-xl p-3">
+                <p class="text-xs text-on-surface-variant mb-1">Check-out</p>
+                <p class="text-sm font-semibold text-on-surface" id="reservation-checkout">-</p>
+            </div>
+        </div>
+
+        <!-- Guest Info -->
+        <div class="space-y-3">
+            <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                <span class="text-sm text-on-surface-variant flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">person</span>
+                    Guest
+                </span>
+                <span class="text-sm font-medium text-on-surface" id="reservation-guest">-</span>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                <span class="text-sm text-on-surface-variant flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">nights</span>
+                    Nights
+                </span>
+                <span class="text-sm font-medium text-on-surface" id="reservation-nights">-</span>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                <span class="text-sm text-on-surface-variant flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">groups</span>
+                    Guests
+                </span>
+                <span class="text-sm font-medium text-on-surface" id="reservation-guests">-</span>
+            </div>
+        </div>
+
+        <!-- Payment Summary -->
+        <div class="bg-surface-container rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-on-surface-variant">Invoice ID</span>
+                <span class="text-sm font-mono font-medium text-on-surface">#{{ invoice_id|default:invoice.id|default:"---" }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-on-surface-variant">Total Paid</span>
+                <span class="font-headline-md text-headline-md text-primary font-bold" id="reservation-total">GH₵{{ total|default:"0" }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-on-surface-variant">Status</span>
+                <span class="badge badge-success">{{ invoice.status|default:"Paid" }}</span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="space-y-3 pt-2">
+            <a href="{% url 'booking' %}" class="btn btn-primary w-full justify-center">
+                <span class="material-symbols-outlined">add</span>
+                Book Another Stay
+            </a>
+            <a href="{% url 'guest_home' %}" class="btn btn-outline w-full justify-center">
+                <span class="material-symbols-outlined">home</span>
+                Back to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Support -->
+    <div class="mt-6 text-center">
+        <p class="text-sm text-on-surface-variant">
+            Need help?
+            <a href="#" class="text-primary font-semibold hover:underline" onclick="event.preventDefault(); StayHub.Toast.info('Support chat coming soon!');">Contact Support</a>
+        </p>
+    </div>
+</main>
+
+{% include "frontend/components/_guest_nav.html" %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Read reservation data from URL params
+    function getParam(name) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name) || '';
+    }
+
+    const checkIn = getParam('check_in');
+    const checkOut = getParam('check_out');
+    const guests = getParam('guests');
+    const total = getParam('total');
+    const roomNumber = getParam('room_number');
+    const roomType = getParam('room_type');
+    const hotelName = getParam('hotel_name');
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '-';
+        const d = new Date(dateStr + 'T00:00:00');
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function formatCurrency(value) {
+        const amount = Number(value || 0);
+        return 'GH₵' + amount.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    }
+
+    // Populate fields
+    document.getElementById('reservation-checkin').textContent = formatDate(checkIn);
+    document.getElementById('reservation-checkout').textContent = formatDate(checkOut);
+    document.getElementById('reservation-guest').textContent = '{{ user_name|default:"Guest" }}';
+    document.getElementById('reservation-guests').textContent = guests || '1';
+    document.getElementById('reservation-total').textContent = formatCurrency(total);
+    document.getElementById('reservation-room').textContent = roomType && roomNumber
+        ? roomType + ' • Room ' + roomNumber
+        : (hotelName || 'Your selected room');
+    if (checkIn && checkOut) {
+        const nights = Math.max(1, Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24)));
+        document.getElementById('reservation-nights').textContent = nights;
+    }
+
+
+</script>
+{% endblock %}

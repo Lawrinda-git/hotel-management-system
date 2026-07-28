@@ -546,6 +546,54 @@ def booking(request):
     })
 
 
+def reservation_confirmed(request):
+    reservation_id = request.GET.get("reservation_id")
+    invoice_id = request.GET.get("invoice_id")
+    check_in = request.GET.get("check_in")
+    check_out = request.GET.get("check_out")
+    guests = request.GET.get("guests", "1")
+    total = request.GET.get("total", "0")
+    room_number = request.GET.get("room_number", "")
+    room_type = request.GET.get("room_type", "")
+    hotel_name = request.GET.get("hotel_name", "")
+
+    reservation = None
+    invoice = None
+    if reservation_id:
+        try:
+            reservation = Reservation.objects.select_related("hotel").get(pk=reservation_id)
+            invoice = Invoice.objects.filter(reservation=reservation).first()
+            if not invoice and invoice_id:
+                try:
+                    invoice = Invoice.objects.get(pk=invoice_id)
+                except Invoice.DoesNotExist:
+                    invoice = None
+        except Reservation.DoesNotExist:
+            reservation = None
+            invoice = None
+
+    user_name = ""
+    user_email = ""
+    if request.user.is_authenticated:
+        user_name = request.user.get_full_name() or request.user.username
+        user_email = getattr(request.user, "email", "") or ""
+
+    context = {
+        "reservation": reservation,
+        "invoice": invoice,
+        "check_in": check_in,
+        "check_out": check_out,
+        "guests": guests,
+        "total": total,
+        "room_number": room_number,
+        "room_type": room_type,
+        "hotel_name": hotel_name,
+        "user_name": user_name,
+        "user_email": user_email,
+    }
+    return render(request, "frontend/reservation_confirmed.html", context)
+
+
 def team(request):
     """Team / About page showing the StayHub team."""
     return render(request, "frontend/team.html")

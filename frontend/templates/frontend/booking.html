@@ -6,108 +6,340 @@
 <header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
     <div class="flex items-center justify-between px-margin-mobile h-16 w-full max-w-screen-xl mx-auto">
         <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-primary text-2xl">menu</span>
+            <a href="{% url 'guest_home' %}" class="btn btn-icon btn-ghost" aria-label="Back">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
             <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold tracking-tight">StayHub</h1>
         </div>
         <div class="flex items-center gap-4">
             {% if user.is_authenticated %}
-            <a href="{% url 'logout' %}" class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95" aria-label="Log out">logout</a>
+            <a href="{% url 'logout' %}" class="btn btn-icon btn-ghost" aria-label="Log out">
+                <span class="material-symbols-outlined">logout</span>
+            </a>
             {% endif %}
-            <span class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity cursor-pointer">notifications</span>
+            <button class="btn btn-icon btn-ghost"><span class="material-symbols-outlined">notifications</span></button>
         </div>
     </div>
 </header>
-<main class="pt-24 pb-32 px-margin-mobile max-w-screen-xl mx-auto">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-        <div class="lg:col-span-8 space-y-8">
-            <section>
-                <h2 class="font-headline-lg text-headline-lg text-primary mb-2">Reserve Your Experience</h2>
-                <p class="font-body-md text-body-md text-on-surface-variant mb-6">Select your dates and room preferences to secure your stay at StayHub.</p>
-            </section>
-            <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
-                    <label class="block font-label-md text-label-md text-primary mb-3" for="guest-name">Guest Name</label>
-                    <input id="guest-name" class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="text" placeholder="Enter full name" value="{{ user_name }}">
-                </div>
-                <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
-                    <label class="block font-label-md text-label-md text-primary mb-3" for="guest-email">Guest Email</label>
-                    <input id="guest-email" class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="email" placeholder="guest@example.com" value="{{ user_email }}">
-                </div>
-                <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
-                    <label class="block font-label-md text-label-md text-primary mb-3" for="guest-phone">Guest Phone</label>
-                    <div class="flex gap-2"><select id="country-code" class="w-28 px-2 py-3 bg-surface-container-low border border-outline-variant rounded-lg"><option selected>+233</option><option>+234</option><option>+254</option><option>+27</option><option>+44</option><option>+1</option></select><input id="guest-phone" required class="min-w-0 flex-1 px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="tel" placeholder="24 123 4567" value="{{ user_phone|cut:'+233' }}"></div>
-                </div>
-                <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20 md:col-span-2">
-                    <label class="block font-label-md text-label-md text-primary mb-3" for="nationality">Nationality</label>
-                    <select id="nationality" required class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md"><option value="Ghana" selected>Ghana</option><option>Nigeria</option><option>Kenya</option><option>South Africa</option><option>United Kingdom</option><option>United States</option><option>Other</option></select>
-                </div>
-                <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
-                    <label class="block font-label-md text-label-md text-primary mb-3" for="id-number">ID Number</label>
-                    <input id="id-number" required class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="text" placeholder="GHA-123456789-0">
-                </div>
-            </section>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
-                    <label class="block font-label-md text-label-md text-primary mb-3">Check-in Date</label>
-                    <div class="relative flex items-center">
-                        <span class="material-symbols-outlined absolute left-3 text-outline">calendar_today</span>
-                        <input id="check-in" class="date-picker-custom w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="date" value="2026-08-15" min="2026-01-01">
-                    </div>
-                </div>
-                <div class="p-6 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/20">
-                    <label class="block font-label-md text-label-md text-primary mb-3">Check-out Date</label>
-                    <div class="relative flex items-center">
-                        <span class="material-symbols-outlined absolute left-3 text-outline">calendar_month</span>
-                        <input id="check-out" class="date-picker-custom w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body-md" type="date" value="2026-08-20" min="2026-01-01">
-                    </div>
-                </div>
-            </div>
-            <div>
-                <h3 class="font-headline-md text-headline-md text-on-surface mb-4">Select Room Type</h3>
-                <p id="room-status" class="mb-4 text-sm text-on-surface-variant">Loading available rooms...</p>
-                <div id="room-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-            </div>
-            <div class="p-6 bg-surface-container-low rounded-xl flex items-center justify-between">
-                <div><h4 class="font-headline-md text-headline-md text-on-surface">Guests</h4><p class="font-body-md text-on-surface-variant">Maximum 4 guests per suite</p></div>
-                <div class="flex items-center gap-6 bg-surface-container-lowest p-2 rounded-lg border border-outline-variant">
-                    <button type="button" class="w-10 h-10 rounded-md flex items-center justify-center bg-surface-container-high hover:bg-surface-variant transition-colors text-primary active:scale-90 transition-transform" onclick="updateGuests(-1)"><span class="material-symbols-outlined">remove</span></button>
-                    <span class="font-headline-md text-headline-md w-8 text-center" id="guest-count">2</span>
-                    <button type="button" class="w-10 h-10 rounded-md flex items-center justify-center bg-primary text-white hover:opacity-90 transition-opacity active:scale-90 transition-transform" onclick="updateGuests(1)"><span class="material-symbols-outlined">add</span></button>
-                </div>
-            </div>
+
+<main class="pt-24 pb-8 px-margin-mobile max-w-screen-xl mx-auto">
+    <!-- Progress Steps -->
+    <div class="steps mb-8 max-w-2xl mx-auto">
+        <div class="step active" id="step-dates">
+            <div class="step-number">1</div>
+            <span class="step-label">Dates</span>
         </div>
-        <div class="lg:col-span-4">
-            <div class="sticky top-24 glass-card p-8 rounded-3xl shadow-xl space-y-6">
-                <h3 class="font-headline-md text-headline-md text-primary border-b border-outline-variant/30 pb-4">Booking Summary</h3>
-                <div class="space-y-4" id="summary-breakdown">
-                    <div class="flex justify-between items-center"><span class="text-on-surface-variant font-body-md">No room selected</span><span class="font-label-md">$0</span></div>
-                </div>
-                <div class="pt-6 border-t border-primary/20">
-                    <div class="flex justify-between items-end mb-8">
-                        <div><p class="text-primary font-label-md uppercase tracking-widest">Total Price</p><p class="text-xs text-on-surface-variant">Inclusive of all fees</p></div>
-                        <p class="font-headline-lg text-primary text-4xl font-bold tracking-tight" id="summary-total">$0</p>
+        <div class="step" id="step-room">
+            <div class="step-number">2</div>
+            <span class="step-label">Room</span>
+        </div>
+        <div class="step" id="step-details">
+            <div class="step-number">3</div>
+            <span class="step-label">Details</span>
+        </div>
+        <div class="step" id="step-pay">
+            <div class="step-number">4</div>
+            <span class="step-label">Pay</span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left Column - Booking Form -->
+        <div class="lg:col-span-8 space-y-6">
+            <!-- Step 1: Date Selection -->
+            <section class="card card-body" id="section-dates">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">calendar_month</span>
                     </div>
-                    <button type="button" id="confirm-booking" class="w-full bg-secondary-container text-on-secondary-fixed py-5 rounded-2xl font-label-md text-lg hover:brightness-95 transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-3"><span>Confirm Booking</span><span class="material-symbols-outlined">arrow_forward</span></button>
-                    <p id="booking-feedback" class="text-sm mt-4 text-on-surface-variant"></p>
-                    <p class="text-center mt-6 text-xs text-on-surface-variant flex items-center justify-center gap-2"><span class="material-symbols-outlined text-sm">lock</span> Secure encrypted checkout</p>
+                    <div>
+                        <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Select Your Dates</h2>
+                        <p class="text-sm text-on-surface-variant">Choose your check-in and check-out dates</p>
+                    </div>
                 </div>
-                <div class="rounded-2xl overflow-hidden h-32 relative group">
-                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('{% static 'frontend/img/1c11e7409c960eda7f3c05c73e0293bf.jpg' %}')"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="label">Check-in Date</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">calendar_today</span>
+                            <input id="check-in" class="input pl-10 date-picker-custom" type="date" value="2026-08-15" min="2026-01-01">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="label">Check-out Date</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">calendar_month</span>
+                            <input id="check-out" class="input pl-10 date-picker-custom" type="date" value="2026-08-20" min="2026-01-01">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between mt-4 p-4 bg-surface-container rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-on-surface-variant">groups</span>
+                        <span class="text-sm text-on-surface-variant">Guests</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button type="button" class="btn btn-icon btn-sm btn-outline" onclick="updateGuests(-1)">
+                            <span class="material-symbols-outlined">remove</span>
+                        </button>
+                        <span class="font-headline-md text-headline-md w-8 text-center font-bold" id="guest-count">2</span>
+                        <button type="button" class="btn btn-icon btn-sm btn-primary" onclick="updateGuests(1)">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </div>
+                </div>
+                <button class="btn btn-primary w-full mt-4" onclick="goToStep(2)">
+                    <span>Continue to Room Selection</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+            </section>
+
+            <!-- Step 2: Room Selection (hidden initially) -->
+            <section class="card card-body hidden" id="section-room">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">meeting_room</span>
+                    </div>
+                    <div>
+                        <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Choose Your Room</h2>
+                        <p class="text-sm text-on-surface-variant">Select the perfect room for your stay</p>
+                    </div>
+                </div>
+                <p id="room-status" class="mb-4 text-sm text-on-surface-variant flex items-center gap-2">
+                    <span class="skeleton" style="width: 200px; height: 16px; display: inline-block;"></span>
+                </p>
+                <div id="room-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div class="flex gap-3 mt-4">
+                    <button class="btn btn-ghost" onclick="goToStep(1)">
+                        <span class="material-symbols-outlined">arrow_back</span> Back
+                    </button>
+                    <button class="btn btn-primary flex-1" id="continue-to-details" disabled onclick="goToStep(3)">
+                        Continue to Guest Details
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Step 3: Guest Details (hidden initially) -->
+            <section class="card card-body hidden" id="section-details">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">person</span>
+                    </div>
+                    <div>
+                        <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Guest Details</h2>
+                        <p class="text-sm text-on-surface-variant">Enter your information to complete the booking</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="label">Full Name</label>
+                        <input id="guest-name" class="input" type="text" placeholder="Enter full name" value="{{ user_name }}">
+                    </div>
+                    <div>
+                        <label class="label">Email Address</label>
+                        <input id="guest-email" class="input" type="email" placeholder="guest@example.com" value="{{ user_email }}">
+                    </div>
+                    <div>
+                        <label class="label">Phone Number</label>
+                        <div class="input-group">
+                            <select id="country-code" class="select" style="width: auto; min-width: 88px;">
+                                <option selected>+233</option><option>+234</option><option>+254</option><option>+27</option><option>+44</option><option>+1</option>
+                            </select>
+                            <input id="guest-phone" required class="input" type="tel" placeholder="24 123 4567" value="{{ user_phone|cut:'+233' }}">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="label">Nationality</label>
+                        <select id="nationality" required class="select">
+                            <option value="Ghana" selected>Ghana</option>
+                            <option>Nigeria</option><option>Kenya</option><option>South Africa</option>
+                            <option>United Kingdom</option><option>United States</option><option>Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="label">ID Number</label>
+                        <input id="id-number" required class="input" type="text" placeholder="GHA-123456789-0">
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-4">
+                    <button class="btn btn-ghost" onclick="goToStep(2)">
+                        <span class="material-symbols-outlined">arrow_back</span> Back
+                    </button>
+                    <button class="btn btn-primary flex-1" onclick="goToStep(4)">
+                        Review & Pay
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Step 4: Payment (hidden initially) -->
+            <section class="card card-body hidden" id="section-pay">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">lock</span>
+                    </div>
+                    <div>
+                        <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Confirm & Pay</h2>
+                        <p class="text-sm text-on-surface-variant">Review your booking and proceed to secure checkout</p>
+                    </div>
+                </div>
+
+                <!-- Booking summary card -->
+                <div class="bg-surface-container rounded-xl p-4 space-y-3 mb-6">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Check-in</span>
+                        <span class="text-sm font-semibold" id="review-checkin">Aug 15, 2026</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Check-out</span>
+                        <span class="text-sm font-semibold" id="review-checkout">Aug 20, 2026</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Guests</span>
+                        <span class="text-sm font-semibold" id="review-guests">2</span>
+                    </div>
+                    <hr class="divider">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Room</span>
+                        <span class="text-sm font-semibold" id="review-room">Not selected</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Nights</span>
+                        <span class="text-sm font-semibold" id="review-nights">5</span>
+                    </div>
+                    <hr class="divider">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Subtotal</span>
+                        <span class="text-sm font-semibold" id="review-subtotal">GH₵0</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Service Fee</span>
+                        <span class="text-sm font-semibold" id="review-service">GH₵0</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Tax (12%)</span>
+                        <span class="text-sm font-semibold" id="review-tax">GH₵0</span>
+                    </div>
+                    <hr class="divider">
+                    <div class="flex items-center justify-between">
+                        <span class="font-headline-md text-headline-md text-primary font-bold">Total</span>
+                        <span class="font-headline-md text-headline-md text-primary font-bold" id="review-total">GH₵0</span>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-secondary-container/20 rounded-xl flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-secondary">verified_user</span>
+                    <p class="text-sm text-on-surface-variant">Your payment is processed securely via <strong>Paystack</strong>. We never store your card details.</p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button class="btn btn-ghost" onclick="goToStep(3)">
+                        <span class="material-symbols-outlined">arrow_back</span> Back
+                    </button>
+                    <button class="btn btn-secondary flex-1 btn-lg" id="confirm-booking" onclick="confirmBooking()">
+                        <span class="material-symbols-outlined">lock</span>
+                        Confirm & Pay Now
+                    </button>
+                </div>
+                <p id="booking-feedback" class="text-sm mt-3 text-center text-on-surface-variant"></p>
+                <p class="text-center mt-4 text-xs text-on-surface-variant flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-sm">lock</span>
+                    Secure encrypted checkout via Paystack
+                </p>
+            </section>
+        </div>
+
+        <!-- Right Column - Sticky Summary -->
+        <div class="lg:col-span-4">
+            <div class="sticky top-24 card-glass p-6 rounded-2xl shadow-xl space-y-4">
+                <div class="flex items-center gap-3 pb-4 border-b border-outline-variant/20">
+                    <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md">
+                        <span class="material-symbols-outlined text-white">receipt_long</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline-md text-headline-md text-primary font-bold">Booking Summary</h3>
+                        <p class="text-xs text-on-surface-variant">Review your selections</p>
+                    </div>
+                </div>
+
+                <!-- Room Preview -->
+                <div id="summary-room-preview" class="hidden">
+                    <div class="aspect-[16/9] rounded-xl bg-gradient-to-br from-primary-container/20 to-secondary-container/30 mb-3 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary" style="font-size: 48px;">meeting_room</span>
+                    </div>
+                    <p class="font-label-md text-label-md text-primary font-semibold" id="summary-room-name">Room Name</p>
+                    <p class="text-xs text-on-surface-variant" id="summary-room-desc">Room details</p>
+                </div>
+
+                <div class="space-y-3" id="summary-breakdown">
+                    <div class="flex items-center justify-between py-2">
+                        <span class="text-sm text-on-surface-variant flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">calendar_today</span>
+                            <span id="summary-dates">Select dates</span>
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between py-2">
+                        <span class="text-sm text-on-surface-variant flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">bed</span>
+                            <span id="summary-room">No room selected</span>
+                        </span>
+                    </div>
+                    <hr class="divider">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Subtotal</span>
+                        <span class="font-label-md" id="summary-subtotal">GH₵0</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Service Fee</span>
+                        <span class="font-label-md" id="summary-service">GH₵0</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Tax (12%)</span>
+                        <span class="font-label-md" id="summary-tax">GH₵0</span>
+                    </div>
+                    <hr class="divider">
+                    <div class="flex items-center justify-between">
+                        <span class="font-headline-md text-headline-md text-primary font-bold">Total</span>
+                        <span class="font-headline-md text-headline-md text-primary font-bold" id="summary-total">GH₵0</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary w-full hidden" id="sticky-continue" onclick="goToStep(2)">
+                    Continue <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+
+                <div class="rounded-xl overflow-hidden h-24 relative mt-4">
+                    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{% static 'frontend/img/1c11e7409c960eda7f3c05c73e0293bf.jpg' %}');"></div>
                     <div class="absolute inset-0 bg-primary/10"></div>
-                    <div class="absolute inset-0 flex items-center justify-center"><span class="bg-white/90 px-4 py-2 rounded-full text-xs font-bold text-primary shadow-sm">View Location</span></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 px-3 py-1.5 rounded-full text-xs font-bold text-primary shadow-sm flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">location_on</span>
+                            View Location
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </main>
 
-<!-- ===== BOTTOM NAVIGATION ===== -->
 {% include "frontend/components/_guest_nav.html" %}
 {% endblock %}
 
 {% block extra_style %}
 <style>
-    .date-picker-custom::-webkit-calendar-picker-indicator { filter: invert(13%) sepia(85%) saturate(3635%) hue-rotate(224deg) brightness(92%) contrast(101%); cursor: pointer; }
+    .date-picker-custom::-webkit-calendar-picker-indicator {
+        filter: invert(13%) sepia(85%) saturate(3635%) hue-rotate(224deg) brightness(92%) contrast(101%);
+        cursor: pointer;
+    }
+    .step-transition {
+        animation: fadeSlideIn 0.3s ease-out;
+    }
+    @keyframes fadeSlideIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 {% endblock %}
 
@@ -116,20 +348,24 @@
     function getCookie(name) {
         const cookieValue = `; ${document.cookie}`;
         const parts = cookieValue.split(`; ${name}=`);
-        if (parts.length === 2) {
-            return parts.pop().split(';').shift();
-        }
+        if (parts.length === 2) return parts.pop().split(';').shift();
         return '';
     }
 
     const bookingState = {
         selectedRoom: null,
         rooms: [],
+        currentStep: 1,
     };
 
     function formatCurrency(value) {
         const amount = Number(value || 0);
         return 'GH₵' + amount.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    }
+
+    function formatDate(dateStr) {
+        const d = new Date(dateStr + 'T00:00:00');
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
     function updateGuests(val) {
@@ -138,7 +374,7 @@
         const next = current + val;
         if (next >= 1 && next <= 4) {
             el.innerText = next;
-            renderSummary();
+            updateSummary();
         }
     }
 
@@ -146,38 +382,129 @@
         return bookingState.rooms.find((room) => room.id === bookingState.selectedRoom) || null;
     }
 
+    // Step navigation
+    function goToStep(step) {
+        bookingState.currentStep = step;
+        // Hide all sections
+        document.querySelectorAll('[id^="section-"]').forEach(s => s.classList.add('hidden'));
+        // Show current section
+        const sectionMap = { 1: 'dates', 2: 'room', 3: 'details', 4: 'pay' };
+        const section = document.getElementById('section-' + sectionMap[step]);
+        if (section) {
+            section.classList.remove('hidden');
+            section.classList.add('step-transition');
+        }
+        // Update steps
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active', 'completed'));
+        for (let i = 1; i <= 4; i++) {
+            const stepEl = document.getElementById('step-' + sectionMap[i]);
+            if (stepEl) {
+                if (i < step) stepEl.classList.add('completed');
+                else if (i === step) stepEl.classList.add('active');
+            }
+        }
+        // Update summary
+        updateSummary();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateSummary() {
+        const checkIn = document.getElementById('check-in').value;
+        const checkOut = document.getElementById('check-out').value;
+        const room = getSelectedRoom();
+        const guests = document.getElementById('guest-count').innerText;
+        const nights = Math.max(1, Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24)) || 1);
+
+        // Date display
+        document.getElementById('summary-dates').textContent = checkIn && checkOut
+            ? formatDate(checkIn) + ' - ' + formatDate(checkOut)
+            : 'Select dates';
+
+        // Room display
+        if (room) {
+            document.getElementById('summary-room').textContent = room.room_type?.type_name + ' - Room ' + room.room_number;
+            document.getElementById('summary-room-preview').classList.remove('hidden');
+            document.getElementById('summary-room-name').textContent = room.room_type?.type_name || 'Room';
+            document.getElementById('summary-room-desc').textContent = room.hotel?.hotel_name + ' • Room ' + room.room_number + (room.floor ? ' • Floor ' + room.floor : '');
+        } else {
+            document.getElementById('summary-room').textContent = 'No room selected';
+            document.getElementById('summary-room-preview').classList.add('hidden');
+        }
+
+        // Review section
+        document.getElementById('review-checkin').textContent = checkIn ? formatDate(checkIn) : '-';
+        document.getElementById('review-checkout').textContent = checkOut ? formatDate(checkOut) : '-';
+        document.getElementById('review-guests').textContent = guests;
+        document.getElementById('review-room').textContent = room ? room.room_type?.type_name + ' ' + room.room_number : 'Not selected';
+        document.getElementById('review-nights').textContent = nights;
+
+        // Pricing
+        const roomRate = Number(room?.room_type?.price_per_night || 0);
+        const base = roomRate * nights;
+        const serviceFee = room ? 45 : 0;
+        const tax = room ? Math.round((base + serviceFee) * 0.12) : 0;
+        const total = base + serviceFee + tax;
+
+        document.getElementById('summary-subtotal').textContent = formatCurrency(base);
+        document.getElementById('summary-service').textContent = formatCurrency(serviceFee);
+        document.getElementById('summary-tax').textContent = formatCurrency(tax);
+        document.getElementById('summary-total').textContent = formatCurrency(total);
+        document.getElementById('review-subtotal').textContent = formatCurrency(base);
+        document.getElementById('review-service').textContent = formatCurrency(serviceFee);
+        document.getElementById('review-tax').textContent = formatCurrency(tax);
+        document.getElementById('review-total').textContent = formatCurrency(total);
+
+        // Enable/disable continue button
+        const continueBtn = document.getElementById('continue-to-details');
+        if (continueBtn) {
+            continueBtn.disabled = !room;
+            if (room) {
+                continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                continueBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    }
+
     function renderRooms() {
         const grid = document.getElementById('room-grid');
         const status = document.getElementById('room-status');
         if (!bookingState.rooms.length) {
             grid.innerHTML = '';
-            status.textContent = 'No available rooms found.';
+            status.innerHTML = '<span class="text-on-surface-variant">No available rooms found for the selected dates.</span>';
             return;
         }
 
-        status.textContent = 'Choose one available room to continue.';
+        status.innerHTML = '<span class="text-on-surface-variant">Choose a room below to continue:</span>';
         grid.innerHTML = bookingState.rooms.map((room) => {
             const isSelected = bookingState.selectedRoom === room.id;
             const price = room.room_type?.price_per_night || '0';
             return `
-                <button type="button" data-room-id="${room.id}" class="relative group text-left overflow-hidden rounded-xl border-2 ${isSelected ? 'border-primary' : 'border-outline-variant'} hover:border-primary transition-all duration-300">
-                    <div class="aspect-[16/10] bg-gradient-to-br from-primary-container/20 to-secondary-container/30"></div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                    <div class="absolute bottom-0 p-6 text-white w-full">
-                        <div class="flex justify-between items-end gap-4">
+                <button type="button" data-room-id="${room.id}"
+                    class="relative text-left overflow-hidden rounded-xl border-2 transition-all duration-300 cursor-pointer
+                    ${isSelected ? 'border-primary ring-2 ring-primary/20' : 'border-outline-variant hover:border-primary/50'}">
+                    <div class="aspect-[16/9] bg-gradient-to-br from-primary-container/20 to-secondary-container/30 relative">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                        <div class="absolute top-3 left-3">
+                            <span class="badge badge-primary text-[10px]">${room.room_type?.type_name || 'Room'}</span>
+                        </div>
+                        ${isSelected ? '<div class="absolute top-3 right-3 bg-primary text-white p-1.5 rounded-full"><span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span></div>' : ''}
+                    </div>
+                    <div class="p-4 bg-surface-container-lowest">
+                        <div class="flex justify-between items-start mb-1">
                             <div>
-                                <p class="font-label-sm text-label-sm text-secondary-container mb-1">${room.hotel.hotel_name}</p>
-                                <h4 class="font-headline-md text-headline-md">Room ${room.room_number}</h4>
-                                <p class="font-body-md text-sm opacity-80">${room.room_type?.type_name || 'Room'}${room.floor ? ` • Floor ${room.floor}` : ''}</p>
+                                <p class="font-label-md text-label-md text-on-surface font-bold">Room ${room.room_number}</p>
+                                <p class="text-xs text-on-surface-variant">${room.hotel?.hotel_name || 'StayHub Hotel'}${room.floor ? ' • Floor ' + room.floor : ''}</p>
                             </div>
                             <div class="text-right">
-                                <p class="font-headline-md text-secondary-fixed">${formatCurrency(price)}</p>
-                                <p class="text-xs opacity-70">per night</p>
+                                <p class="font-headline-md text-headline-md text-primary font-bold">${formatCurrency(price)}</p>
+                                <p class="text-xs text-on-surface-variant">/night</p>
                             </div>
                         </div>
-                    </div>
-                    <div class="absolute top-4 right-4 bg-primary text-white p-2 rounded-full ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity">
-                        <span class="material-symbols-outlined">check_circle</span>
+                        <div class="flex items-center gap-2 mt-2 text-xs text-on-surface-variant">
+                            <span class="flex items-center gap-1"><span class="material-symbols-outlined" style="font-size: 14px;">bed</span> 1 Bed</span>
+                            <span class="flex items-center gap-1"><span class="material-symbols-outlined" style="font-size: 14px;">square_foot</span> 40m²</span>
+                        </div>
                     </div>
                 </button>
             `;
@@ -187,27 +514,9 @@
             button.addEventListener('click', () => {
                 bookingState.selectedRoom = Number(button.getAttribute('data-room-id'));
                 renderRooms();
-                renderSummary();
+                updateSummary();
             });
         });
-    }
-
-    function renderSummary() {
-        const room = getSelectedRoom();
-        const nights = Math.max(1, Math.ceil((new Date(document.getElementById('check-out').value) - new Date(document.getElementById('check-in').value)) / (1000 * 60 * 60 * 24)) || 1);
-        const roomRate = Number(room?.room_type?.price_per_night || 0);
-        const base = roomRate * nights;
-        const serviceFee = room ? 45 : 0;
-        const tax = room ? Math.round((base + serviceFee) * 0.12) : 0;
-        const total = base + serviceFee + tax;
-
-        const summaryBreakdown = document.getElementById('summary-breakdown');
-        summaryBreakdown.innerHTML = room ? `
-            <div class="flex justify-between items-center"><span class="text-on-surface-variant font-body-md">${room.room_type?.type_name || 'Room'} x ${nights} nights</span><span class="font-label-md">${formatCurrency(base)}</span></div>
-            <div class="flex justify-between items-center"><span class="text-on-surface-variant font-body-md">Service Fee</span><span class="font-label-md">${formatCurrency(serviceFee)}</span></div>
-            <div class="flex justify-between items-center"><span class="text-on-surface-variant font-body-md">Luxury Tax (12%)</span><span class="font-label-md">${formatCurrency(tax)}</span></div>
-        ` : '<div class="flex justify-between items-center"><span class="text-on-surface-variant font-body-md">No room selected</span><span class="font-label-md">$0</span></div>';
-        document.getElementById('summary-total').textContent = formatCurrency(total);
     }
 
     async function loadRooms() {
@@ -215,38 +524,43 @@
         try {
             const response = await fetch('{% url "booking_options" %}');
             const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.detail || 'Failed to load rooms.');
-            }
+            if (!response.ok) throw new Error(data.detail || 'Failed to load rooms.');
             bookingState.rooms = data.results || [];
             bookingState.selectedRoom = bookingState.rooms[0]?.id || null;
             renderRooms();
-            renderSummary();
+            updateSummary();
         } catch (error) {
             bookingState.rooms = [];
             bookingState.selectedRoom = null;
             renderRooms();
-            renderSummary();
-            status.textContent = error.message;
+            updateSummary();
+            status.innerHTML = '<span class="text-error">' + error.message + '</span>';
         }
     }
 
     async function confirmBooking() {
         const feedback = document.getElementById('booking-feedback');
-        feedback.textContent = 'Submitting booking...';
+        feedback.textContent = 'Processing your booking...';
+        feedback.className = 'text-sm mt-3 text-center text-on-surface-variant';
 
         const selectedRoom = getSelectedRoom();
         if (!selectedRoom) {
-            feedback.textContent = 'Select a room first.';
+            feedback.textContent = 'Please select a room first.';
+            feedback.className = 'text-sm mt-3 text-center text-error';
             return;
         }
 
         const checkInValue = document.getElementById('check-in').value;
         const checkOutValue = document.getElementById('check-out').value;
         if (!checkInValue || !checkOutValue) {
-            feedback.textContent = 'Select valid check-in and check-out dates.';
+            feedback.textContent = 'Please select valid check-in and check-out dates.';
+            feedback.className = 'text-sm mt-3 text-center text-error';
             return;
         }
+
+        const btn = document.getElementById('confirm-booking');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size: 18px;">progress_activity</span> Processing...';
 
         const payload = {
             guest_name: document.getElementById('guest-name').value,
@@ -262,55 +576,47 @@
         try {
             const response = await fetch('{% url "create_booking" %}', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': getCookie('csrftoken'),
-                },
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
                 body: JSON.stringify(payload),
             });
 
             const data = await response.json();
-            feedback.textContent = response.ok ? data.detail : data.detail || 'Booking failed.';
-            if (response.ok) {
-                feedback.classList.remove('text-error');
-                feedback.classList.add('text-primary');
-                const checkoutResponse = await fetch('{% url "paystack_checkout" %}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': getCookie('csrftoken'),
-                    },
-                    body: JSON.stringify({ invoice_id: data.invoice.id }),
-                });
-                const checkoutData = await checkoutResponse.json();
-                if (!checkoutResponse.ok) {
-                    throw new Error(checkoutData.detail || 'Could not start Paystack checkout.');
-                }
-                window.location.href = checkoutData.authorization_url;
-            } else {
-                feedback.classList.add('text-error');
+            if (!response.ok) throw new Error(data.detail || 'Booking failed.');
+
+            feedback.textContent = 'Booking confirmed! Redirecting...';
+            feedback.className = 'text-sm mt-3 text-center text-primary font-semibold';
+
+            const checkInValue = document.getElementById('check-in').value;
+            const checkOutValue = document.getElementById('check-out').value;
+            const guestsValue = document.getElementById('guest-count').innerText;
+            const selectedRoom = getSelectedRoom();
+            const url = new URL('{% url "reservation_confirmed" %}', window.location.origin);
+            url.searchParams.set('reservation_id', data.reservation.id);
+            url.searchParams.set('invoice_id', data.invoice.id);
+            if (checkInValue) url.searchParams.set('check_in', checkInValue);
+            if (checkOutValue) url.searchParams.set('check_out', checkOutValue);
+            if (guestsValue) url.searchParams.set('guests', guestsValue);
+            if (selectedRoom) {
+                url.searchParams.set('room_number', selectedRoom.room_number || '');
+                url.searchParams.set('room_type', selectedRoom.room_type?.type_name || '');
+                url.searchParams.set('hotel_name', selectedRoom.hotel?.hotel_name || '');
             }
+            url.searchParams.set('total', data.invoice.total_amount);
+            window.location.href = url.toString();
         } catch (error) {
-            feedback.textContent = 'Network error. Please try again.';
-            feedback.classList.add('text-error');
+            feedback.textContent = error.message;
+            feedback.className = 'text-sm mt-3 text-center text-error';
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined">lock</span> Confirm & Pay Now';
         }
     }
 
-    document.getElementById('check-in').addEventListener('change', renderSummary);
-    document.getElementById('check-out').addEventListener('change', renderSummary);
-    document.getElementById('confirm-booking').addEventListener('click', confirmBooking);
+    // Event listeners
+    document.getElementById('check-in').addEventListener('change', updateSummary);
+    document.getElementById('check-out').addEventListener('change', updateSummary);
 
-    const card = document.querySelector('.glass-card');
-    if (card) {
-        document.addEventListener('mousemove', (e) => {
-            const x = e.clientX / window.innerWidth;
-            const y = e.clientY / window.innerHeight;
-            card.style.transform = `translate(${(x - 0.5) * 10}px, ${(y - 0.5) * 10}px)`;
-        });
-    }
-
+    // Initialize
     loadRooms();
+    updateSummary();
 </script>
 {% endblock %}

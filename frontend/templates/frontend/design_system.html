@@ -387,23 +387,24 @@
     <h2 class="ds-section-title">Usage Guide</h2>
     <div style="background: var(--color-surface-container-lowest); padding: 24px; border-radius: var(--radius-xl); border: 1px solid var(--color-outline-variant);">
       <p style="margin-bottom: 12px; color: var(--color-on-surface-variant);">To use these components in any template:</p>
-      <div style="background: var(--color-surface-container); padding: 16px; border-radius: var(--radius-lg); font-family: monospace; font-size: 13px; line-height: 1.8; overflow-x: auto;">
-        <span style="color: var(--color-primary);">{%</span> extends "frontend/base.html" <span style="color: var(--color-primary);">%}</span><br>
-        <br>
-        <span style="color: #16a34a;"><!-- Use CSS component classes --></span><br>
-        <button class="<span style="color: var(--color-secondary);">btn btn-primary btn-lg</span>">Click Me</button><br>
-        <div class="<span style="color: var(--color-secondary);">card</span>">...</div><br>
-        <span class="<span style="color: var(--color-secondary);">badge badge-success</span>">Active</span><br>
-        <br>
-        <span style="color: #16a34a;"><!-- Include navigation partials --></span><br>
-        {% include "frontend/components/_guest_nav.html" %}<br>
-        {% include "frontend/components/_dark_mode_toggle.html" %}<br>
-        <br>
-        <span style="color: #16a34a;"><!-- Use JS utilities --></span><br>
-        <script><br>
-        &nbsp;&nbsp;StayHub.Toast.success('Done!');<br>
-        &nbsp;&nbsp;StayHub.Modal.open({ title: '...', body: '...' });<br>
-        </script>
+    <div style="background: var(--color-surface-container); padding: 16px; border-radius: var(--radius-lg); font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 13px; line-height: 1.8; overflow-x: auto; white-space: pre;">
+{% templatetag openblock %} extends "frontend/base.html" {% templatetag closeblock %}
+{% templatetag openblock %} load static {% templatetag closeblock %}
+
+<span style="color: #16a34a;"><!-- Use CSS component classes --></span>
+<button class="btn btn-primary btn-lg">Click Me</button>
+<div class="card">...</div>
+<span class="badge badge-success">Active</span>
+
+<span style="color: #16a34a;"><!-- Include navigation partials --></span>
+{% templatetag openblock %} include "frontend/components/_guest_nav.html" {% templatetag closeblock %}
+{% templatetag openblock %} include "frontend/components/_dark_mode_toggle.html" {% templatetag closeblock %}
+
+<span style="color: #16a34a;"><!-- Use JS utilities --></span>
+<script>
+  StayHub.Toast.success('Done!');
+  StayHub.Modal.open({ title: '...', body: '...' });
+</script>
       </div>
     </div>
   </section>
