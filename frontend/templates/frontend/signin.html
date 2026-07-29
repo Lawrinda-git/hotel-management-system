@@ -68,10 +68,12 @@
         </div>
     </div>
 
-    <p class="text-center text-base text-on-surface-variant mt-8">
-        Don't have an account?
-        <a class="text-primary font-bold hover:underline ml-1" href="{% url 'create_account' %}">Create Account</a>
-    </p>
+    {% if not user.is_authenticated %}
+        <p class="text-center text-base text-on-surface-variant mt-8">
+            Don't have an account?
+            <a class="text-primary font-bold hover:underline ml-1" href="{% url 'create_account' %}">Create Account</a>
+        </p>
+    {% endif %}
 </main>
 {% endblock %}
 {% block extra_scripts %}

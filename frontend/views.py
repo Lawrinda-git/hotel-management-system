@@ -265,6 +265,8 @@ def logout_view(request):
 
 def create_account(request):
     """New user registration page."""
+    if request.user.is_authenticated:
+        return redirect("guest_home")
     return render(request, "frontend/create_account.html")
 
 
@@ -277,18 +279,22 @@ def password_reset(request):
         if not identifier:
             return render(request, "frontend/password_reset.html", {"error": "Username or email is required.", "staff_login": staff_login})
         
+        # Keep the two login surfaces account-specific.  A guest reset request
+        # must never resolve a staff account (and vice versa).
+        # Staff accounts use their department role (manager, receptionist,
+        # accountant, etc.); guests are the only accounts with role=guest.
+        role_filter = {"role__isnull": False} if staff_login else {"role": "guest"}
         user = None
         if "@" in identifier:
-            user = Staff.objects.filter(email__iexact=identifier).first()
+            query = Staff.objects.filter(email__iexact=identifier, **role_filter)
+            user = query.exclude(role="guest").first() if staff_login else query.first()
         if user is None:
-            user = Staff.objects.filter(username__iexact=identifier).first()
+            query = Staff.objects.filter(username__iexact=identifier, **role_filter)
+            user = query.exclude(role="guest").first() if staff_login else query.first()
         
         if user is None:
             # Don't reveal whether the account exists
-            return redirect("password_reset_done")
-        
-        if staff_login and user.role == "guest":
-            return render(request, "frontend/password_reset.html", {"error": "This account is not a staff account.", "staff_login": staff_login})
+            return redirect("password_reset_done" if not staff_login else "/password-reset/done/?staff_login=1")
         
         # Use Django's built-in password reset with email
         from django.contrib.auth.tokens import default_token_generator
@@ -298,6 +304,8 @@ def password_reset(request):
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         reset_url = request.build_absolute_uri(f"/reset/{uid}/{token}/")
+        if staff_login:
+            reset_url += "?staff_login=1"
         
         try:
             from django.core.mail import send_mail
@@ -311,7 +319,7 @@ def password_reset(request):
         except Exception:
             pass  # Silent fail like login
         
-        return redirect("password_reset_done")
+        return redirect("password_reset_done" if not staff_login else "/password-reset/done/?staff_login=1")
     
     return render(request, "frontend/password_reset.html", {"staff_login": staff_login})
 

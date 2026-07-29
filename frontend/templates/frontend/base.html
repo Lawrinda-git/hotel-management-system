@@ -129,6 +129,36 @@
 <!-- Design System JS -->
 <script src="{% static 'frontend/js/main.js' %}"></script>
 
+<!-- Add an accessible visibility toggle to every password field, including
+     fields rendered by Django forms and newly added templates. -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('input[type="password"]').forEach(function (input, index) {
+        const parent = input.parentElement;
+        if (!parent) return;
+        if (parent.querySelector('button[data-password-toggle], button[onclick*="toggle"], button')) return;
+        const wrapper = document.createElement('span');
+        wrapper.className = 'relative block';
+        parent.insertBefore(wrapper, input);
+        wrapper.appendChild(input);
+        input.classList.add('pr-12');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors';
+        button.setAttribute('aria-label', 'Show password');
+        button.dataset.passwordToggle = 'true';
+        button.innerHTML = '<span class="material-symbols-outlined text-xl">visibility</span>';
+        button.addEventListener('click', function () {
+            const visible = input.type === 'text';
+            input.type = visible ? 'password' : 'text';
+            button.setAttribute('aria-label', visible ? 'Show password' : 'Hide password');
+            button.querySelector('span').textContent = visible ? 'visibility' : 'visibility_off';
+        });
+        wrapper.appendChild(button);
+    });
+});
+</script>
+
 {% block extra_scripts %}{% endblock %}
 </body>
 </html>
