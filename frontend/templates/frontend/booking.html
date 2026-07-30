@@ -43,6 +43,19 @@
         </div>
     </div>
 
+    <!-- Staff Quick Actions (only visible to staff) -->
+    {% if is_staff %}
+    <div class="card p-4 mb-6 flex flex-wrap gap-3">
+      <input id="walkin-guest-search" class="input flex-1 min-w-[220px]" placeholder="Search guest by email or phone..." type="search">
+      <button class="btn btn-primary" onclick="document.getElementById('app-toast').textContent='Guest search coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+        <span class="material-symbols-outlined text-lg">search</span> Find Guest
+      </button>
+      <button class="btn btn-outline" onclick="document.getElementById('app-toast').textContent='Walk-in guest mode activated';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+        <span class="material-symbols-outlined text-lg">person_add</span> New Walk-in
+      </button>
+    </div>
+    {% endif %}
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- Left Column - Booking Form -->
         <div class="lg:col-span-8 space-y-6">

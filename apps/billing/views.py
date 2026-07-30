@@ -146,7 +146,8 @@ def create_paystack_checkout(request):
 		data = _initialize_paystack_transaction(invoice, request)
 	except (ValueError, requests.RequestException, OSError) as exc:
 		logger.exception("Unable to initialize Paystack payment for invoice %s", invoice.id)
-		return JsonResponse({"detail": f"Paystack checkout failed: {exc}"}, status=503)
+		error_message = "Payment gateway is currently unavailable. Please check your internet connection and try again."
+		return JsonResponse({"detail": error_message}, status=503)
 
 	return JsonResponse({
 		"detail": "Paystack checkout initialized.",

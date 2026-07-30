@@ -1,0 +1,165 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub | Staff Profile{% endblock %}
+{% block body_class %}bg-background text-on-surface pb-20{% endblock %}
+{% block content %}
+<!-- ===== TOP HEADER ===== -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+  <div class="flex items-center justify-between px-4 h-16 max-w-6xl mx-auto">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md">
+        <span class="material-symbols-outlined text-white text-xl">badge</span>
+      </div>
+      <div>
+        <h1 class="font-headline-md text-headline-md text-primary font-bold leading-tight">StayHub</h1>
+        <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Staff Profile</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'manager_dashboard' %}" aria-label="Back to Dashboard" class="btn btn-icon btn-ghost">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <a href="{% url 'logout' %}" class="btn btn-icon btn-ghost" aria-label="Log out">
+        <span class="material-symbols-outlined">logout</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="pt-20 pb-8 px-4 max-w-2xl mx-auto">
+  <!-- Profile Header -->
+  <section class="card p-6 mb-6">
+    <div class="flex items-center gap-4 mb-6">
+      {% if request.user.profile_picture %}
+      <img src="{{ request.user.profile_picture.url }}" alt="Profile" class="avatar avatar-xl ring-4 ring-primary-fixed">
+      {% else %}
+      <div class="avatar avatar-initials avatar-xl ring-4 ring-primary-fixed">{{ request.user.staff_name|default:request.user.username|first|upper }}</div>
+      {% endif %}
+      <div>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ request.user.staff_name|default:request.user.get_full_name|default:request.user.username }}</h1>
+        <p class="text-on-surface-variant flex items-center gap-1 mt-1">
+          <span class="material-symbols-outlined text-base">mail</span>
+          {{ request.user.email }}
+        </p>
+        <span class="badge badge-primary mt-2">{{ request.user.role|title }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Edit Profile Form -->
+  <section class="card p-6">
+    <h2 class="font-headline-md text-headline-md text-primary font-bold mb-4">Edit Profile</h2>
+
+    {% if profile_error %}
+    <div class="flex items-center gap-3 bg-error-container rounded-xl px-4 py-3 mb-4">
+      <span class="material-symbols-outlined text-on-error-container">error</span>
+      <p class="text-sm text-on-error-container font-medium">{{ profile_error }}</p>
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="space-y-5">
+      {% csrf_token %}
+
+      <!-- Profile Picture -->
+      <div>
+        <label class="block text-sm font-semibold text-primary mb-2">Profile Picture</label>
+        <div class="flex items-center gap-4">
+          {% if request.user.profile_picture %}
+          <img src="{{ request.user.profile_picture.url }}" alt="Current" class="avatar avatar-lg ring-2 ring-primary-fixed">
+          {% else %}
+          <div class="avatar avatar-initials avatar-lg ring-2 ring-primary-fixed">{{ request.user.staff_name|first|upper }}</div>
+          {% endif %}
+          <div class="flex-1">
+            <input type="file" name="profile_picture" accept="image/*" class="input !py-2 text-sm">
+            <p class="text-xs text-on-surface-variant mt-1">PNG, JPG, or WEBP up to 5 MB.</p>
+          </div>
+        </div>
+        {% if request.user.profile_picture %}
+        <label class="flex items-center gap-2 mt-3 text-sm text-on-surface-variant cursor-pointer hover:text-error transition-colors">
+          <input type="checkbox" name="clear_picture" value="1" class="rounded border-outline-variant text-error focus:ring-error">
+          Remove current picture
+        </label>
+        {% endif %}
+      </div>
+
+      <hr class="divider">
+
+      <!-- Full Name -->
+      <div>
+        <label class="block text-sm font-semibold text-primary mb-1.5" for="id_full_name">Full Name</label>
+        <input type="text" name="full_name" id="id_full_name" value="{{ request.user.staff_name|default:request.user.get_full_name }}" required class="input" placeholder="Enter your full name">
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label class="block text-sm font-semibold text-primary mb-1.5" for="id_email">Email Address</label>
+        <input type="email" name="email" id="id_email" value="{{ request.user.email }}" required class="input" placeholder="your@email.com">
+      </div>
+
+      <!-- Phone -->
+      <div>
+        <label class="block text-sm font-semibold text-primary mb-1.5">Phone Number</label>
+        <div class="input-group">
+          <select name="country_code" class="select" style="width: auto; min-width: 88px;">
+            <option value="+233" {% if phone_country_code == '+233' %}selected{% endif %}>+233</option>
+            <option value="+234" {% if phone_country_code == '+234' %}selected{% endif %}>+234</option>
+            <option value="+254" {% if phone_country_code == '+254' %}selected{% endif %}>+254</option>
+            <option value="+27" {% if phone_country_code == '+27' %}selected{% endif %}>+27</option>
+            <option value="+44" {% if phone_country_code == '+44' %}selected{% endif %}>+44</option>
+            <option value="+1" {% if phone_country_code == '+1' %}selected{% endif %}>+1</option>
+          </select>
+          <input type="tel" name="staff_phone" value="{{ phone_number }}" required placeholder="24 123 4567" class="input">
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Buttons -->
+      <div class="flex items-center justify-end gap-3">
+        <a href="{% url 'manager_dashboard' %}" class="btn btn-ghost">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+          <span class="material-symbols-outlined text-base">save</span>
+          Save Changes
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Account Actions -->
+  <section class="card p-6 mt-6">
+    <h2 class="font-headline-md text-headline-md text-primary font-bold mb-4">Account</h2>
+    <div class="flex flex-wrap gap-3">
+      <a href="{% url 'password_reset' %}" class="btn btn-outline">
+        <span class="material-symbols-outlined text-base">lock_reset</span>
+        Change Password
+      </a>
+      <a href="{% url 'logout' %}" class="btn btn-ghost">
+        <span class="material-symbols-outlined text-base">logout</span>
+        Sign Out
+      </a>
+    </div>
+  </section>
+</main>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+  <div class="flex items-center justify-around h-16 max-w-lg mx-auto">
+    <a href="{% url 'manager_dashboard' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span class="text-[10px] font-semibold">Dashboard</span>
+    </a>
+    <a href="{% url 'booking' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">calendar_add_on</span>
+      <span class="text-[10px] font-semibold">Bookings</span>
+    </a>
+    <a href="{% url 'admin_management' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">admin_panel_settings</span>
+      <span class="text-[10px] font-semibold">Manage</span>
+    </a>
+    <a href="{% url 'staff_profile' %}" class="flex flex-col items-center gap-0.5 text-primary">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL'1;">person</span>
+      <span class="text-[10px] font-semibold">Profile</span>
+    </a>
+  </div>
+</nav>
+{% endblock %}

@@ -35,9 +35,17 @@
             <input id="explore-search" name="q" value="{{ search_query }}" class="input flex-1 rounded-xl" type="search" placeholder="Search hotels, locations, or amenities...">
             <button class="btn btn-primary" type="submit"><span class="material-symbols-outlined">search</span><span class="hidden sm:inline">Search</span></button>
         </form>
+
+        <!-- Category Filter -->
+        <div class="mt-4 flex gap-2 overflow-x-auto hide-scrollbar pb-2">
+            <a href="{% url 'explore_stays' %}{% if request.GET.q %}?q={{ request.GET.q }}{% endif %}" class="btn btn-sm rounded-full {% if not category %}btn-primary{% else %}btn-ghost border border-outline-variant/30{% endif %}">All</a>
+            {% for code, label in hotel_categories %}
+            <a href="{% url 'explore_stays' %}?category={{ code }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-sm rounded-full {% if category == code %}btn-primary{% else %}btn-ghost border border-outline-variant/30{% endif %}">{{ label }}</a>
+            {% endfor %}
+        </div>
     </section>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="card group" data-stay-card>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="card group" data-stay-card data-category="RESORT">
             <div class="relative h-72 w-full overflow-hidden">
                 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="{% static 'frontend/img/7113f748cb477fa2fec71cdca34d7400.jpg' %}" alt="La Palm Royal Beach Hotel" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -45,6 +53,7 @@
                     <span class="material-symbols-outlined text-secondary-container text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
                     <span class="text-white font-label-md text-label-md">4.9</span>
                 </div>
+                <span class="absolute top-4 left-4 badge badge-primary text-[10px]">RESORT</span>
             </div>
             <div class="card-body">
                 <div class="flex justify-between items-start mb-2">
@@ -62,7 +71,7 @@
                 </div>
             </div>
         </div>
-        <div class="card group" data-stay-card>
+        <div class="card group" data-stay-card data-category="HOTEL">
             <div class="relative h-72 w-full overflow-hidden">
                 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="{% static 'frontend/img/d903519e676e485832027f1ced40bc7b.jpg' %}" alt="Kempinski Hotel Gold Coast City" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -70,6 +79,7 @@
                     <span class="material-symbols-outlined text-secondary-container text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
                     <span class="text-white font-label-md text-label-md">4.7</span>
                 </div>
+                <span class="absolute top-4 left-4 badge badge-primary text-[10px]">HOTEL</span>
             </div>
             <div class="card-body">
                 <div class="flex justify-between items-start mb-2">
@@ -86,7 +96,7 @@
                 </div>
             </div>
         </div>
-        <div class="card group" data-stay-card>
+        <div class="card group" data-stay-card data-category="RESORT">
             <div class="relative h-72 w-full overflow-hidden">
                 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="{% static 'frontend/img/0958f6955f4703f8ee177b4f3d3be348.jpg' %}" alt="Royal Senchi Resort" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -94,6 +104,7 @@
                     <span class="material-symbols-outlined text-secondary-container text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
                     <span class="text-white font-label-md text-label-md">4.5</span>
                 </div>
+                <span class="absolute top-4 left-4 badge badge-primary text-[10px]">RESORT</span>
             </div>
             <div class="card-body">
                 <div class="flex justify-between items-start mb-2">
@@ -110,7 +121,7 @@
                 </div>
             </div>
         </div>
-        <div class="card group lg:col-span-1" data-stay-card>
+        <div class="card group lg:col-span-1" data-stay-card data-category="RESORT">
             <div class="relative h-72 w-full overflow-hidden">
                 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="{% static 'frontend/img/961517923804f2e48a85a5c1ac83e837.jpg' %}" alt="Busua Beach Resort" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -150,14 +161,43 @@
 <script>
     const query = (document.getElementById('explore-search')?.value || '').trim().toLowerCase();
     const cards = document.querySelectorAll('[data-stay-card]');
-    cards.forEach(card => card.hidden = !!query && !card.textContent.toLowerCase().includes(query));
-    if (query && !Array.from(cards).some(card => !card.hidden)) {
-        const empty = document.createElement('p');
-        empty.className = 'col-span-full rounded-2xl bg-surface-container p-8 text-center text-on-surface-variant';
-        empty.textContent = 'No stays matched your search.';
-        document.querySelector('.grid').appendChild(empty);
+    const categoryButtons = document.querySelectorAll('.mt-4 .btn');
+    let activeCategory = '{{ category|default:"" }}';
+
+    function filterCards() {
+        let visibleCount = 0;
+        cards.forEach(card => {
+            const cardCategory = card.getAttribute('data-category') || '';
+            const matchesQuery = !query || card.textContent.toLowerCase().includes(query);
+            const matchesCategory = !activeCategory || cardCategory === activeCategory;
+            card.hidden = !(matchesQuery && matchesCategory);
+            if (!card.hidden) visibleCount++;
+        });
+
+        // Show empty state if no results
+        const existingEmpty = document.querySelector('.col-span-full.text-center');
+        if (existingEmpty) existingEmpty.remove();
+        if (visibleCount === 0) {
+            const empty = document.createElement('p');
+            empty.className = 'col-span-full rounded-2xl bg-surface-container p-8 text-center text-on-surface-variant';
+            empty.textContent = 'No stays matched your filters.';
+            document.querySelector('.grid').appendChild(empty);
+        }
     }
-    const filterButtons = document.querySelectorAll('.flex.gap-3 button:not(:first-child)');
-    filterButtons.forEach(btn => { btn.addEventListener('click', () => { btn.classList.toggle('bg-primary'); btn.classList.toggle('text-white'); btn.classList.toggle('bg-white'); btn.classList.toggle('text-on-surface'); }); });
+
+    // Category button clicks
+    categoryButtons.forEach(btn => {
+        if (btn.getAttribute('href') && btn.getAttribute('href').includes('category=')) {
+            btn.addEventListener('click', (e) => {
+                // Update active state
+                categoryButtons.forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-ghost', 'border', 'border-outline-variant/30'); });
+                btn.classList.remove('btn-ghost', 'border', 'border-outline-variant/30');
+                btn.classList.add('btn-primary');
+            });
+        }
+    });
+
+    // Initial filter
+    filterCards();
 </script>
 {% endblock %}

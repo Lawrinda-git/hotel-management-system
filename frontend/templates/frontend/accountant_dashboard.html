@@ -1,137 +1,161 @@
 {% extends "frontend/base.html" %}
 {% load static %}
-{% block title %}StayHub Accountant Dashboard{% endblock %}
-{% block body_class %}bg-background text-on-background font-body-md selection:bg-secondary-fixed selection:text-on-secondary-fixed{% endblock %}
+{% block title %}StayHub | Accountant{% endblock %}
+{% block body_class %}bg-background text-on-surface pb-20{% endblock %}
 {% block content %}
-<div class="flex min-h-screen">
-    <aside class="w-[280px] h-screen sticky top-0 left-0 bg-primary flex flex-col shadow-xl z-50">
-        <div class="px-6 py-8">
-            <div class="flex items-center gap-3 mb-10">
-                <div class="w-10 h-10 rounded-lg bg-secondary-fixed flex items-center justify-center text-primary font-bold text-headline-md">SH</div>
-                <div><h1 class="font-headline-md text-headline-md font-bold text-secondary-fixed leading-tight">StayHub</h1><p class="text-on-primary-container text-label-sm opacity-80">Luxury Management</p></div>
-            </div>
-            <nav class="space-y-1">
-                <a href="{% url 'manager_dashboard' %}" class="flex items-center gap-4 px-6 py-4 text-on-primary-fixed hover:text-on-primary hover:bg-primary-fixed-variant/10 transition-colors duration-200 cursor-pointer active:scale-95"><span class="material-symbols-outlined">dashboard</span><span class="font-body-md text-body-md">Manager</span></a>
-                <a href="{% url 'receptionist_dashboard' %}" class="flex items-center gap-4 px-6 py-4 text-on-primary-fixed hover:text-on-primary hover:bg-primary-fixed-variant/10 transition-colors duration-200 cursor-pointer active:scale-95"><span class="material-symbols-outlined">receipt_long</span><span class="font-body-md text-body-md">Receptionist</span></a>
-                <div class="flex items-center gap-4 px-6 py-4 text-on-primary bg-primary-fixed-variant/20 border-r-4 border-secondary-fixed cursor-pointer active:scale-95"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span><span class="font-body-md text-body-md">Accountant</span></div>
-                <a href="{% url 'housekeeping_dashboard' %}" class="flex items-center gap-4 px-6 py-4 text-on-primary-fixed hover:text-on-primary hover:bg-primary-fixed-variant/10 transition-colors duration-200 cursor-pointer active:scale-95"><span class="material-symbols-outlined">cleaning_services</span><span class="font-body-md text-body-md">Housekeeping</span></a>
-            </nav>
+<!-- ===== TOP HEADER ===== -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+  <div class="flex items-center justify-between px-4 h-16 max-w-6xl mx-auto">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md">
+        <span class="material-symbols-outlined text-white text-xl">account_balance</span>
+      </div>
+      <div>
+        <h1 class="font-headline-md text-headline-md text-primary font-bold leading-tight">StayHub</h1>
+        <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Accountant</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'profile' %}" class="btn btn-icon btn-ghost" aria-label="Profile">
+        <span class="material-symbols-outlined">person</span>
+      </a>
+      <a href="{% url 'logout' %}" class="btn btn-icon btn-ghost" aria-label="Log out">
+        <span class="material-symbols-outlined">logout</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="pt-20 pb-8 px-4 max-w-6xl mx-auto">
+  <!-- Welcome -->
+  <section class="mb-6">
+    <h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">Welcome, {{ request.user.staff_name|default:"Accountant" }}</h2>
+    <p class="text-on-surface-variant">Financial overview and invoice management.</p>
+  </section>
+
+  <!-- KPI Cards -->
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+    <div class="card p-4">
+      <div class="flex items-center gap-2 text-primary mb-1">
+        <span class="material-symbols-outlined text-lg">receipt_long</span>
+        <span class="text-xs text-on-surface-variant uppercase tracking-wider">Invoices</span>
+      </div>
+      <p class="text-2xl font-bold text-on-surface">{{ invoice_count }}</p>
+    </div>
+    <div class="card p-4">
+      <div class="flex items-center gap-2 text-amber-600 mb-1">
+        <span class="material-symbols-outlined text-lg">hourglass_empty</span>
+        <span class="text-xs text-on-surface-variant uppercase tracking-wider">Unpaid</span>
+      </div>
+      <p class="text-2xl font-bold text-on-surface">{{ unpaid_invoice_count }}</p>
+    </div>
+    <div class="card p-4">
+      <div class="flex items-center gap-2 text-green-600 mb-1">
+        <span class="material-symbols-outlined text-lg">check_circle</span>
+        <span class="text-xs text-on-surface-variant uppercase tracking-wider">Paid</span>
+      </div>
+      <p class="text-2xl font-bold text-on-surface">{{ paid_invoice_count }}</p>
+    </div>
+    <div class="card p-4">
+      <div class="flex items-center gap-2 text-blue-600 mb-1">
+        <span class="material-symbols-outlined text-lg">payments</span>
+        <span class="text-xs text-on-surface-variant uppercase tracking-wider">Payments</span>
+      </div>
+      <p class="text-2xl font-bold text-on-surface">{{ recent_payments|length }}</p>
+    </div>
+  </section>
+
+  <!-- Quick Actions -->
+  <section class="grid grid-cols-2 gap-3 mb-6">
+    <button class="btn btn-primary py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg" onclick="document.getElementById('app-toast').textContent='Invoice creation coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+      <span class="material-symbols-outlined">add</span>
+      <span>New Invoice</span>
+    </button>
+    <button class="btn btn-outline py-4 rounded-xl flex items-center justify-center gap-2" onclick="document.getElementById('app-toast').textContent='Report export coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+      <span class="material-symbols-outlined">download</span>
+      <span>Export</span>
+    </button>
+  </section>
+
+  <!-- Recent Invoices -->
+  <section class="card p-5 mb-4">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-headline-md text-headline-md text-primary font-bold flex items-center gap-2">
+        <span class="material-symbols-outlined text-lg">receipt_long</span> Recent Invoices
+      </h3>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="text-xs text-on-surface-variant uppercase border-b border-outline-variant/20">
+            <th class="pb-2 font-semibold">Invoice #</th>
+            <th class="pb-2 font-semibold">Guest</th>
+            <th class="pb-2 font-semibold">Amount</th>
+            <th class="pb-2 font-semibold">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-variant/10">
+          {% for invoice in recent_invoices %}
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="py-3 text-sm font-semibold text-primary">#{{ invoice.id }}</td>
+            <td class="py-3 text-sm">{{ invoice.reservation.guest.guest_name|default:"-" }}</td>
+            <td class="py-3 text-sm font-medium">GH₵{{ invoice.total_amount }}</td>
+            <td class="py-3">
+              <span class="badge {% if invoice.status == 'paid' %}badge-success{% elif invoice.status == 'unpaid' %}badge-warning{% elif invoice.status == 'partial' %}badge-primary{% else %}badge-outline{% endif %} text-[10px]">
+                {{ invoice.status|title }}
+              </span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="py-6 text-center text-sm text-on-surface-variant">No invoices yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Recent Payments -->
+  <section class="card p-5">
+    <h3 class="font-headline-md text-headline-md text-primary font-bold mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL'1;">payments</span> Recent Payments
+    </h3>
+    <div class="space-y-2">
+      {% for payment in recent_payments %}
+      <div class="flex items-center justify-between py-3 border-b border-outline-variant/20">
+        <div>
+          <p class="font-medium text-sm text-on-surface">GH₵{{ payment.amount }}</p>
+          <p class="text-xs text-on-surface-variant">{{ payment.method|title }} · {{ payment.payment_date|date:"M d, Y" }}</p>
         </div>
-        <div class="mt-auto border-t border-white/10 px-6 py-8">
-            <div class="flex items-center gap-4 px-6 py-3 text-on-primary-fixed hover:text-on-primary transition-colors cursor-pointer"><span class="material-symbols-outlined">settings</span><span class="text-body-md">Settings</span></div>
-            <a href="{% url 'logout' %}" class="flex items-center gap-4 px-6 py-3 text-on-primary-fixed hover:text-on-primary transition-colors"><span class="material-symbols-outlined">logout</span><span class="text-body-md">Logout</span></a>
-        </div>
-    </aside>
-    <main class="flex-1 flex flex-col min-w-0">
-        <section class="px-8 pt-6 grid grid-cols-2 lg:grid-cols-4 gap-4" aria-label="Live financial data">
-            <div class="card p-4"><p class="text-xs text-on-surface-variant">Invoices</p><p class="text-2xl font-bold text-primary">{{ invoice_count }}</p></div>
-            <div class="card p-4"><p class="text-xs text-on-surface-variant">Unpaid</p><p class="text-2xl font-bold text-primary">{{ unpaid_invoice_count }}</p></div>
-            <div class="card p-4"><p class="text-xs text-on-surface-variant">Paid</p><p class="text-2xl font-bold text-primary">{{ paid_invoice_count }}</p></div>
-            <div class="card p-4"><p class="text-xs text-on-surface-variant">Recent payments</p><p class="text-2xl font-bold text-primary">{{ recent_payments|length }}</p></div>
-        </section>
-        <section class="px-8 pt-6" aria-label="Recent invoices from database">
-            <div class="card p-5"><h3 class="font-headline-md text-primary mb-3">Recent invoices</h3>{% for invoice in recent_invoices %}<div class="flex justify-between border-b border-outline-variant/20 py-2 text-sm"><span>Invoice #{{ invoice.id }} · {{ invoice.reservation.guest.guest_name }}</span><span class="text-on-surface-variant">GH₵{{ invoice.total_amount }} · {{ invoice.status|title }}</span></div>{% empty %}<p class="text-sm text-on-surface-variant">No invoices recorded yet.</p>{% endfor %}</div>
-        </section>
-        <header class="w-full h-16 sticky top-0 z-40 bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center px-margin-desktop shadow-sm">
-            <div class="flex items-center gap-6">
-                <h2 class="text-primary font-bold text-headline-md hidden md:block">Financial Dashboard</h2>
-                <div class="relative"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span><input class="pl-10 pr-4 py-2 bg-surface-container border-none rounded-full text-label-md w-64 focus:ring-2 focus:ring-primary/20" placeholder="Search transactions..." type="text"></div>
-            </div>
-            <div class="flex items-center gap-6">
-                <nav class="hidden lg:flex gap-6 items-center">
-                    <a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md" href="#">Analytics</a>
-                    <a class="text-on-surface-variant hover:text-primary transition-all font-label-md text-label-md" href="#">Reports</a>
-                    <a class="text-on-surface-variant hover:text-primary transition-all font-label-md text-label-md" href="#">Schedules</a>
-                </nav>
-                <div class="h-6 w-[1px] bg-outline-variant"></div>
-                <div class="flex items-center gap-4">
-                    <button class="p-2 hover:bg-surface-container-low rounded-full transition-colors relative"><span class="material-symbols-outlined text-on-surface-variant">notifications</span><span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span></button>
-                    <div class="flex items-center gap-3 cursor-pointer p-1 pr-3 hover:bg-surface-container-low rounded-full transition-all">
-                        <div class="w-8 h-8 rounded-full bg-cover bg-center border border-primary/20" style="background-image: url('{% static 'frontend/img/91d27984bd200d1766557504853f8fd4.jpg' %}')"></div>
-                        <span class="text-label-md font-bold text-primary">Admin</span>
-                    </div>
-                </div>
-            </div>
-        </header>
-        <div class="p-margin-desktop max-w-container-max mx-auto w-full">
-            <div class="mb-10 flex justify-between items-end">
-                <div><h3 class="text-headline-xl font-headline-xl text-primary mb-2">Welcome back, Accountant</h3><p class="text-body-lg text-on-surface-variant">Here is your financial summary for <span class="font-bold text-on-surface">October 2023</span>.</p></div>
-                <button class="bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md flex items-center gap-2 shadow-lg hover:shadow-primary/20 transition-all active:scale-95"><span class="material-symbols-outlined">add</span>Create Booking</button>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-10">
-                <div class="bg-white p-8 rounded-xl shadow-lg border border-outline-variant/50 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><span class="material-symbols-outlined text-[64px]" style="font-variation-settings: 'FILL' 1;">payments</span></div>
-                    <p class="text-label-md uppercase tracking-widest text-on-surface-variant mb-4">Daily Revenue</p>
-                    <div class="flex items-baseline gap-2"><h4 class="text-headline-xl font-headline-xl text-primary">$12,450</h4><span class="text-emerald-600 text-label-sm font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">trending_up</span>+8.2%</span></div>
-                    <div class="mt-4 w-full bg-surface-container-low h-1 rounded-full overflow-hidden"><div class="bg-primary h-full w-[70%]"></div></div>
-                </div>
-                <div class="glass-card p-8 rounded-xl shadow-lg relative overflow-hidden group border-secondary-fixed/30">
-                    <div class="absolute -top-4 -right-4 w-24 h-24 bg-secondary-fixed/20 rounded-full blur-2xl"></div>
-                    <p class="text-label-md uppercase tracking-widest text-secondary mb-4">Monthly Revenue</p>
-                    <div class="flex items-baseline gap-2"><h4 class="text-headline-xl font-headline-xl text-secondary">$342,800</h4><span class="text-emerald-600 text-label-sm font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">trending_up</span>+12.5%</span></div>
-                    <p class="mt-4 text-label-sm text-on-surface-variant italic">Top performing month this year</p>
-                </div>
-                <div class="bg-white p-8 rounded-xl shadow-lg border border-outline-variant/50 relative overflow-hidden group">
-                    <p class="text-label-md uppercase tracking-widest text-on-surface-variant mb-4">Pending Payments</p>
-                    <div class="flex items-baseline gap-2"><h4 class="text-headline-xl font-headline-xl text-error">$8,210</h4><span class="text-on-surface-variant text-label-sm font-bold">14 Invoices</span></div>
-                    <div class="mt-6 flex gap-2"><span class="px-3 py-1 bg-error-container text-on-error-container text-label-sm rounded-full">High Priority</span><span class="px-3 py-1 bg-surface-container text-on-surface-variant text-label-sm rounded-full">Follow-up due</span></div>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter mb-10">
-                <div class="lg:col-span-1 bg-primary p-8 rounded-2xl text-on-primary shadow-xl relative overflow-hidden">
-                    <div class="relative z-10">
-                        <div class="flex justify-between items-start mb-8"><h5 class="font-headline-md text-headline-md text-secondary-fixed">Luxury Tax (12%)</h5><span class="material-symbols-outlined">account_balance</span></div>
-                        <div class="mb-6"><p class="text-label-md opacity-70 mb-1">Total Accrued (Q4)</p><p class="text-headline-lg font-headline-lg">$41,136.00</p></div>
-                        <div class="space-y-4"><div class="flex justify-between text-label-md border-b border-white/10 pb-2"><span class="opacity-70">Next Filing Date</span><span>Nov 15, 2023</span></div><div class="flex justify-between text-label-md border-b border-white/10 pb-2"><span class="opacity-70">Tax ID</span><span>LX-882-901</span></div></div>
-                        <button class="mt-8 w-full py-3 bg-secondary-fixed text-on-secondary-fixed font-bold rounded-lg hover:bg-secondary-fixed-dim transition-colors">Export Tax Summary</button>
-                    </div>
-                </div>
-                <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-lg border border-outline-variant/50">
-                    <div class="flex justify-between items-center mb-8"><h5 class="font-headline-md text-headline-md text-primary">Financial Reporting</h5><div class="flex gap-2"><button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-primary">filter_list</span></button><button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-primary">download</span></button></div></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="p-6 rounded-xl border border-outline-variant/30 hover:border-primary/50 transition-all cursor-pointer group"><div class="w-12 h-12 bg-primary-fixed rounded-full flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform"><span class="material-symbols-outlined">bar_chart</span></div><h6 class="font-bold text-primary mb-2">Quarterly P&L Statement</h6><p class="text-label-sm text-on-surface-variant">Detailed breakdown of profit and losses for the current fiscal quarter.</p></div>
-                        <div class="p-6 rounded-xl border border-outline-variant/30 hover:border-primary/50 transition-all cursor-pointer group"><div class="w-12 h-12 bg-secondary-container/30 rounded-full flex items-center justify-center text-secondary mb-4 group-hover:scale-110 transition-transform"><span class="material-symbols-outlined">pie_chart</span></div><h6 class="font-bold text-primary mb-2">Service Revenue Split</h6><p class="text-label-sm text-on-surface-variant">Comparison between room revenue, spa, and dining luxury services.</p></div>
-                    </div>
-                    <div class="mt-6 p-4 bg-surface-container-low rounded-lg flex items-center gap-4"><span class="material-symbols-outlined text-primary">info</span><p class="text-label-sm text-on-surface-variant">Auto-generated reports are updated every 24 hours at 00:00 UTC.</p></div>
-                </div>
-            </div>
-            <section class="bg-white rounded-2xl shadow-xl border border-outline-variant/50 overflow-hidden">
-                <div class="px-8 py-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
-                    <h5 class="font-headline-md text-headline-md text-primary">Recent Transactions</h5>
-                    <div class="flex gap-4"><div class="flex items-center gap-2 px-3 py-1 bg-surface-container rounded text-label-sm text-on-surface-variant border border-outline-variant/50 cursor-pointer"><span>Status: All</span><span class="material-symbols-outlined text-[16px]">expand_more</span></div><button class="text-primary font-bold text-label-md hover:underline transition-all">View All</button></div>
-                </div>
-                <div class="overflow-x-auto"><table class="w-full text-left">
-                    <thead><tr class="bg-surface-container/30 border-b border-outline-variant"><th class="px-8 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Transaction ID</th><th class="px-8 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Guest</th><th class="px-8 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Amount</th><th class="px-8 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Tax (12%)</th><th class="px-8 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Status</th><th class="px-8 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Action</th></tr></thead>
-                    <tbody class="divide-y divide-outline-variant/50">
-                        <tr class="hover:bg-surface-container-low transition-colors"><td class="px-8 py-5 font-label-md text-primary font-bold">#TRX-9921</td><td class="px-8 py-5"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-surface-container text-primary flex items-center justify-center font-bold text-[10px]">AH</div><div><p class="font-bold text-on-surface">Alexander Hamilton</p><p class="text-label-sm text-on-surface-variant">Suite 405</p></div></div></td><td class="px-8 py-5 font-bold text-on-surface">$2,400.00</td><td class="px-8 py-5 text-on-surface-variant">$288.00</td><td class="px-8 py-5"><span class="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-label-sm font-bold">Paid</span></td><td class="px-8 py-5"><button class="text-primary hover:text-secondary transition-colors"><span class="material-symbols-outlined">receipt</span></button></td></tr>
-                        <tr class="hover:bg-surface-container-low transition-colors"><td class="px-8 py-5 font-label-md text-primary font-bold">#TRX-9922</td><td class="px-8 py-5"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-surface-container text-primary flex items-center justify-center font-bold text-[10px]">SM</div><div><p class="font-bold text-on-surface">Sophia Martinez</p><p class="text-label-sm text-on-surface-variant">Penthouse A</p></div></div></td><td class="px-8 py-5 font-bold text-on-surface">$5,100.00</td><td class="px-8 py-5 text-on-surface-variant">$612.00</td><td class="px-8 py-5"><span class="px-3 py-1 bg-secondary-container/50 text-secondary-fixed-dim rounded-full text-label-sm font-bold">Pending</span></td><td class="px-8 py-5"><button class="text-primary hover:text-secondary transition-colors"><span class="material-symbols-outlined">send</span></button></td></tr>
-                        <tr class="hover:bg-surface-container-low transition-colors"><td class="px-8 py-5 font-label-md text-primary font-bold">#TRX-9923</td><td class="px-8 py-5"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-surface-container text-primary flex items-center justify-center font-bold text-[10px]">JD</div><div><p class="font-bold text-on-surface">Julian De Silva</p><p class="text-label-sm text-on-surface-variant">Deluxe 112</p></div></div></td><td class="px-8 py-5 font-bold text-on-surface">$1,250.00</td><td class="px-8 py-5 text-on-surface-variant">$150.00</td><td class="px-8 py-5"><span class="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-label-sm font-bold">Paid</span></td><td class="px-8 py-5"><button class="text-primary hover:text-secondary transition-colors"><span class="material-symbols-outlined">receipt</span></button></td></tr>
-                        <tr class="hover:bg-surface-container-low transition-colors"><td class="px-8 py-5 font-label-md text-primary font-bold">#TRX-9924</td><td class="px-8 py-5"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-surface-container text-primary flex items-center justify-center font-bold text-[10px]">EW</div><div><p class="font-bold text-on-surface">Emma Watson</p><p class="text-label-sm text-on-surface-variant">Suite 203</p></div></div></td><td class="px-8 py-5 font-bold text-on-surface">$3,200.00</td><td class="px-8 py-5 text-on-surface-variant">$384.00</td><td class="px-8 py-5"><span class="px-3 py-1 bg-secondary-container/50 text-secondary-fixed-dim rounded-full text-label-sm font-bold">Pending</span></td><td class="px-8 py-5"><button class="text-primary hover:text-secondary transition-colors"><span class="material-symbols-outlined">send</span></button></td></tr>
-                    </tbody>
-                </table></div>
-                <div class="p-6 bg-surface-container/20 flex justify-between items-center text-label-sm text-on-surface-variant">
-                    <span>Showing 4 of 128 transactions</span>
-                    <div class="flex gap-2"><button class="px-3 py-1 border border-outline-variant rounded hover:bg-white transition-colors">Previous</button><button class="px-3 py-1 border border-outline-variant rounded hover:bg-white transition-colors bg-white font-bold text-primary">1</button><button class="px-3 py-1 border border-outline-variant rounded hover:bg-white transition-colors">2</button><button class="px-3 py-1 border border-outline-variant rounded hover:bg-white transition-colors">3</button><button class="px-3 py-1 border border-outline-variant rounded hover:bg-white transition-colors">Next</button></div>
-                </div>
-            </section>
-        </div>
-    </main>
-</div>
-{% endblock %}
-{% block extra_scripts %}
-<script>
-    document.querySelectorAll('.group').forEach(card => {
-        card.addEventListener('mouseenter', () => card.classList.add('translate-y-[-4px]'));
-        card.addEventListener('mouseleave', () => card.classList.remove('translate-y-[-4px]'));
-    });
-    const navItems = document.querySelectorAll('nav div');
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            navItems.forEach(i => { i.classList.remove('bg-primary-fixed-variant/20', 'border-r-4', 'border-secondary-fixed', 'text-on-primary'); i.classList.add('text-on-primary-fixed'); i.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0"; });
-            item.classList.add('bg-primary-fixed-variant/20', 'border-r-4', 'border-secondary-fixed', 'text-on-primary');
-            item.classList.remove('text-on-primary-fixed');
-            item.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 1";
-        });
-    });
-</script>
+        <span class="badge {% if payment.status == 'success' %}badge-success{% elif payment.status == 'pending' %}badge-warning{% else %}badge-error{% endif %} text-[10px]">
+          {{ payment.status|title }}
+        </span>
+      </div>
+      {% empty %}
+      <p class="text-sm text-on-surface-variant text-center py-4">No payments recorded yet.</p>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+  <div class="flex items-center justify-around h-16 max-w-lg mx-auto">
+    <a href="{% url 'accountant_dashboard' %}" class="flex flex-col items-center gap-0.5 text-primary">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL'1;">dashboard</span>
+      <span class="text-[10px] font-semibold">Dashboard</span>
+    </a>
+    <a href="{% url 'booking' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">calendar_add_on</span>
+      <span class="text-[10px] font-semibold">Bookings</span>
+    </a>
+    <a href="{% url 'explore_stays' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">search</span>
+      <span class="text-[10px] font-semibold">Explore</span>
+    </a>
+    <a href="{% url 'profile' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] font-semibold">Profile</span>
+    </a>
+  </div>
+</nav>
 {% endblock %}

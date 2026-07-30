@@ -36,3 +36,5 @@ Thumbs.db
 
 #env
 .env
+download_fonts.py
+manage_seed.py

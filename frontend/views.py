@@ -25,6 +25,7 @@ from apps.guests.models import Guest
 from apps.billing.models import Invoice
 from apps.reservations.models import Reservation, RoomReservation
 from apps.rooms.models import Room
+from apps.hotels.models import Hotel
 
 
 Staff = get_user_model()
@@ -165,13 +166,17 @@ def profile(request):
             phone_country_code, phone_number = code, phone[len(code):]
             break
 
+    # Use staff profile template for staff users, guest profile for guests
+    is_staff = user.is_authenticated and (user.role or "").lower() in ("admin", "manager", "receptionist", "accountant", "housekeeping")
+    template = "frontend/staff_profile.html" if is_staff else "frontend/profile.html"
+
     def render_profile(**extra):
         context = {
             "phone_country_code": phone_country_code,
             "phone_number": phone_number,
         }
         context.update(extra)
-        return render(request, "frontend/profile.html", context)
+        return render(request, template, context)
 
     if request.method == "POST":
         full_name = (request.POST.get("full_name") or "").strip()
@@ -197,7 +202,7 @@ def profile(request):
                 return render_profile(profile_error="Use an image file smaller than 5 MB.")
             user.profile_picture = upload
         user.save()
-        return redirect("profile")
+        return redirect("staff_profile" if is_staff else "profile")
     return render_profile()
 
 
@@ -276,7 +281,16 @@ def admin_signup(request):
 
 
 def logout_view(request):
+    """Log out and redirect staff to staff_login, guests to signin."""
+    if not request.user.is_authenticated:
+        return redirect("signin")
+    # Capture role BEFORE logout clears the session
+    role = (request.user.role or "").lower()
+    user_id = request.user.pk
     logout(request)
+    # Verify the user was a staff member
+    if role in ("admin", "manager", "receptionist", "accountant", "housekeeping"):
+        return redirect("staff_login")
     return redirect("signin")
 
 
@@ -285,8 +299,6 @@ def create_account(request):
     if request.user.is_authenticated:
         return redirect("guest_home")
     return render(request, "frontend/create_account.html")
-
-
 
 
 def two_factor(request):
@@ -454,16 +466,8 @@ def guest_home(request):
     """Main customer home/explore page after login. Redirect staff to their dashboards."""
     if request.user.is_authenticated:
         role = (request.user.role or "").lower()
-        if role == "admin":
-            return redirect("manager_dashboard")
-        elif role == "manager":
-            return redirect("manager_dashboard")
-        elif role == "receptionist":
-            return redirect("receptionist_dashboard")
-        elif role == "accountant":
-            return redirect("accountant_dashboard")
-        elif role == "housekeeping":
-            return redirect("housekeeping_dashboard")
+        if role in ("admin", "manager", "receptionist", "accountant", "housekeeping"):
+            return redirect("manager_dashboard" if role in ("admin", "manager") else f"{role}_dashboard")
     name = request.user.get_full_name().strip() if request.user.is_authenticated else "Guest"
     name = name or (request.user.staff_name if request.user.is_authenticated else "Guest")
     return render(request, "frontend/guest_home.html", {"display_name": name})
@@ -471,27 +475,32 @@ def guest_home(request):
 
 def explore_stays(request):
     """Room booking / explore stays page."""
+    if request.user.is_authenticated and (request.user.role or "").lower() in ("admin", "manager", "receptionist", "accountant", "housekeeping"):
+        return redirect("manager_dashboard" if (request.user.role or "").lower() in ("admin", "manager") else f"{(request.user.role or '').lower()}_dashboard")
     name = request.user.get_full_name().strip() if request.user.is_authenticated else "Guest"
     name = name or (request.user.staff_name if request.user.is_authenticated else "Guest")
     category = request.GET.get("category", "")
     search_query = request.GET.get("q", "")
+    hotel_categories = Hotel.Category.choices
     return render(request, "frontend/explore_stays.html", {
         "display_name": name,
         "category": category,
         "search_query": search_query,
+        "hotel_categories": hotel_categories,
     })
 
 
 def hotel_details(request):
     """Detailed view of a single hotel."""
+    if request.user.is_authenticated and (request.user.role or "").lower() in ("admin", "manager", "receptionist", "accountant", "housekeeping"):
+        return redirect("manager_dashboard" if (request.user.role or "").lower() in ("admin", "manager") else f"{(request.user.role or '').lower()}_dashboard")
     name = request.user.get_full_name().strip() if request.user.is_authenticated else "Guest"
     name = name or (request.user.staff_name if request.user.is_authenticated else "Guest")
     hotel_id = request.GET.get("hotel", "1")
-    # Map hotel IDs to names
     hotels = {
-        "1": {"name": "La Palm Royal Beach Hotel", "location": "Liberation Road, Accra", "rating": "5.0", "price": "GH₵250"},
-        "2": {"name": "Kempinski Hotel Gold Coast City", "location": "Gamel Abdul Nasser Avenue, Accra", "rating": "4.9", "price": "GH₵400"},
-        "3": {"name": "Royal Senchi Resort", "location": "Senchi, Eastern Region", "rating": "4.8", "price": "GH₵350"},
+        "1": {"name": "La Palm Royal Beach Hotel", "location": "Liberation Road, Accra", "rating": "5.0", "price": "GH₵250", "image": "frontend/img/008833018260f8f9343a80c63b5be476.jpg", "category": "RESORT", "description": "Luxury beachfront resort with ocean views and premium amenities."},
+        "2": {"name": "Kempinski Hotel Gold Coast City", "location": "Gamel Abdul Nasser Avenue, Accra", "rating": "4.9", "price": "GH₵400", "image": "frontend/img/d903519e676e485832027f1ced40bc7b.jpg", "category": "HOTEL", "description": "Five-star urban hotel in the heart of Accra's business district."},
+        "3": {"name": "Royal Senchi Resort", "location": "Senchi, Eastern Region", "rating": "4.8", "price": "GH₵350", "image": "frontend/img/acb50fa45400182975c5ad13e56831a3.jpg", "category": "RESORT", "description": "Serene resort nestled along the Volta River with lush gardens."},
     }
     hotel_info = hotels.get(hotel_id, hotels["1"])
     return render(request, "frontend/hotel_details.html", {
@@ -501,6 +510,9 @@ def hotel_details(request):
         "hotel_location": hotel_info["location"],
         "hotel_rating": hotel_info["rating"],
         "hotel_price": hotel_info["price"],
+        "hotel_image": hotel_info["image"],
+        "hotel_category": hotel_info.get("category", "HOTEL"),
+        "hotel_description": hotel_info.get("description", ""),
     })
 
 
@@ -509,13 +521,15 @@ def booking(request):
     name = request.user.get_full_name().strip() if request.user.is_authenticated else "Guest"
     name = name or (request.user.staff_name if request.user.is_authenticated else "Guest")
     user_email = request.user.email if request.user.is_authenticated else ""
-    user_phone = request.user.staff_phone if request.user.is_authenticated and hasattr(request.user, 'staff_phone') else ""
-    user_name = request.user.staff_name if request.user.is_authenticated and hasattr(request.user, 'staff_name') else name
+    user_phone = getattr(request.user, 'staff_phone', '') if request.user.is_authenticated else ""
+    user_name = getattr(request.user, 'staff_name', name) if request.user.is_authenticated else name
+    is_staff = request.user.is_authenticated and (request.user.role or "").lower() in ("admin", "manager", "receptionist", "accountant", "housekeeping")
     return render(request, "frontend/booking.html", {
         "display_name": name,
         "user_email": user_email,
         "user_phone": user_phone,
         "user_name": user_name,
+        "is_staff": is_staff,
     })
 
 
@@ -546,12 +560,6 @@ def reservation_confirmed(request):
             reservation = None
             invoice = None
 
-    user_name = ""
-    user_email = ""
-    if request.user.is_authenticated:
-        user_name = request.user.get_full_name() or request.user.username
-        user_email = getattr(request.user, "email", "") or ""
-
     context = {
         "reservation": reservation,
         "invoice": invoice,
@@ -562,8 +570,8 @@ def reservation_confirmed(request):
         "room_number": room_number,
         "room_type": room_type,
         "hotel_name": hotel_name,
-        "user_name": user_name,
-        "user_email": user_email,
+        "user_name": request.user.get_full_name() or request.user.username if request.user.is_authenticated else "Guest",
+        "user_email": getattr(request.user, "email", "") or "",
         "guest_email": guest_email,
     }
     return render(request, "frontend/reservation_confirmed.html", context)
@@ -753,7 +761,6 @@ def manager_dashboard(request):
     role = (user.role or "").lower()
     is_manager_admin = role in MANAGER_ROLES
     
-    # Branch scoping for dashboard counts
     staff_qs = Staff.objects.all()
     room_qs = Room.objects.all()
     reservation_qs = Reservation.objects.all()
@@ -765,10 +772,7 @@ def manager_dashboard(request):
         reservation_qs = reservation_qs.filter(hotel_id=user.hotel_id)
         maintenance_qs = maintenance_qs.filter(room__hotel_id=user.hotel_id)
     
-    # For managers/admins, optionally scope to a specific branch if they have one
     if is_manager_admin and user.hotel_id:
-        # Even managers might be assigned to a specific branch; show them
-        # their branch data, plus an option to see all via a query param
         if request.GET.get("scope") != "all":
             staff_qs = staff_qs.filter(hotel_id=user.hotel_id)
             room_qs = room_qs.filter(hotel_id=user.hotel_id)
@@ -787,6 +791,7 @@ def manager_dashboard(request):
         "today_checkins": reservation_qs.filter(check_in__date=today).select_related("guest", "hotel").order_by("check_in")[:10],
         "today_checkouts": reservation_qs.filter(check_out__date=today).select_related("guest", "hotel").order_by("check_out")[:10],
         "live_rooms": room_qs.select_related("room_type").order_by("room_number")[:24],
+        "recent_reservations": reservation_qs.select_related("guest", "hotel").order_by("-booking_date")[:10],
     }
     return render(request, "frontend/manager_dashboard.html", context)
 
@@ -807,6 +812,7 @@ def receptionist_dashboard(request):
         "today_checkins": reservations.filter(check_in__date=today).select_related("guest")[:20],
         "today_checkouts": reservations.filter(check_out__date=today).select_related("guest")[:20],
         "upcoming_reservations": reservations.filter(check_in__date__gte=today).order_by("check_in")[:20],
+        "all_rooms": rooms.select_related("room_type").order_by("room_number")[:30],
     })
 
 
@@ -832,7 +838,6 @@ def accountant_dashboard(request):
 def housekeeping_dashboard(request):
     """Housekeeping operations dashboard."""
     from apps.rooms.models import Maintenance
-    from apps.common.mixins import MANAGER_ROLES
     rooms = Room.objects.select_related("room_type", "hotel")
     maintenance = Maintenance.objects.select_related("room", "room__room_type", "staff").exclude(status=Maintenance.MaintenanceStatus.RESOLVED).exclude(status=Maintenance.MaintenanceStatus.CLOSED)
     if request.user.hotel_id:
@@ -841,9 +846,41 @@ def housekeeping_dashboard(request):
     return render(request, "frontend/housekeeping_dashboard.html", {
         "dirty_rooms": rooms.filter(housekeeping_status=Room.HousekeepingStatus.DIRTY).order_by("room_number"),
         "clean_rooms": rooms.filter(housekeeping_status=Room.HousekeepingStatus.CLEAN).order_by("room_number"),
+        "inspected_rooms": rooms.filter(housekeeping_status=Room.HousekeepingStatus.INSPECTED).order_by("room_number"),
         "maintenance_tasks": maintenance.order_by("-report_date")[:20],
         "room_inventory": rooms.order_by("room_number")[:40],
     })
+
+
+@_role_required("admin", "manager")
+def admin_management(request):
+    """Admin management page for rooms, images, and employees."""
+    from apps.rooms.models import Room, Maintenance
+    from apps.accounts.models import Staff
+    
+    user = request.user
+    role = (user.role or "").lower()
+    is_admin = role == "admin"
+    
+    staff_qs = Staff.objects.all()
+    rooms_qs = Room.objects.select_related("room_type", "hotel").all()
+    hotels_qs = Hotel.objects.all()
+    maintenance_qs = Maintenance.objects.select_related("room", "staff").order_by("-report_date")[:20]
+    
+    if user.hotel_id and not is_admin:
+        staff_qs = staff_qs.filter(hotel_id=user.hotel_id)
+        rooms_qs = rooms_qs.filter(hotel_id=user.hotel_id)
+        maintenance_qs = maintenance_qs.filter(room__hotel_id=user.hotel_id)
+    
+    context = {
+        "staff_members": staff_qs.order_by("role", "staff_name"),
+        "rooms": rooms_qs.order_by("room_number"),
+        "hotels": hotels_qs.order_by("category", "hotel_name"),
+        "maintenance_tasks": maintenance_qs,
+        "is_admin": is_admin,
+        "hotel_categories": Hotel.Category.choices,
+    }
+    return render(request, "frontend/admin_management.html", context)
 
 
 def design_system(request):

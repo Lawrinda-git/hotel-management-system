@@ -1,12 +1,12 @@
 {% extends "frontend/base.html" %}
 {% load static %}
-{% block title %}StayHub | Ghanaian Luxury Hotel{% endblock %}
+{% block title %}StayHub | {{ hotel_name }}{% endblock %}
 {% block body_class %}bg-surface text-on-surface selection:bg-secondary-container/30 pb-24{% endblock %}
 {% block content %}
 <nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm flex items-center justify-between px-margin-mobile h-16 w-full">
     <div class="flex items-center gap-4">
-        <a href="{% url 'guest_home' %}" class="btn btn-icon btn-ghost"><span class="material-symbols-outlined">arrow_back_ios</span></a>
-        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold tracking-tight">StayHub</h1>
+        <a href="{% url 'guest_home' %}" class="btn btn-icon btn-ghost"><span class="material-symbols-outlined">arrow_back</span></a>
+        <span class="badge badge-primary text-[10px]">{{ hotel_category|default:"HOTEL" }}</span>
     </div>
     <div class="flex items-center gap-4">
         <button class="btn btn-icon btn-ghost"><span class="material-symbols-outlined">share</span></button>
@@ -16,8 +16,13 @@
 <main class="pb-8 pt-16">
     <section class="relative w-full h-[397px] overflow-hidden group">
         <div class="flex h-full overflow-x-auto snap-x snap-mandatory scroll-hide">
+            {% if hotel_image %}
             <div class="min-w-full h-full snap-start relative">
-                <img class="w-full h-full object-cover" src='{% static 'frontend/img/1749e21bb3d356f3e4f48c61995c6e08.jpg' %}' alt="Hotel" loading="lazy">
+                <img class="w-full h-full object-cover" src="{{ hotel_image }}" alt="{{ hotel_name }}" loading="lazy">
+            </div>
+            {% endif %}
+            <div class="min-w-full h-full snap-start relative">
+                <img class="w-full h-full object-cover" src='{% static 'frontend/img/1749e21bb3d356f3e4f48c61995c6e08.jpg' %}' alt="Room" loading="lazy">
             </div>
             <div class="min-w-full h-full snap-start relative">
                 <img class="w-full h-full object-cover" src='{% static 'frontend/img/2ae72ff1e56a6dbacba34c0d54c40023.jpg' %}' alt="Lobby" loading="lazy">
@@ -30,27 +35,28 @@
             <div class="w-8 h-1 rounded-full bg-white" id="indicator-0"></div>
             <div class="w-2 h-1 rounded-full bg-white/40" id="indicator-1"></div>
             <div class="w-2 h-1 rounded-full bg-white/40" id="indicator-2"></div>
+            <div class="w-2 h-1 rounded-full bg-white/40" id="indicator-3"></div>
         </div>
         <div class="card-glass absolute top-6 right-6 px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg">
             <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
-            <span class="font-label-md text-label-md text-on-surface">5.0 (428 reviews)</span>
+            <span class="font-label-md text-label-md text-on-surface">{{ hotel_rating }} (428 reviews)</span>
         </div>
     </section>
     <section class="px-margin-mobile mt-8">
         <div class="flex justify-between items-start">
             <div>
-                <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold mb-1">La Palm Royal Beach Hotel</h2>
-                <div class="flex items-center text-on-surface-variant gap-1"><span class="material-symbols-outlined text-primary text-body-md">location_on</span><span class="text-body-md font-body-md">Liberation Road, Accra, Ghana</span></div>
+                <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold mb-1">{{ hotel_name }}</h2>
+                <div class="flex items-center text-on-surface-variant gap-1"><span class="material-symbols-outlined text-primary text-body-md">location_on</span><span class="text-body-md font-body-md">{{ hotel_location }}</span></div>
             </div>
             <div class="text-right">
                 <p class="text-on-surface-variant text-label-sm font-label-sm uppercase tracking-widest">Starting from</p>
-                <p class="text-primary font-headline-md text-headline-md font-bold">GH₵250<span class="text-label-md">/night</span></p>
+                <p class="text-primary font-headline-md text-headline-md font-bold">{{ hotel_price }}<span class="text-label-md">/night</span></p>
             </div>
         </div>
     </section>
     <section class="px-margin-mobile mt-8">
         <h3 class="font-headline-md text-headline-md text-primary mb-3">About</h3>
-        <p class="text-on-surface-variant font-body-md leading-relaxed">Experience unparalleled luxury at La Palm Royal Beach Hotel. Nestled along the pristine coastline of Accra, our property combines Ghanaian heritage with modern prestige. Enjoy curated experiences, from private beachfront dinners to rejuvenating spa treatments overlooking the Atlantic Ocean.</p>
+        <p class="text-on-surface-variant font-body-md leading-relaxed">{{ hotel_description|default:"Experience luxury and comfort at our property. We offer world-class amenities and exceptional service to make your stay unforgettable." }}</p>
     </section>
     <section class="px-margin-mobile mt-10">
         <h3 class="font-headline-md text-headline-md text-primary mb-4">Amenities</h3>
@@ -58,68 +64,18 @@
             <div class="card-sm card-body flex flex-col items-center justify-center gap-2 shadow-sm hover:shadow-md transition-shadow text-center"><span class="material-symbols-outlined text-primary text-3xl">wifi</span><span class="font-label-md text-label-md">Free WiFi</span></div>
             <div class="card-sm card-body flex flex-col items-center justify-center gap-2 shadow-sm hover:shadow-md transition-shadow text-center"><span class="material-symbols-outlined text-primary text-3xl">pool</span><span class="font-label-md text-label-md">Infinity Pool</span></div>
             <div class="card-sm card-body flex flex-col items-center justify-center gap-2 shadow-sm hover:shadow-md transition-shadow text-center"><span class="material-symbols-outlined text-primary text-3xl">spa</span><span class="font-label-md text-label-md">Luxury Spa</span></div>
+            <div class="card-sm card-body flex flex-col items-center justify-center gap-2 shadow-sm hover:shadow-md transition-shadow text-center"><span class="material-symbols-outlined text-primary text-3xl">restaurant</span><span class="font-label-md text-label-md">Restaurant</span></div>
             <div class="card-sm card-body flex flex-col items-center justify-center gap-2 shadow-sm hover:shadow-md transition-shadow text-center"><span class="material-symbols-outlined text-primary text-3xl">fitness_center</span><span class="font-label-md text-label-md">Gym</span></div>
+            <div class="card-sm card-body flex flex-col items-center justify-center gap-2 shadow-sm hover:shadow-md transition-shadow text-center"><span class="material-symbols-outlined text-primary text-3xl">local_parking</span><span class="font-label-md text-label-md">Parking</span></div>
+            <div class="card-sm card-body flex flex-col items-center justify-center gap-2 shadow-sm hover:shadow-md transition-shadow text-center"><span class="material-symbols-outlined text-primary text-3xl">room_service</span><span class="font-label-md text-label-md">Room Service</span></div>
+            <div class="card-sm card-body flex flex-col items-center justify-center gap-2 shadow-sm hover:shadow-md transition-shadow text-center"><span class="material-symbols-outlined text-primary text-3xl">concierge</span><span class="font-label-md text-label-md">Concierge</span></div>
         </div>
     </section>
     <section class="px-margin-mobile mt-10">
-        <div class="relative w-full h-48 rounded-2xl overflow-hidden shadow-sm border border-outline-variant/30">
-            <img class="w-full h-full object-cover" src='{% static 'frontend/img/abb16cd505cb36fb89dbb9c18373adad.jpg' %}' alt="Map" loading="lazy">
-            <div class="absolute inset-0 bg-primary/10 flex items-center justify-center">
-                <div class="bg-white p-3 rounded-full shadow-xl"><span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">location_on</span></div>
-            </div>
-        </div>
-    </section>
-    <section class="px-margin-mobile mt-10">
-        <h3 class="font-headline-md text-headline-md text-primary mb-4">Available Rooms</h3>
-        <div class="space-y-4">
-            <a href="{% url 'booking' %}" class="card flex gap-4 items-center p-4 active:scale-[0.98] transition-transform">
-                <div class="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0"><img class="w-full h-full object-cover" src='{% static 'frontend/img/5a466fe0faaf34d7d1e4f8aaa4b7a692.jpg' %}' alt="Room" loading="lazy"></div>
-                <div class="flex-grow">
-                    <h4 class="font-label-md text-label-md text-on-surface mb-1">Deluxe Room</h4>
-                    <div class="flex items-center gap-2 text-on-surface-variant text-label-sm mb-2"><span class="material-symbols-outlined text-sm">bed</span> 1 King Bed <span class="material-symbols-outlined text-sm">square_foot</span> 40m²</div>
-                    <p class="text-primary font-bold text-body-md">GH₵400 <span class="font-normal text-on-surface-variant text-label-sm">/night</span></p>
-                </div>
-                <span class="material-symbols-outlined text-primary-container">arrow_forward_ios</span>
-            </a>
-            <a href="{% url 'booking' %}" class="card flex gap-4 items-center p-4 active:scale-[0.98] transition-transform">
-                <div class="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0"><img class="w-full h-full object-cover" src='{% static 'frontend/img/6bb1290260fb0c9e18be06ade37bf273.jpg' %}' alt="Villa" loading="lazy"></div>
-                <div class="flex-grow">
-                    <h4 class="font-label-md text-label-md text-on-surface mb-1">Ocean View Suite</h4>
-                    <div class="flex items-center gap-2 text-on-surface-variant text-label-sm mb-2"><span class="material-symbols-outlined text-sm">bed</span> 1 King Bed <span class="material-symbols-outlined text-sm">pool</span> Ocean View</div>
-                    <p class="text-primary font-bold text-body-md">GH₵650 <span class="font-normal text-on-surface-variant text-label-sm">/night</span></p>
-                </div>
-                <span class="material-symbols-outlined text-primary-container">arrow_forward_ios</span>
-            </a>
-        </div>
+        <a href="{% url 'booking' %}" class="btn btn-primary w-full btn-lg">
+            <span class="material-symbols-outlined text-lg">calendar_add_on</span>
+            Book This {{ hotel_category|default:"Property" }}
+        </a>
     </section>
 </main>
-<div class="fixed bottom-0 left-0 w-full card-glass h-24 flex items-center justify-between px-6 pb-safe border-t border-outline-variant/10 shadow-[0_-8px_30px_rgb(0,0,0,0.04)] z-[60]">
-    <div class="flex flex-col">
-        <span class="text-label-sm text-on-surface-variant">Total Price</span>
-        <span class="text-headline-md font-bold text-primary">GH₵250 <span class="text-label-sm font-medium">/night</span></span>
-    </div>
-    <a href="{% url 'booking' %}" class="btn btn-primary btn-lg">Book Now <span class="material-symbols-outlined text-sm">calendar_month</span></a>
-</div>
-{% endblock %}
-{% block extra_style %}
-<style>
-    .scroll-hide::-webkit-scrollbar { display: none; }
-    .scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
-</style>
-{% endblock %}
-{% block extra_scripts %}
-<script>
-    const gallery = document.querySelector('.overflow-x-auto');
-    const indicators = document.querySelectorAll('[id^="indicator-"]');
-    if(gallery) {
-        gallery.addEventListener('scroll', () => {
-            const scrollPercent = gallery.scrollLeft / (gallery.scrollWidth - gallery.clientWidth);
-            const index = Math.round(scrollPercent * (indicators.length - 1));
-            indicators.forEach((ind, i) => {
-                if(i === index) { ind.classList.replace('w-2', 'w-8'); ind.classList.replace('bg-white/40', 'bg-white'); }
-                else { ind.classList.replace('w-8', 'w-2'); ind.classList.replace('bg-white', 'bg-white/40'); }
-            });
-        });
-    }
-</script>
 {% endblock %}

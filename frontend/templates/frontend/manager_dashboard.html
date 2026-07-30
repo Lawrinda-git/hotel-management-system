@@ -1,191 +1,224 @@
 {% extends "frontend/base.html" %}
 {% load static %}
-{% block title %}StayHub Manager Dashboard{% endblock %}
-{% block body_class %}bg-background font-body-md text-on-background selection:bg-secondary-fixed selection:text-on-secondary-fixed{% endblock %}
+{% block title %}StayHub | Manager Dashboard{% endblock %}
+{% block body_class %}bg-background text-on-surface pb-20{% endblock %}
 {% block content %}
-<div class="flex min-h-screen">
-    <aside class="w-[280px] h-screen sticky top-0 left-0 bg-primary flex flex-col shadow-xl z-50">
-        <div class="px-8 py-10 flex flex-col items-center">
-            <div class="mb-4"><span class="material-symbols-outlined text-secondary-fixed text-4xl">hotel_class</span></div>
-            <h1 class="font-headline-md text-headline-md font-bold text-secondary-fixed">StayHub</h1>
-            <p class="font-label-sm text-label-sm uppercase tracking-widest text-primary-fixed/60 mt-1">Luxury Management</p>
+<!-- ===== TOP HEADER ===== -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+  <div class="flex items-center justify-between px-4 h-16 max-w-6xl mx-auto">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md">
+        <span class="material-symbols-outlined text-white text-xl">hotel_class</span>
+      </div>
+      <div>
+        <h1 class="font-headline-md text-headline-md text-primary font-bold leading-tight">StayHub</h1>
+        <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Manager Dashboard</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'profile' %}" class="btn btn-icon btn-ghost" aria-label="Profile">
+        <span class="material-symbols-outlined">person</span>
+      </a>
+      <a href="{% url 'logout' %}" class="btn btn-icon btn-ghost" aria-label="Log out">
+        <span class="material-symbols-outlined">logout</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="pt-20 pb-8 px-4 max-w-6xl mx-auto">
+  <!-- Welcome -->
+  <section class="mb-6">
+    <h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">Good {{ request.user.staff_name|default:"Admin" }}</h2>
+    <p class="text-on-surface-variant">Here's what's happening at your hotel today.</p>
+  </section>
+
+  <!-- KPI Cards -->
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+    <div class="card p-4">
+      <div class="flex items-center gap-2 text-primary mb-1">
+        <span class="material-symbols-outlined text-lg">login</span>
+        <span class="text-xs text-on-surface-variant uppercase tracking-wider">Check-ins</span>
+      </div>
+      <p class="text-2xl font-bold text-on-surface">{{ today_checkins|length }}</p>
+    </div>
+    <div class="card p-4">
+      <div class="flex items-center gap-2 text-primary mb-1">
+        <span class="material-symbols-outlined text-lg">logout</span>
+        <span class="text-xs text-on-surface-variant uppercase tracking-wider">Check-outs</span>
+      </div>
+      <p class="text-2xl font-bold text-on-surface">{{ today_checkouts|length }}</p>
+    </div>
+    <div class="card p-4">
+      <div class="flex items-center gap-2 text-primary mb-1">
+        <span class="material-symbols-outlined text-lg">meeting_room</span>
+        <span class="text-xs text-on-surface-variant uppercase tracking-wider">Available</span>
+      </div>
+      <p class="text-2xl font-bold text-on-surface">{{ available_rooms }}</p>
+    </div>
+    <div class="card p-4">
+      <div class="flex items-center gap-2 text-primary mb-1">
+        <span class="material-symbols-outlined text-lg">build</span>
+        <span class="text-xs text-on-surface-variant uppercase tracking-wider">Maintenance</span>
+      </div>
+      <p class="text-2xl font-bold text-on-surface">{{ recent_maintenance|length }}</p>
+    </div>
+  </section>
+
+  <!-- Quick Actions -->
+  <section class="grid grid-cols-2 gap-3 mb-6">
+    <a href="{% url 'booking' %}" class="btn btn-primary py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg">
+      <span class="material-symbols-outlined">add</span>
+      <span>New Booking</span>
+    </a>
+    <a href="{% url 'explore_stays' %}" class="btn btn-outline py-4 rounded-xl flex items-center justify-center gap-2">
+      <span class="material-symbols-outlined">search</span>
+      <span>View Stays</span>
+    </a>
+  </section>
+
+  <!-- Today's Arrivals & Departures -->
+  <section class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div class="card p-5">
+      <h3 class="font-headline-md text-headline-md text-primary font-bold mb-3 flex items-center gap-2">
+        <span class="material-symbols-outlined text-lg">login</span> Today's Arrivals
+      </h3>
+      <div class="space-y-2">
+        {% for reservation in today_checkins %}
+        <div class="flex items-center justify-between py-2 border-b border-outline-variant/20">
+          <div>
+            <p class="font-medium text-on-surface">{{ reservation.guest.guest_name }}</p>
+            <p class="text-xs text-on-surface-variant">#{{ reservation.id }} · {{ reservation.check_in|date:"H:i" }}</p>
+          </div>
+          <span class="badge badge-success text-[10px]">Arriving</span>
         </div>
-        <nav class="flex-1 px-4 space-y-2 mt-4">
-            <div class="flex items-center gap-4 px-6 py-4 text-on-primary bg-primary-fixed-variant/20 border-r-4 border-secondary-fixed cursor-pointer"><span class="material-symbols-outlined">dashboard</span><span class="font-label-md text-label-md">Manager</span></div>
-            <a href="{% url 'receptionist_dashboard' %}" class="flex items-center gap-4 px-6 py-4 text-on-primary-fixed hover:text-on-primary hover:bg-primary-fixed-variant/10 transition-colors duration-200 cursor-pointer"><span class="material-symbols-outlined">receipt_long</span><span class="font-label-md text-label-md">Receptionist</span></a>
-            <a href="{% url 'accountant_dashboard' %}" class="flex items-center gap-4 px-6 py-4 text-on-primary-fixed hover:text-on-primary hover:bg-primary-fixed-variant/10 transition-colors duration-200 cursor-pointer"><span class="material-symbols-outlined">account_balance_wallet</span><span class="font-label-md text-label-md">Accountant</span></a>
-            <a href="{% url 'housekeeping_dashboard' %}" class="flex items-center gap-4 px-6 py-4 text-on-primary-fixed hover:text-on-primary hover:bg-primary-fixed-variant/10 transition-colors duration-200 cursor-pointer"><span class="material-symbols-outlined">cleaning_services</span><span class="font-label-md text-label-md">Housekeeping</span></a>
-        </nav>
-        <div class="p-6"><button class="w-full py-4 bg-secondary-container text-on-secondary-container font-label-md text-label-md rounded-lg shadow-lg active:scale-95 transition-transform hover:brightness-105">Book Now</button></div>
-        <div class="mt-auto px-4 pb-8 space-y-2">
-            <div class="flex items-center gap-4 px-6 py-3 text-on-primary-fixed hover:text-on-primary hover:bg-primary-fixed-variant/10 transition-colors duration-200 cursor-pointer"><span class="material-symbols-outlined">settings</span><span class="font-label-md text-label-md">Settings</span></div>
-            <a href="{% url 'logout' %}" class="flex items-center gap-4 px-6 py-3 text-on-primary-fixed hover:text-on-primary hover:bg-primary-fixed-variant/10 transition-colors duration-200"><span class="material-symbols-outlined">logout</span><span class="font-label-md text-label-md">Logout</span></a>
+        {% empty %}
+        <p class="text-sm text-on-surface-variant text-center py-4">No arrivals scheduled today.</p>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card p-5">
+      <h3 class="font-headline-md text-headline-md text-primary font-bold mb-3 flex items-center gap-2">
+        <span class="material-symbols-outlined text-lg">logout</span> Today's Departures
+      </h3>
+      <div class="space-y-2">
+        {% for reservation in today_checkouts %}
+        <div class="flex items-center justify-between py-2 border-b border-outline-variant/20">
+          <div>
+            <p class="font-medium text-on-surface">{{ reservation.guest.guest_name }}</p>
+            <p class="text-xs text-on-surface-variant">#{{ reservation.id }} · {{ reservation.check_out|date:"H:i" }}</p>
+          </div>
+          <span class="badge badge-warning text-[10px]">Departing</span>
         </div>
-    </aside>
-    <main class="flex-1 flex flex-col min-w-0">
-        <section class="px-8 pt-6 grid grid-cols-2 lg:grid-cols-4 gap-4" aria-label="Live database operations">
-            <div class="card p-4"><p class="text-xs text-on-surface-variant">Today's check-ins</p><p class="text-2xl font-bold text-primary">{{ today_checkins|length }}</p></div>
-            <div class="card p-4"><p class="text-xs text-on-surface-variant">Today's check-outs</p><p class="text-2xl font-bold text-primary">{{ today_checkouts|length }}</p></div>
-            <div class="card p-4"><p class="text-xs text-on-surface-variant">Available rooms</p><p class="text-2xl font-bold text-primary">{{ available_rooms }}</p></div>
-            <div class="card p-4"><p class="text-xs text-on-surface-variant">Open maintenance</p><p class="text-2xl font-bold text-primary">{{ recent_maintenance|length }}</p></div>
-        </section>
-        <section class="px-8 pt-6 grid lg:grid-cols-2 gap-6" aria-label="Manager reservation overview">
-            <div class="card p-5"><h3 class="font-headline-md text-primary mb-3">Today's arrivals</h3>{% for reservation in today_checkins %}<div class="flex justify-between border-b border-outline-variant/20 py-2 text-sm"><span>{{ reservation.guest.guest_name }}</span><span class="text-on-surface-variant">#{{ reservation.id }} · {{ reservation.check_in|date:"H:i" }}</span></div>{% empty %}<p class="text-sm text-on-surface-variant">No arrivals today.</p>{% endfor %}</div>
-            <div class="card p-5"><h3 class="font-headline-md text-primary mb-3">Today's departures</h3>{% for reservation in today_checkouts %}<div class="flex justify-between border-b border-outline-variant/20 py-2 text-sm"><span>{{ reservation.guest.guest_name }}</span><span class="text-on-surface-variant">#{{ reservation.id }} · {{ reservation.check_out|date:"H:i" }}</span></div>{% empty %}<p class="text-sm text-on-surface-variant">No departures today.</p>{% endfor %}</div>
-        </section>
-        <header class="w-full h-16 sticky top-0 z-40 bg-surface-container-lowest flex justify-between items-center px-margin-desktop shadow-sm border-b border-outline-variant">
-            <div class="flex items-center gap-4">
-                <button id="menuToggle" class="material-symbols-outlined text-on-surface-variant p-2 hover:bg-surface-container-low rounded-lg transition-all">menu</button>
-                <h2 class="text-primary font-bold font-label-md uppercase tracking-wider">StayHub Dashboard</h2>
-            </div>
-            <div class="flex items-center gap-2">
-                <div class="relative">
-                    <button id="notificationBtn" class="material-symbols-outlined text-on-surface-variant p-2 hover:bg-surface-container-low rounded-lg transition-all relative">
-                        notifications
-                        <span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
-                    </button>
-                    <div id="notificationPopup" class="hidden absolute right-0 top-12 w-80 bg-surface-container-lowest rounded-xl shadow-2xl border border-outline-variant p-4 z-50">
-                        <h4 class="font-label-md text-label-md font-bold text-on-surface mb-3">Notifications</h4>
-                        <div class="space-y-2">
-                            <div class="p-3 bg-primary/5 rounded-lg border-l-4 border-primary">
-                                <p class="text-sm text-on-surface font-medium">New booking received</p>
-                                <p class="text-xs text-on-surface-variant mt-1">Room 201 - Royal Suite</p>
-                            </div>
-                            <div class="p-3 bg-surface-container-low rounded-lg">
-                                <p class="text-sm text-on-surface font-medium">Payment confirmed</p>
-                                <p class="text-xs text-on-surface-variant mt-1">Invoice #1234 - GH₵450</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <a href="{% url 'logout' %}" class="material-symbols-outlined text-on-surface-variant p-2 hover:bg-surface-container-low rounded-lg transition-all" title="Logout">logout</a>
-            </div>
-        </header>
-        <div class="p-margin-desktop space-y-gutter overflow-y-auto max-w-container-max mx-auto w-full">
-            <section class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div><h3 class="font-headline-lg text-headline-lg text-on-surface">Good Morning, {{ request.user.staff_name|default:"Admin" }}</h3><p class="text-on-surface-variant font-body-md mt-1">System Overview Dashboard</p></div>
-                <div class="flex items-center gap-3 bg-surface-container-low p-2 rounded-xl">
-                    <button class="px-4 py-2 bg-white shadow-sm rounded-lg font-label-md text-label-md text-primary">Daily</button>
-                    <button class="px-4 py-2 font-label-md text-label-md text-on-surface-variant hover:text-primary">Weekly</button>
-                    <button class="px-4 py-2 font-label-md text-label-md text-on-surface-variant hover:text-primary">Monthly</button>
-                </div>
-            </section>
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-                <div class="glass-card p-8 rounded-3xl flex flex-col relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><span class="material-symbols-outlined text-8xl">payments</span></div>
-                    <div class="flex items-center gap-3 mb-6"><div class="w-12 h-12 rounded-2xl bg-secondary-fixed flex items-center justify-center"><span class="material-symbols-outlined text-on-secondary-fixed">people</span></div><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Total Staff</span></div>
-                    <div class="mt-auto"><h4 class="font-headline-xl text-headline-xl text-primary">{{ total_staff|default:0 }}</h4><p class="text-green-600 font-label-sm text-label-sm mt-2 flex items-center gap-1">Registered staff members</p></div>
-                </div>
-                <div class="glass-card p-8 rounded-3xl flex flex-col relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><span class="material-symbols-outlined text-8xl">king_bed</span></div>
-                    <div class="flex items-center gap-3 mb-6"><div class="w-12 h-12 rounded-2xl bg-primary-fixed flex items-center justify-center"><span class="material-symbols-outlined text-on-primary-fixed">meeting_room</span></div><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Total Rooms</span></div>
-                    <div class="mt-auto"><h4 class="font-headline-xl text-headline-xl text-primary">{{ total_rooms|default:0 }}</h4><p class="text-on-surface-variant font-label-sm text-label-sm mt-2">{{ available_rooms|default:0 }} available</p></div>
-                </div>
-                <div class="glass-card p-8 rounded-3xl flex flex-col relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><span class="material-symbols-outlined text-8xl">book_online</span></div>
-                    <div class="flex items-center gap-3 mb-6"><div class="w-12 h-12 rounded-2xl bg-tertiary-fixed flex items-center justify-center"><span class="material-symbols-outlined text-on-tertiary-fixed-variant">confirmed</span></div><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Reservations</span></div>
-                    <div class="mt-auto"><h4 class="font-headline-xl text-headline-xl text-primary">{{ total_reservations|default:0 }}</h4><p class="text-on-surface-variant font-label-sm text-label-sm mt-2">Total reservations</p></div>
-                </div>
-            </section>
-            <section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
-                <div class="lg:col-span-2 bg-surface-container-lowest p-8 rounded-3xl shadow-sm border border-outline-variant">
-                    <div class="flex items-center justify-between mb-8"><div><h5 class="font-headline-md text-headline-md text-on-surface">Revenue Analytics</h5><p class="text-on-surface-variant font-label-sm text-label-sm">Monthly trends and forecasting</p></div>
-                        <div class="flex items-center gap-4"><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-primary"></span><span class="text-on-surface-variant text-label-sm">Actual</span></div><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-secondary-fixed-dim"></span><span class="text-on-surface-variant text-label-sm">Target</span></div></div>
-                    </div>
-                    <div class="h-64 flex items-end justify-between gap-4 px-4">
-                        <div class="flex-1 flex flex-col items-center gap-2 group"><div class="w-full bg-primary/20 rounded-t-lg relative flex items-end justify-center h-32 hover:bg-primary/40 transition-all cursor-pointer"><div class="w-1/2 bg-primary rounded-t-md h-3/4"></div></div><span class="text-label-sm text-on-surface-variant">Jun</span></div>
-                        <div class="flex-1 flex flex-col items-center gap-2 group"><div class="w-full bg-primary/20 rounded-t-lg relative flex items-end justify-center h-48 hover:bg-primary/40 transition-all cursor-pointer"><div class="w-1/2 bg-primary rounded-t-md h-4/5"></div></div><span class="text-label-sm text-on-surface-variant">Jul</span></div>
-                        <div class="flex-1 flex flex-col items-center gap-2 group"><div class="w-full bg-primary/20 rounded-t-lg relative flex items-end justify-center h-40 hover:bg-primary/40 transition-all cursor-pointer"><div class="w-1/2 bg-primary rounded-t-md h-2/3"></div></div><span class="text-label-sm text-on-surface-variant">Aug</span></div>
-                        <div class="flex-1 flex flex-col items-center gap-2 group"><div class="w-full bg-primary/20 rounded-t-lg relative flex items-end justify-center h-56 hover:bg-primary/40 transition-all cursor-pointer"><div class="w-1/2 bg-primary rounded-t-md h-full"></div></div><span class="text-label-sm text-on-surface-variant">Sep</span></div>
-                        <div class="flex-1 flex flex-col items-center gap-2 group"><div class="w-full bg-primary/20 rounded-t-lg relative flex items-end justify-center h-52 hover:bg-primary/40 transition-all cursor-pointer"><div class="w-1/2 bg-primary rounded-t-md h-[90%]"></div></div><span class="text-label-sm text-on-surface-variant">Oct</span></div>
-                    </div>
-                </div>
-                <div class="bg-surface-container-lowest p-8 rounded-3xl shadow-sm border border-outline-variant flex flex-col">
-                    <div class="flex items-center justify-between mb-6"><h5 class="font-headline-md text-headline-md text-on-surface">Room Grid</h5><span class="material-symbols-outlined text-on-surface-variant cursor-pointer">grid_view</span></div>
-                    <div class="grid grid-cols-4 gap-3 flex-1 overflow-y-auto pr-2">
-                        {% for room in '101 102 103 104 105 106 201 202 203 204 205 206'|cut:' '|make_list %}
-                        {% endfor %}
-                        <div class="aspect-square bg-green-100/50 border border-green-200 rounded-xl flex items-center justify-center text-green-700 font-bold hover:scale-105 transition-transform cursor-pointer" title="Available">101</div>
-                        <div class="aspect-square bg-primary-fixed border border-primary/20 rounded-xl flex items-center justify-center text-primary font-bold hover:scale-105 cursor-pointer" title="Occupied">102</div>
-                        <div class="aspect-square bg-primary-fixed border border-primary/20 rounded-xl flex items-center justify-center text-primary font-bold hover:scale-105 cursor-pointer" title="Occupied">103</div>
-                        <div class="aspect-square bg-amber-100/50 border border-amber-200 rounded-xl flex items-center justify-center text-amber-700 font-bold hover:scale-105 cursor-pointer" title="Maintenance">104</div>
-                        <div class="aspect-square bg-green-100/50 border border-green-200 rounded-xl flex items-center justify-center text-green-700 font-bold">105</div>
-                        <div class="aspect-square bg-green-100/50 border border-green-200 rounded-xl flex items-center justify-center text-green-700 font-bold">106</div>
-                        <div class="aspect-square bg-primary-fixed border border-primary/20 rounded-xl flex items-center justify-center text-primary font-bold">201</div>
-                        <div class="aspect-square bg-primary-fixed border border-primary/20 rounded-xl flex items-center justify-center text-primary font-bold">202</div>
-                        <div class="aspect-square bg-green-100/50 border border-green-200 rounded-xl flex items-center justify-center text-green-700 font-bold">203</div>
-                        <div class="aspect-square bg-green-100/50 border border-green-200 rounded-xl flex items-center justify-center text-green-700 font-bold">204</div>
-                        <div class="aspect-square bg-amber-100/50 border border-amber-200 rounded-xl flex items-center justify-center text-amber-700 font-bold">205</div>
-                        <div class="aspect-square bg-green-100/50 border border-green-200 rounded-xl flex items-center justify-center text-green-700 font-bold">206</div>
-                    </div>
-                    <div class="mt-6 flex justify-between pt-4 border-t border-outline-variant">
-                        <div class="flex items-center gap-2"><span class="status-dot bg-green-500" style="width:8px;height:8px;border-radius:50%;display:inline-block"></span><span class="text-label-sm text-on-surface-variant">Available</span></div>
-                        <div class="flex items-center gap-2"><span class="status-dot bg-primary" style="width:8px;height:8px;border-radius:50%;display:inline-block"></span><span class="text-label-sm text-on-surface-variant">Occupied</span></div>
-                        <div class="flex items-center gap-2"><span class="status-dot bg-amber-500" style="width:8px;height:8px;border-radius:50%;display:inline-block"></span><span class="text-label-sm text-on-surface-variant">Service</span></div>
-                    </div>
-                </div>
-            </section>
-            <section class="bg-surface-container-lowest p-8 rounded-3xl shadow-sm border border-outline-variant">
-                <div class="flex items-center justify-between mb-8"><h5 class="font-headline-md text-headline-md text-on-surface">Recent Staff Activity</h5><button class="text-primary font-label-md text-label-md flex items-center gap-2 hover:underline">View All Logs <span class="material-symbols-outlined text-sm">arrow_forward</span></button></div>
-                <div class="overflow-x-auto"><table class="w-full text-left border-collapse">
-                    <thead><tr class="border-b border-outline-variant"><th class="py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Staff Member</th><th class="py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Department</th><th class="py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Action</th><th class="py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Timestamp</th><th class="py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right">Status</th></tr></thead>
-                    <tbody class="divide-y divide-outline-variant">
-                        <tr class="hover:bg-surface-container-low transition-colors group"><td class="py-5"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-primary-fixed-dim text-on-primary-fixed font-bold flex items-center justify-center text-xs">EJ</div><span class="font-body-md text-on-surface font-medium">Elena Jenkins</span></div></td><td class="py-5 text-on-surface-variant font-body-md">Reception</td><td class="py-5 text-on-surface font-body-md">Checked-in guest #7721</td><td class="py-5 text-on-surface-variant font-body-md">10:45 AM</td><td class="py-5 text-right"><span class="px-3 py-1 bg-green-100 text-green-700 rounded-full font-label-sm text-label-sm">Success</span></td></tr>
-                        <tr class="hover:bg-surface-container-low transition-colors group"><td class="py-5"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold flex items-center justify-center text-xs">MK</div><span class="font-body-md text-on-surface font-medium">Marcus Khol</span></div></td><td class="py-5 text-on-surface-variant font-body-md">Housekeeping</td><td class="py-5 text-on-surface font-body-md">Completed Room 104 cleaning</td><td class="py-5 text-on-surface-variant font-body-md">09:12 AM</td><td class="py-5 text-right"><span class="px-3 py-1 bg-green-100 text-green-700 rounded-full font-label-sm text-label-sm">Success</span></td></tr>
-                        <tr class="hover:bg-surface-container-low transition-colors group"><td class="py-5"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-bold flex items-center justify-center text-xs">SW</div><span class="font-body-md text-on-surface font-medium">Sarah Wong</span></div></td><td class="py-5 text-on-surface-variant font-body-md">Accounts</td><td class="py-5 text-on-surface font-body-md">Updated Q3 Revenue Report</td><td class="py-5 text-on-surface-variant font-body-md">08:30 AM</td><td class="py-5 text-right"><span class="px-3 py-1 bg-primary-fixed text-primary rounded-full font-label-sm text-label-sm">Pending</span></td></tr>
-                    </tbody>
-                </table></div>
-            </section>
+        {% empty %}
+        <p class="text-sm text-on-surface-variant text-center py-4">No departures scheduled today.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Overview -->
+  <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="card p-5 text-center">
+      <span class="material-symbols-outlined text-3xl text-primary mb-2" style="font-variation-settings:'FILL'1;">badge</span>
+      <p class="text-3xl font-bold text-on-surface">{{ total_staff|default:0 }}</p>
+      <p class="text-sm text-on-surface-variant">Staff Members</p>
+    </div>
+    <div class="card p-5 text-center">
+      <span class="material-symbols-outlined text-3xl text-primary mb-2" style="font-variation-settings:'FILL'1;">meeting_room</span>
+      <p class="text-3xl font-bold text-on-surface">{{ total_rooms|default:0 }}</p>
+      <p class="text-sm text-on-surface-variant">Total Rooms</p>
+    </div>
+    <div class="card p-5 text-center">
+      <span class="material-symbols-outlined text-3xl text-primary mb-2" style="font-variation-settings:'FILL'1;">book_online</span>
+      <p class="text-3xl font-bold text-on-surface">{{ total_reservations|default:0 }}</p>
+      <p class="text-sm text-on-surface-variant">Reservations</p>
+    </div>
+  </section>
+
+  <!-- Recent Reservations -->
+  <section class="card p-5 mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-headline-md text-headline-md text-primary font-bold">Recent Reservations</h3>
+      <a href="{% url 'booking' %}" class="text-sm text-primary font-semibold hover:underline">View All</a>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="text-xs text-on-surface-variant uppercase border-b border-outline-variant/20">
+            <th class="pb-2 font-semibold">Guest</th>
+            <th class="pb-2 font-semibold">Room</th>
+            <th class="pb-2 font-semibold">Status</th>
+            <th class="pb-2 font-semibold text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-variant/10">
+          {% for reservation in recent_reservations %}
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="py-3">
+              <p class="font-medium text-sm">{{ reservation.guest.guest_name }}</p>
+              <p class="text-xs text-on-surface-variant">#{{ reservation.id }}</p>
+            </td>
+            <td class="py-3 text-sm">{{ reservation.hotel.hotel_name|default:"-" }}</td>
+            <td class="py-3">
+              <span class="badge {% if reservation.status == 'Confirmed' %}badge-success{% elif reservation.status == 'Pending' %}badge-warning{% elif reservation.status == 'Cancelled' %}badge-error{% else %}badge-outline{% endif %} text-[10px]">
+                {{ reservation.status }}
+              </span>
+            </td>
+            <td class="py-3 text-right">
+              <a href="{% url 'booking' %}" class="text-primary text-sm font-semibold hover:underline">Manage</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="py-6 text-center text-sm text-on-surface-variant">No reservations yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Maintenance Tasks -->
+  <section class="card p-5">
+    <h3 class="font-headline-md text-headline-md text-primary font-bold mb-3 flex items-center gap-2">
+      <span class="material-symbols-outlined text-lg">build</span> Open Maintenance
+    </h3>
+    <div class="space-y-2">
+      {% for task in recent_maintenance %}
+      <div class="flex items-center justify-between py-2 border-b border-outline-variant/20">
+        <div>
+          <p class="font-medium text-sm text-on-surface">Room {{ task.room.room_number }}</p>
+          <p class="text-xs text-on-surface-variant">{{ task.issue|truncatechars:40 }}</p>
         </div>
-    </main>
-</div>
-{% endblock %}
-{% block extra_scripts %}
-<script>
-    document.querySelectorAll('.glass-card').forEach(card => {
-        card.addEventListener('mouseenter', () => { card.style.transform = 'translateY(-4px)'; card.style.transition = 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)'; });
-        card.addEventListener('mouseleave', () => { card.style.transform = 'translateY(0)'; });
-    });
-    const searchInput = document.createElement('input');
-    searchInput.type = 'text'; searchInput.placeholder = 'Search guests or rooms...';
-    searchInput.className = 'bg-surface-container border-none rounded-lg px-4 py-2 font-label-sm text-label-sm focus:ring-2 focus:ring-primary w-64 transition-all duration-300';
-    const navLeft = document.querySelector('header > div:first-child');
-    const sc = document.createElement('div'); sc.className = 'ml-12 hidden xl:block'; sc.appendChild(searchInput);
-    if(navLeft) navLeft.appendChild(sc);
-    
-    // Menu toggle functionality
-    const menuToggle = document.getElementById('menuToggle');
-    const sidebar = document.querySelector('aside');
-    let sidebarOpen = true;
-    
-    if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', () => {
-            sidebarOpen = !sidebarOpen;
-            if (sidebarOpen) {
-                sidebar.style.transform = 'translateX(0)';
-                sidebar.style.marginLeft = '0';
-            } else {
-                sidebar.style.transform = 'translateX(-100%)';
-                sidebar.style.marginLeft = '-280px';
-            }
-        });
-    }
-    
-    // Notification popup functionality
-    const notificationBtn = document.getElementById('notificationBtn');
-    const notificationPopup = document.getElementById('notificationPopup');
-    
-    if (notificationBtn && notificationPopup) {
-        notificationBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            notificationPopup.classList.toggle('hidden');
-        });
-        
-        document.addEventListener('click', (e) => {
-            if (!notificationPopup.contains(e.target) && e.target !== notificationBtn) {
-                notificationPopup.classList.add('hidden');
-            }
-        });
-    }
-</script>
+        <span class="badge {% if task.status == 'OPEN' %}badge-error{% elif task.status == 'IN_PROGRESS' %}badge-warning{% else %}badge-outline{% endif %} text-[10px]">
+          {{ task.status|title }}
+        </span>
+      </div>
+      {% empty %}
+      <p class="text-sm text-on-surface-variant text-center py-4">No open maintenance tasks.</p>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+  <div class="flex items-center justify-around h-16 max-w-lg mx-auto">
+    <a href="{% url 'manager_dashboard' %}" class="flex flex-col items-center gap-0.5 text-primary">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL'1;">dashboard</span>
+      <span class="text-[10px] font-semibold">Dashboard</span>
+    </a>
+    <a href="{% url 'booking' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">calendar_add_on</span>
+      <span class="text-[10px] font-semibold">Bookings</span>
+    </a>
+    <a href="{% url 'explore_stays' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">search</span>
+      <span class="text-[10px] font-semibold">Explore</span>
+    </a>
+    <a href="{% url 'profile' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] font-semibold">Profile</span>
+    </a>
+  </div>
+</nav>
 {% endblock %}

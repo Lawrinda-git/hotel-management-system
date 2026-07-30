@@ -108,8 +108,7 @@
     <!-- Support -->
     <div class="mt-6 text-center">
         <p class="text-sm text-on-surface-variant">
-            Need help?
-            <a href="#" class="text-primary font-semibold hover:underline" onclick="event.preventDefault(); StayHub.Toast.info('Support chat coming soon!');">Contact Support</a>
+            Need help? Contact the front desk for assistance with your reservation.
         </p>
     </div>
 </main>
@@ -128,7 +127,7 @@
         refreshStatus();
         window.setInterval(refreshStatus, 30000);
     }
-    // Read reservation data from URL params
+
     function getParam(name) {
         const params = new URLSearchParams(window.location.search);
         return params.get(name) || '';
@@ -153,7 +152,6 @@
         return 'GH₵' + amount.toLocaleString('en-US', { maximumFractionDigits: 0 });
     }
 
-    // Populate fields
     document.getElementById('reservation-checkin').textContent = formatDate(checkIn);
     document.getElementById('reservation-checkout').textContent = formatDate(checkOut);
     document.getElementById('reservation-guest').textContent = '{{ user_name|default:"Guest" }}';
@@ -166,7 +164,5 @@
         const nights = Math.max(1, Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24)));
         document.getElementById('reservation-nights').textContent = nights;
     }
-
-
 </script>
 {% endblock %}

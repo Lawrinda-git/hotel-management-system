@@ -1,0 +1,255 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub | Admin Management{% endblock %}
+{% block body_class %}bg-background text-on-surface pb-20{% endblock %}
+{% block content %}
+<!-- ===== TOP HEADER ===== -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+  <div class="flex items-center justify-between px-4 h-16 max-w-6xl mx-auto">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md">
+        <span class="material-symbols-outlined text-white text-xl">admin_panel_settings</span>
+      </div>
+      <div>
+        <h1 class="font-headline-md text-headline-md text-primary font-bold leading-tight">StayHub</h1>
+        <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Admin Control</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'manager_dashboard' %}" class="btn btn-icon btn-ghost" aria-label="Back to Dashboard">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <a href="{% url 'profile' %}" class="btn btn-icon btn-ghost" aria-label="Profile">
+        <span class="material-symbols-outlined">person</span>
+      </a>
+      <a href="{% url 'logout' %}" class="btn btn-icon btn-ghost" aria-label="Log out">
+        <span class="material-symbols-outlined">logout</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="pt-20 pb-8 px-4 max-w-6xl mx-auto">
+  <!-- Welcome -->
+  <section class="mb-6">
+    <h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">Admin Management</h2>
+    <p class="text-on-surface-variant">Control rooms, images, employees, and maintenance.</p>
+  </section>
+
+  <!-- Tabs -->
+  <section class="flex gap-2 mb-6 overflow-x-auto pb-2">
+    <button onclick="document.getElementById('tab-rooms').classList.remove('hidden');document.getElementById('tab-staff').classList.add('hidden');document.getElementById('tab-hotels').classList.add('hidden');document.getElementById('tab-maintenance').classList.add('hidden');this.classList.add('bg-primary','text-white');this.classList.remove('bg-surface-container','text-on-surface');" class="btn btn-primary btn-sm whitespace-nowrap" id="tab-rooms-btn">
+      <span class="material-symbols-outlined text-sm">meeting_room</span> Rooms
+    </button>
+    <button onclick="document.getElementById('tab-staff').classList.remove('hidden');document.getElementById('tab-rooms').classList.add('hidden');document.getElementById('tab-hotels').classList.add('hidden');document.getElementById('tab-maintenance').classList.add('hidden');this.classList.add('bg-primary','text-white');this.classList.remove('bg-surface-container','text-on-surface');" class="btn btn-ghost btn-sm whitespace-nowrap bg-surface-container text-on-surface" id="tab-staff-btn">
+      <span class="material-symbols-outlined text-sm">badge</span> Employees
+    </button>
+    <button onclick="document.getElementById('tab-hotels').classList.remove('hidden');document.getElementById('tab-rooms').classList.add('hidden');document.getElementById('tab-staff').classList.add('hidden');document.getElementById('tab-maintenance').classList.add('hidden');this.classList.add('bg-primary','text-white');this.classList.remove('bg-surface-container','text-on-surface');" class="btn btn-ghost btn-sm whitespace-nowrap bg-surface-container text-on-surface" id="tab-hotels-btn">
+      <span class="material-symbols-outlined text-sm">hotel</span> Hotels
+    </button>
+    <button onclick="document.getElementById('tab-maintenance').classList.remove('hidden');document.getElementById('tab-rooms').classList.add('hidden');document.getElementById('tab-staff').classList.add('hidden');document.getElementById('tab-hotels').classList.add('hidden');this.classList.add('bg-primary','text-white');this.classList.remove('bg-surface-container','text-on-surface');" class="btn btn-ghost btn-sm whitespace-nowrap bg-surface-container text-on-surface" id="tab-maintenance-btn">
+      <span class="material-symbols-outlined text-sm">build</span> Maintenance
+    </button>
+  </section>
+
+  <!-- Rooms Tab -->
+  <section id="tab-rooms" class="card p-5 mb-4">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-headline-md text-headline-md text-primary font-bold flex items-center gap-2">
+        <span class="material-symbols-outlined text-lg">meeting_room</span> Room Management
+      </h3>
+      <button class="btn btn-primary btn-sm" onclick="document.getElementById('app-toast').textContent='Add room form coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+        <span class="material-symbols-outlined text-sm">add</span> Add Room
+      </button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="text-xs text-on-surface-variant uppercase border-b border-outline-variant/20">
+            <th class="pb-2 font-semibold">Room</th>
+            <th class="pb-2 font-semibold">Hotel</th>
+            <th class="pb-2 font-semibold">Type</th>
+            <th class="pb-2 font-semibold">Status</th>
+            <th class="pb-2 font-semibold">Price</th>
+            <th class="pb-2 font-semibold text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-variant/10">
+          {% for room in rooms %}
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="py-3">
+              <p class="font-semibold text-sm text-primary">#{{ room.room_number }}</p>
+              <p class="text-xs text-on-surface-variant">Floor {{ room.floor|default:"-" }}</p>
+            </td>
+            <td class="py-3 text-sm">{{ room.hotel.hotel_name|default:"-" }}</td>
+            <td class="py-3 text-sm">{{ room.room_type.type_name|default:"Standard" }}</td>
+            <td class="py-3">
+              <span class="badge {% if room.status == 'AVAILABLE' %}badge-success{% elif room.status == 'OCCUPIED' %}badge-primary{% elif room.status == 'MAINTENANCE' %}badge-error{% else %}badge-warning{% endif %} text-[10px]">
+                {{ room.status|title }}
+              </span>
+            </td>
+            <td class="py-3 text-sm font-medium">GH₵{{ room.price_per_night|default:room.room_type.price_per_night|default:0 }}</td>
+            <td class="py-3 text-right">
+              <button class="text-primary text-xs font-semibold hover:underline mr-2" onclick="document.getElementById('app-toast').textContent='Edit room {{ room.room_number }} coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">Edit</button>
+              <button class="text-error text-xs font-semibold hover:underline" onclick="document.getElementById('app-toast').textContent='Delete room {{ room.room_number }} coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">Delete</button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="py-6 text-center text-sm text-on-surface-variant">No rooms found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Staff Tab -->
+  <section id="tab-staff" class="card p-5 mb-4 hidden">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-headline-md text-headline-md text-primary font-bold flex items-center gap-2">
+        <span class="material-symbols-outlined text-lg">badge</span> Employees
+      </h3>
+      <button class="btn btn-primary btn-sm" onclick="document.getElementById('app-toast').textContent='Add employee form coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+        <span class="material-symbols-outlined text-sm">add</span> Add Employee
+      </button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="text-xs text-on-surface-variant uppercase border-b border-outline-variant/20">
+            <th class="pb-2 font-semibold">Name</th>
+            <th class="pb-2 font-semibold">Email</th>
+            <th class="pb-2 font-semibold">Role</th>
+            <th class="pb-2 font-semibold">Phone</th>
+            <th class="pb-2 font-semibold text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-variant/10">
+          {% for staff in staff_members %}
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="py-3">
+              <div class="flex items-center gap-2">
+                <div class="avatar avatar-initialis w-8 h-8 text-xs">{{ staff.staff_name|first|upper }}</div>
+                <span class="font-medium text-sm">{{ staff.staff_name }}</span>
+              </div>
+            </td>
+            <td class="py-3 text-sm text-on-surface-variant">{{ staff.email }}</td>
+            <td class="py-3">
+              <span class="badge {% if staff.role == 'admin' %}badge-primary{% elif staff.role == 'manager' %}badge-success{% elif staff.role == 'receptionist' %}badge-outline{% elif staff.role == 'accountant' %}badge-secondary{% else %}badge-warning{% endif %} text-[10px]">
+                {{ staff.role|title }}
+              </span>
+            </td>
+            <td class="py-3 text-sm">{{ staff.staff_phone|default:"-" }}</td>
+            <td class="py-3 text-right">
+              <button class="text-primary text-xs font-semibold hover:underline mr-2" onclick="document.getElementById('app-toast').textContent='Edit employee coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">Edit</button>
+              {% if staff.role != 'admin' %}
+              <button class="text-error text-xs font-semibold hover:underline" onclick="document.getElementById('app-toast').textContent='Remove employee coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">Remove</button>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="py-6 text-center text-sm text-on-surface-variant">No employees found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Hotels Tab -->
+  <section id="tab-hotels" class="card p-5 mb-4 hidden">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-headline-md text-headline-md text-primary font-bold flex items-center gap-2">
+        <span class="material-symbols-outlined text-lg">hotel</span> Hotels & Resorts
+      </h3>
+      <button class="btn btn-primary btn-sm" onclick="document.getElementById('app-toast').textContent='Add hotel form coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+        <span class="material-symbols-outlined text-sm">add</span> Add Property
+      </button>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+      <button class="btn btn-primary btn-sm">All</button>
+      {% for code, label in hotel_categories %}
+      <button class="btn btn-ghost btn-sm">{{ label }}</button>
+      {% endfor %}
+    </div>
+
+    <!-- Grouped by Category -->
+    {% for category_code, category_label in hotel_categories %}
+    {% with category_hotels=hotels|dictsort:"category" %}
+    {% endif %}
+    {% endfor %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for hotel in hotels %}
+      <div class="card p-4">
+        <div class="aspect-video rounded-xl bg-surface-container mb-3 flex items-center justify-center overflow-hidden relative">
+          {% if hotel.hotel_image %}
+          <img src="{{ hotel.hotel_image.url }}" alt="{{ hotel.hotel_name }}" class="w-full h-full object-cover">
+          {% else %}
+          <span class="material-symbols-outlined text-4xl text-outline">hotel</span>
+          {% endif %}
+          <span class="absolute top-2 left-2 badge badge-primary text-[10px]">{{ hotel.get_category_display }}</span>
+        </div>
+        <h4 class="font-headline-md text-headline-md text-on-surface font-bold mb-1">{{ hotel.hotel_name }}</h4>
+        <p class="text-sm text-on-surface-variant mb-1">{{ hotel.hotel_address|truncatechars:60 }}</p>
+        <p class="text-sm text-on-surface-variant">{{ hotel.hotel_phone }}</p>
+        <div class="flex gap-2 mt-3">
+          <button class="btn btn-outline btn-sm flex-1" onclick="document.getElementById('app-toast').textContent='Edit hotel coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">Edit</button>
+        </div>
+      </div>
+      {% empty %}
+      <p class="col-span-full text-sm text-on-surface-variant text-center py-4">No hotels configured.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Maintenance Tab -->
+  <section id="tab-maintenance" class="card p-5 mb-4 hidden">
+    <h3 class="font-headline-md text-headline-md text-primary font-bold mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-lg">build</span> Open Maintenance Tasks
+    </h3>
+    <div class="space-y-2">
+      {% for task in maintenance_tasks %}
+      <div class="flex items-center justify-between py-3 border-b border-outline-variant/20">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-700">
+            <span class="material-symbols-outlined text-lg">build</span>
+          </div>
+          <div>
+            <p class="font-medium text-sm text-on-surface">Room {{ task.room.room_number }}</p>
+            <p class="text-xs text-on-surface-variant">{{ task.issue|truncatechars:50 }}</p>
+          </div>
+        </div>
+        <span class="badge {% if task.status == 'OPEN' %}badge-error{% elif task.status == 'IN_PROGRESS' %}badge-warning{% else %}badge-outline{% endif %} text-[10px]">
+          {{ task.status|title }}
+        </span>
+      </div>
+      {% empty %}
+      <p class="text-sm text-green-600 text-center py-4 font-medium">No open maintenance tasks.</p>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+  <div class="flex items-center justify-around h-16 max-w-lg mx-auto">
+    <a href="{% url 'admin_management' %}" class="flex flex-col items-center gap-0.5 text-primary">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL'1;">dashboard</span>
+      <span class="text-[10px] font-semibold">Manage</span>
+    </a>
+    <a href="{% url 'manager_dashboard' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">monitoring</span>
+      <span class="text-[10px] font-semibold">Overview</span>
+    </a>
+    <a href="{% url 'booking' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">calendar_add_on</span>
+      <span class="text-[10px] font-semibold">Bookings</span>
+    </a>
+    <a href="{% url 'profile' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] font-semibold">Profile</span>
+    </a>
+  </div>
+</nav>
+{% endblock %}

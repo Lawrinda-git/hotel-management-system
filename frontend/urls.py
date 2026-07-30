@@ -73,4 +73,6 @@ urlpatterns = [
     path("accountant/", views.accountant_dashboard, name="accountant_dashboard"),
     path("housekeeping/", views.housekeeping_dashboard, name="housekeeping_dashboard"),
     path("design-system/", views.design_system, name="design_system"),
+    path("admin-management/", views.admin_management, name="admin_management"),
+    path("staff-profile/", views.profile, name="staff_profile"),
 ]
