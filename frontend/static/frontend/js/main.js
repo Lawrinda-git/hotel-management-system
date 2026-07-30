@@ -203,6 +203,31 @@
     }
   };
 
+  // ===================== API / ERROR HANDLING =====================
+  // A small shared wrapper keeps JSON errors consistent across pages while
+  // retaining the native fetch API for simple requests.
+  const Api = {
+    request: async function(url, options) {
+      var response;
+      try {
+        response = await fetch(url, options || {});
+      } catch (error) {
+        Toast.error('Network error. Please check your connection and try again.');
+        throw error;
+      }
+      var data = {};
+      try { data = await response.json(); } catch (ignore) {}
+      if (!response.ok) {
+        var message = data.detail || data.error || 'Something went wrong. Please try again.';
+        Toast.error(message);
+        var error = new Error(message);
+        error.status = response.status;
+        throw error;
+      }
+      return data;
+    }
+  };
+
   // ===================== DATE PICKER STYLING =====================
   // Fix date input styling by setting min date
   document.addEventListener('DOMContentLoaded', function() {
@@ -223,11 +248,27 @@
   }
 
   function init() {
-    DarkMode.init();
+    // Dark mode is intentionally disabled for the current StayHub experience.
+    document.documentElement.classList.remove('dark');
     Dropdown.init();
     BottomNav.init();
     HeaderScroll.init();
     SearchHandler.init();
+    document.querySelectorAll('img:not([loading])').forEach(function(img) {
+      img.loading = 'lazy';
+      img.decoding = 'async';
+    });
+    document.querySelectorAll('form[data-toast-success]').forEach(function(form) {
+      form.addEventListener('submit', function() {
+        Toast.success(form.getAttribute('data-toast-success'));
+      });
+    });
+    window.addEventListener('error', function() {
+      Toast.error('We could not complete that action. Please try again.');
+    });
+    window.addEventListener('unhandledrejection', function() {
+      Toast.error('We could not complete that action. Please try again.');
+    });
   }
 
   // Expose to global scope for inline usage
@@ -235,7 +276,8 @@
     Toast: Toast,
     Modal: Modal,
     DarkMode: DarkMode,
-    Dropdown: Dropdown
+    Dropdown: Dropdown,
+    Api: Api
   };
 
 })();

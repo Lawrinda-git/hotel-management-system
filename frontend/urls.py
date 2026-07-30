@@ -35,6 +35,7 @@ urlpatterns = [
     path("api/booking/options/", views.booking_options, name="booking_options"),
     path("api/booking/create/", views.create_booking, name="create_booking"),
     path("reservation-confirmed/", views.reservation_confirmed, name="reservation_confirmed"),
+    path("api/reservations/<int:reservation_id>/status/", views.reservation_status, name="reservation_status"),
     # Staff Dashboard Pages
     path("manager/", views.manager_dashboard, name="manager_dashboard"),
     path("receptionist/", views.receptionist_dashboard, name="receptionist_dashboard"),

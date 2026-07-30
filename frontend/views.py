@@ -18,6 +18,7 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.db import connection, transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
 from apps.guests.models import Guest
@@ -156,15 +157,31 @@ def database_health(request):
 def profile(request):
     """Show and update the signed-in user's profile."""
     user = request.user
+    phone = user.staff_phone or ""
+    phone_country_code = "+233"
+    phone_number = phone
+    for code in ("+233", "+234", "+254", "+27", "+44", "+1"):
+        if phone.startswith(code):
+            phone_country_code, phone_number = code, phone[len(code):]
+            break
+
+    def render_profile(**extra):
+        context = {
+            "phone_country_code": phone_country_code,
+            "phone_number": phone_number,
+        }
+        context.update(extra)
+        return render(request, "frontend/profile.html", context)
+
     if request.method == "POST":
         full_name = (request.POST.get("full_name") or "").strip()
         email = (request.POST.get("email") or "").strip().lower()
         staff_phone = _phone_value(request.POST.get("country_code"), request.POST.get("staff_phone"))
         upload = request.FILES.get("profile_picture")
         if not full_name or not email or not staff_phone:
-            return render(request, "frontend/profile.html", {"profile_error": "Name, email, and a valid phone number are required."})
+            return render_profile(profile_error="Name, email, and a valid phone number are required.")
         if Staff.objects.filter(email__iexact=email).exclude(pk=user.pk).exists():
-            return render(request, "frontend/profile.html", {"profile_error": "That email is already in use."})
+            return render_profile(profile_error="That email is already in use.")
         parts = full_name.split(maxsplit=1)
         user.staff_name = full_name
         user.first_name = parts[0]
@@ -177,11 +194,11 @@ def profile(request):
             user.profile_picture = None
         if upload:
             if upload.size > 5 * 1024 * 1024 or not (upload.content_type or "").startswith("image/"):
-                return render(request, "frontend/profile.html", {"profile_error": "Use an image file smaller than 5 MB."})
+                return render_profile(profile_error="Use an image file smaller than 5 MB.")
             user.profile_picture = upload
         user.save()
         return redirect("profile")
-    return render(request, "frontend/profile.html")
+    return render_profile()
 
 
 @require_http_methods(["POST"])
@@ -274,7 +291,7 @@ def password_reset(request):
     """Email a reset link for password reset."""
     staff_login = request.GET.get("staff_login") == "1"
     if request.method == "POST":
-        identifier = (request.POST.get("username") or "").strip()
+        identifier = (request.POST.get("username") or request.POST.get("email") or "").strip()
         
         if not identifier:
             return render(request, "frontend/password_reset.html", {"error": "Username or email is required.", "staff_login": staff_login})
@@ -564,6 +581,7 @@ def reservation_confirmed(request):
     room_number = request.GET.get("room_number", "")
     room_type = request.GET.get("room_type", "")
     hotel_name = request.GET.get("hotel_name", "")
+    guest_email = request.GET.get("guest_email", "")
 
     reservation = None
     invoice = None
@@ -598,8 +616,22 @@ def reservation_confirmed(request):
         "hotel_name": hotel_name,
         "user_name": user_name,
         "user_email": user_email,
+        "guest_email": guest_email,
     }
     return render(request, "frontend/reservation_confirmed.html", context)
+
+
+@require_http_methods(["GET"])
+def reservation_status(request, reservation_id):
+    """Return live status for a reservation owned by the current guest/staff user."""
+    reservation = Reservation.objects.select_related("guest").filter(pk=reservation_id).first()
+    if not reservation:
+        return JsonResponse({"detail": "Reservation not found."}, status=404)
+    if not request.user.is_authenticated and request.GET.get("email", "").lower() != reservation.guest.guest_email.lower():
+        return JsonResponse({"detail": "Authentication required."}, status=403)
+    if request.user.is_authenticated and request.user.email.lower() != reservation.guest.guest_email.lower() and not request.user.is_staff:
+        return JsonResponse({"detail": "Not allowed."}, status=403)
+    return JsonResponse({"id": reservation.pk, "status": reservation.status})
 
 
 def team(request):
@@ -712,7 +744,7 @@ def create_booking(request):
             hotel=room.hotel,
             check_in=check_in,
             check_out=check_out,
-            status=Reservation.ReservationStatus.CONFIRMED,
+            status=Reservation.ReservationStatus.PENDING,
         )
         RoomReservation.objects.create(resv=reservation, room=room)
         room.status = Room.RoomStatus.RESERVED
@@ -795,6 +827,7 @@ def manager_dashboard(request):
             reservation_qs = reservation_qs.filter(hotel_id=user.hotel_id)
             maintenance_qs = maintenance_qs.filter(room__hotel_id=user.hotel_id)
     
+    today = timezone.localdate()
     context = {
         "total_staff": staff_qs.count(),
         "total_rooms": room_qs.count(),
@@ -803,6 +836,9 @@ def manager_dashboard(request):
         "maintenance_rooms": room_qs.filter(status=Room.RoomStatus.MAINTENANCE).count(),
         "total_reservations": reservation_qs.count(),
         "recent_maintenance": maintenance_qs.order_by("-report_date")[:5],
+        "today_checkins": reservation_qs.filter(check_in__date=today).select_related("guest", "hotel").order_by("check_in")[:10],
+        "today_checkouts": reservation_qs.filter(check_out__date=today).select_related("guest", "hotel").order_by("check_out")[:10],
+        "live_rooms": room_qs.select_related("room_type").order_by("room_number")[:24],
     }
     return render(request, "frontend/manager_dashboard.html", context)
 
@@ -810,19 +846,56 @@ def manager_dashboard(request):
 @_role_required("receptionist")
 def receptionist_dashboard(request):
     """Receptionist operations dashboard."""
-    return render(request, "frontend/receptionist_dashboard.html")
+    from apps.rooms.models import Room
+    today = timezone.localdate()
+    reservations = Reservation.objects.select_related("guest", "hotel").order_by("check_in")
+    rooms = Room.objects.all()
+    if request.user.hotel_id:
+        reservations = reservations.filter(hotel_id=request.user.hotel_id)
+        rooms = rooms.filter(hotel_id=request.user.hotel_id)
+    return render(request, "frontend/receptionist_dashboard.html", {
+        "available_rooms_count": rooms.filter(status=Room.RoomStatus.AVAILABLE).count(),
+        "ready_rooms_count": rooms.filter(status=Room.RoomStatus.AVAILABLE, housekeeping_status=Room.HousekeepingStatus.CLEAN).count(),
+        "today_checkins": reservations.filter(check_in__date=today).select_related("guest")[:20],
+        "today_checkouts": reservations.filter(check_out__date=today).select_related("guest")[:20],
+        "upcoming_reservations": reservations.filter(check_in__date__gte=today).order_by("check_in")[:20],
+    })
 
 
 @_role_required("accountant")
 def accountant_dashboard(request):
     """Accountant/financial dashboard."""
-    return render(request, "frontend/accountant_dashboard.html")
+    from apps.billing.models import Payment
+    invoices = Invoice.objects.select_related("reservation", "reservation__guest").order_by("-issue_date")
+    payments = Payment.objects.select_related("invoice", "invoice__reservation__guest").order_by("-payment_date")
+    if request.user.hotel_id:
+        invoices = invoices.filter(hotel_id=request.user.hotel_id)
+        payments = payments.filter(hotel_id=request.user.hotel_id)
+    return render(request, "frontend/accountant_dashboard.html", {
+        "invoice_count": invoices.count(),
+        "unpaid_invoice_count": invoices.filter(status=Invoice.InvoiceStatus.UNPAID).count(),
+        "paid_invoice_count": invoices.filter(status=Invoice.InvoiceStatus.PAID).count(),
+        "recent_invoices": invoices[:10],
+        "recent_payments": payments[:10],
+    })
 
 
 @_role_required("housekeeping")
 def housekeeping_dashboard(request):
     """Housekeeping operations dashboard."""
-    return render(request, "frontend/housekeeping_dashboard.html")
+    from apps.rooms.models import Maintenance
+    from apps.common.mixins import MANAGER_ROLES
+    rooms = Room.objects.select_related("room_type", "hotel")
+    maintenance = Maintenance.objects.select_related("room", "room__room_type", "staff").exclude(status=Maintenance.MaintenanceStatus.RESOLVED).exclude(status=Maintenance.MaintenanceStatus.CLOSED)
+    if request.user.hotel_id:
+        rooms = rooms.filter(hotel_id=request.user.hotel_id)
+        maintenance = maintenance.filter(room__hotel_id=request.user.hotel_id)
+    return render(request, "frontend/housekeeping_dashboard.html", {
+        "dirty_rooms": rooms.filter(housekeeping_status=Room.HousekeepingStatus.DIRTY).order_by("room_number"),
+        "clean_rooms": rooms.filter(housekeeping_status=Room.HousekeepingStatus.CLEAN).order_by("room_number"),
+        "maintenance_tasks": maintenance.order_by("-report_date")[:20],
+        "room_inventory": rooms.order_by("room_number")[:40],
+    })
 
 
 def design_system(request):

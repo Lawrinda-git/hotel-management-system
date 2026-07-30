@@ -25,7 +25,7 @@
                     <p class="font-headline-md text-headline-md text-primary font-bold">#{{ reservation_id|default:"---" }}</p>
                 </div>
             </div>
-            <span class="badge badge-success">Confirmed</span>
+            <span class="badge badge-success" id="reservation-status">Confirmed</span>
         </div>
 
         <!-- Hotel & Room -->
@@ -119,6 +119,15 @@
 
 {% block extra_scripts %}
 <script>
+    const statusId = '{{ reservation_id|default:"" }}';
+    if (statusId) {
+        const statusBadge = document.getElementById('reservation-status');
+        const statusEmail = encodeURIComponent('{{ guest_email|default:user_email|escapejs }}');
+        const refreshStatus = () => fetch('{% url "reservation_status" reservation_id=0 %}'.replace('/0/', '/' + statusId + '/') + '?email=' + statusEmail)
+            .then(r => r.ok ? r.json() : null).then(data => { if (data && statusBadge) statusBadge.textContent = data.status.replace('_', ' '); }).catch(() => {});
+        refreshStatus();
+        window.setInterval(refreshStatus, 30000);
+    }
     // Read reservation data from URL params
     function getParam(name) {
         const params = new URLSearchParams(window.location.search);

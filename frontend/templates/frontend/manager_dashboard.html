@@ -23,6 +23,16 @@
         </div>
     </aside>
     <main class="flex-1 flex flex-col min-w-0">
+        <section class="px-8 pt-6 grid grid-cols-2 lg:grid-cols-4 gap-4" aria-label="Live database operations">
+            <div class="card p-4"><p class="text-xs text-on-surface-variant">Today's check-ins</p><p class="text-2xl font-bold text-primary">{{ today_checkins|length }}</p></div>
+            <div class="card p-4"><p class="text-xs text-on-surface-variant">Today's check-outs</p><p class="text-2xl font-bold text-primary">{{ today_checkouts|length }}</p></div>
+            <div class="card p-4"><p class="text-xs text-on-surface-variant">Available rooms</p><p class="text-2xl font-bold text-primary">{{ available_rooms }}</p></div>
+            <div class="card p-4"><p class="text-xs text-on-surface-variant">Open maintenance</p><p class="text-2xl font-bold text-primary">{{ recent_maintenance|length }}</p></div>
+        </section>
+        <section class="px-8 pt-6 grid lg:grid-cols-2 gap-6" aria-label="Manager reservation overview">
+            <div class="card p-5"><h3 class="font-headline-md text-primary mb-3">Today's arrivals</h3>{% for reservation in today_checkins %}<div class="flex justify-between border-b border-outline-variant/20 py-2 text-sm"><span>{{ reservation.guest.guest_name }}</span><span class="text-on-surface-variant">#{{ reservation.id }} · {{ reservation.check_in|date:"H:i" }}</span></div>{% empty %}<p class="text-sm text-on-surface-variant">No arrivals today.</p>{% endfor %}</div>
+            <div class="card p-5"><h3 class="font-headline-md text-primary mb-3">Today's departures</h3>{% for reservation in today_checkouts %}<div class="flex justify-between border-b border-outline-variant/20 py-2 text-sm"><span>{{ reservation.guest.guest_name }}</span><span class="text-on-surface-variant">#{{ reservation.id }} · {{ reservation.check_out|date:"H:i" }}</span></div>{% empty %}<p class="text-sm text-on-surface-variant">No departures today.</p>{% endfor %}</div>
+        </section>
         <header class="w-full h-16 sticky top-0 z-40 bg-surface-container-lowest flex justify-between items-center px-margin-desktop shadow-sm border-b border-outline-variant">
             <div class="flex items-center gap-4">
                 <button id="menuToggle" class="material-symbols-outlined text-on-surface-variant p-2 hover:bg-surface-container-low rounded-lg transition-all">menu</button>

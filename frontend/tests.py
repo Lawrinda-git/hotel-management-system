@@ -47,6 +47,20 @@ class PublicJourneyTests(TestCase):
         self.assertContains(response, "Morgan")
         self.assertNotContains(response, ">Alex<")
 
+    def test_authenticated_users_are_redirected_from_registration(self):
+        user = Staff.objects.create_user(
+            username="already@example.com", email="already@example.com", password="SafePass123",
+            staff_name="Already Registered", role="guest",
+        )
+        self.client.force_login(user)
+        response = self.client.get(reverse("create_account"))
+        self.assertRedirects(response, reverse("guest_home"))
+
+    def test_explore_search_value_is_preserved(self):
+        response = self.client.get(reverse("explore_stays"), {"q": "Accra"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="Accra"')
+
     def test_staff_can_sign_in_with_email(self):
         Staff.objects.create_user(
             username="manager@example.com", email="manager@example.com", password="SafePass123",

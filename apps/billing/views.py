@@ -9,6 +9,7 @@ from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django_filters.rest_framework import DjangoFilterBackend
@@ -32,7 +33,9 @@ def _initialize_paystack_transaction(invoice, request):
 		"email": guest.guest_email,
 		"amount": str(amount_kobo),
 		"reference": f"inv-{invoice.id}-{invoice.reservation_id}",
-		"callback_url": settings.PAYSTACK_RETURN_URL,
+		# Build this from the incoming request so localhost, ngrok, staging,
+		# and the eventual production domain all return to the correct host.
+		"callback_url": request.build_absolute_uri(reverse("booking")),
 		"metadata": {
 			"invoice_id": invoice.id,
 			"reservation_id": invoice.reservation_id,
@@ -83,6 +86,37 @@ def verify_paystack_payment(request, reference):
         status = payment_data.get("status")
         amount = Decimal(str(payment_data.get("amount", 0))) / Decimal("100")
         paid_at = payment_data.get("paid_at")
+
+        # Complete the matching invoice/reservation only after Paystack has
+        # verified a successful transaction. References are generated as
+        # inv-{invoice_id}-{reservation_id} during checkout initialization.
+        payment_recorded = False
+        if status == "success":
+            reference_parts = reference.split("-")
+            if len(reference_parts) == 3 and reference_parts[0] == "inv":
+                invoice = Invoice.objects.select_related("reservation").filter(
+                    pk=reference_parts[1], reservation_id=reference_parts[2]
+                ).first()
+                if invoice and amount >= invoice.total_amount:
+                    with transaction.atomic():
+                        Payment.objects.update_or_create(
+                            provider_reference=reference,
+                            defaults={
+                                "invoice": invoice,
+                                "amount": amount,
+                                "method": Payment.PaymentMethod.PAYSTACK,
+                                "status": Payment.PaymentStatus.SUCCESS,
+                                "provider_response": data,
+                            },
+                        )
+                        invoice.status = Invoice.InvoiceStatus.PAID
+                        invoice.save(update_fields=["status"])
+                        invoice.reservation.status = invoice.reservation.ReservationStatus.CONFIRMED
+                        invoice.reservation.save(update_fields=["status"])
+                        payment_recorded = True
+
+        if status == "success" and not payment_recorded:
+            return JsonResponse({"detail": "Payment could not be matched to an invoice."}, status=400)
         
         return JsonResponse({
             "detail": "Payment verified.",

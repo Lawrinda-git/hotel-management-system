@@ -35,19 +35,6 @@
       </div>
     </div>
 
-    <!-- Dark Mode Toggle -->
-    <div class="bg-surface-container rounded-xl p-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center">
-          <span class="material-symbols-outlined text-on-surface-variant">dark_mode</span>
-        </div>
-        <div>
-          <p class="font-label-md text-label-md text-on-surface font-semibold">Dark Mode</p>
-          <p class="text-label-sm text-on-surface-variant">Switch between light and dark themes</p>
-        </div>
-      </div>
-      {% include "frontend/components/_dark_mode_toggle.html" %}
-    </div>
   </section>
 
   <!-- Edit Profile Form -->
@@ -69,7 +56,7 @@
     </div>
     {% endif %}
 
-    <form method="post" enctype="multipart/form-data" class="space-y-6">
+    <form method="post" enctype="multipart/form-data" class="space-y-6" data-toast-success="Profile updated successfully.">
       {% csrf_token %}
 
       <!-- Profile Picture Upload -->
@@ -112,14 +99,14 @@
         <label class="label">Phone Number</label>
         <div class="input-group">
           <select name="country_code" class="select" style="width: auto; min-width: 88px;">
-            <option selected>+233</option>
-            <option>+234</option>
-            <option>+254</option>
-            <option>+27</option>
-            <option>+44</option>
-            <option>+1</option>
+            <option {% if phone_country_code == '+233' %}selected{% endif %}>+233</option>
+            <option {% if phone_country_code == '+234' %}selected{% endif %}>+234</option>
+            <option {% if phone_country_code == '+254' %}selected{% endif %}>+254</option>
+            <option {% if phone_country_code == '+27' %}selected{% endif %}>+27</option>
+            <option {% if phone_country_code == '+44' %}selected{% endif %}>+44</option>
+            <option {% if phone_country_code == '+1' %}selected{% endif %}>+1</option>
           </select>
-          <input name="staff_phone" type="tel" value="{{ request.user.staff_phone|cut:'+233' }}" required placeholder="24 123 4567" class="input">
+          <input name="staff_phone" type="tel" value="{{ phone_number }}" required placeholder="24 123 4567" class="input">
         </div>
       </div>
 

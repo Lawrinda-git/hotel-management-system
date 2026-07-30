@@ -23,6 +23,15 @@
         </div>
     </aside>
     <main class="flex-1 flex flex-col min-w-0">
+        <section class="px-8 pt-6 grid grid-cols-2 lg:grid-cols-4 gap-4" aria-label="Live financial data">
+            <div class="card p-4"><p class="text-xs text-on-surface-variant">Invoices</p><p class="text-2xl font-bold text-primary">{{ invoice_count }}</p></div>
+            <div class="card p-4"><p class="text-xs text-on-surface-variant">Unpaid</p><p class="text-2xl font-bold text-primary">{{ unpaid_invoice_count }}</p></div>
+            <div class="card p-4"><p class="text-xs text-on-surface-variant">Paid</p><p class="text-2xl font-bold text-primary">{{ paid_invoice_count }}</p></div>
+            <div class="card p-4"><p class="text-xs text-on-surface-variant">Recent payments</p><p class="text-2xl font-bold text-primary">{{ recent_payments|length }}</p></div>
+        </section>
+        <section class="px-8 pt-6" aria-label="Recent invoices from database">
+            <div class="card p-5"><h3 class="font-headline-md text-primary mb-3">Recent invoices</h3>{% for invoice in recent_invoices %}<div class="flex justify-between border-b border-outline-variant/20 py-2 text-sm"><span>Invoice #{{ invoice.id }} · {{ invoice.reservation.guest.guest_name }}</span><span class="text-on-surface-variant">GH₵{{ invoice.total_amount }} · {{ invoice.status|title }}</span></div>{% empty %}<p class="text-sm text-on-surface-variant">No invoices recorded yet.</p>{% endfor %}</div>
+        </section>
         <header class="w-full h-16 sticky top-0 z-40 bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center px-margin-desktop shadow-sm">
             <div class="flex items-center gap-6">
                 <h2 class="text-primary font-bold text-headline-md hidden md:block">Financial Dashboard</h2>

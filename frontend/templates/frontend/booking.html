@@ -358,6 +358,31 @@
         currentStep: 1,
     };
 
+    async function completePaystackReturn() {
+        const params = new URLSearchParams(window.location.search);
+        const reference = params.get('reference') || params.get('trxref');
+        if (!reference) return false;
+        const status = document.getElementById('room-status');
+        if (status) status.innerHTML = '<span class="skeleton skeleton-text" style="display:inline-block;width:220px;height:16px"></span>';
+        try {
+            const verifyUrl = '{% url "paystack_verify" reference="PAYSTACK_REFERENCE" %}'.replace('PAYSTACK_REFERENCE', encodeURIComponent(reference));
+            const response = await fetch(verifyUrl);
+            const payment = await response.json();
+            if (!response.ok || payment.status !== 'success') throw new Error(payment.detail || 'Payment was not completed.');
+            const parts = reference.split('-');
+            if (parts.length !== 3 || parts[0] !== 'inv') throw new Error('Invalid payment reference.');
+            const url = new URL('{% url "reservation_confirmed" %}', window.location.origin);
+            url.searchParams.set('invoice_id', parts[1]);
+            url.searchParams.set('reservation_id', parts[2]);
+            window.location.replace(url.toString());
+            return true;
+        } catch (error) {
+            if (window.StayHub) StayHub.Toast.error(error.message);
+            if (status) status.innerHTML = '<span class="text-error">' + error.message + '</span>';
+            return true;
+        }
+    }
+
     function formatCurrency(value) {
         const amount = Number(value || 0);
         return 'GH₵' + amount.toLocaleString('en-US', { maximumFractionDigits: 0 });
@@ -521,6 +546,7 @@
 
     async function loadRooms() {
         const status = document.getElementById('room-status');
+        if (status) status.innerHTML = '<span class="skeleton skeleton-text" style="display:inline-block;width:180px;height:16px"></span>';
         try {
             const response = await fetch('{% url "booking_options" %}');
             const data = await response.json();
@@ -535,6 +561,7 @@
             renderRooms();
             updateSummary();
             status.innerHTML = '<span class="text-error">' + error.message + '</span>';
+            if (window.StayHub) StayHub.Toast.error(error.message);
         }
     }
 
@@ -583,31 +610,22 @@
             const data = await response.json();
             if (!response.ok) throw new Error(data.detail || 'Booking failed.');
 
-            feedback.textContent = 'Booking confirmed! Redirecting...';
+            feedback.textContent = 'Opening secure Paystack checkout...';
             feedback.className = 'text-sm mt-3 text-center text-primary font-semibold';
-
-            const checkInValue = document.getElementById('check-in').value;
-            const checkOutValue = document.getElementById('check-out').value;
-            const guestsValue = document.getElementById('guest-count').innerText;
-            const selectedRoom = getSelectedRoom();
-            const url = new URL('{% url "reservation_confirmed" %}', window.location.origin);
-            url.searchParams.set('reservation_id', data.reservation.id);
-            url.searchParams.set('invoice_id', data.invoice.id);
-            if (checkInValue) url.searchParams.set('check_in', checkInValue);
-            if (checkOutValue) url.searchParams.set('check_out', checkOutValue);
-            if (guestsValue) url.searchParams.set('guests', guestsValue);
-            if (selectedRoom) {
-                url.searchParams.set('room_number', selectedRoom.room_number || '');
-                url.searchParams.set('room_type', selectedRoom.room_type?.type_name || '');
-                url.searchParams.set('hotel_name', selectedRoom.hotel?.hotel_name || '');
-            }
-            url.searchParams.set('total', data.invoice.total_amount);
-            window.location.href = url.toString();
+            const checkoutResponse = await fetch('{% url "paystack_checkout" %}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify({ invoice_id: data.invoice.id }),
+            });
+            const checkout = await checkoutResponse.json();
+            if (!checkoutResponse.ok || !checkout.authorization_url) throw new Error(checkout.detail || 'Unable to start Paystack checkout.');
+            window.location.href = checkout.authorization_url;
         } catch (error) {
             feedback.textContent = error.message;
             feedback.className = 'text-sm mt-3 text-center text-error';
             btn.disabled = false;
             btn.innerHTML = '<span class="material-symbols-outlined">lock</span> Confirm & Pay Now';
+            if (window.StayHub) StayHub.Toast.error(error.message);
         }
     }
 
@@ -615,8 +633,9 @@
     document.getElementById('check-in').addEventListener('change', updateSummary);
     document.getElementById('check-out').addEventListener('change', updateSummary);
 
-    // Initialize
-    loadRooms();
-    updateSummary();
+    // Verify Paystack callbacks before loading a fresh booking form.
+    completePaystackReturn().then(function (handled) {
+        if (!handled) { loadRooms(); updateSummary(); }
+    });
 </script>
 {% endblock %}

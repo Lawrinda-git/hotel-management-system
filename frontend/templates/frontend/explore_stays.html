@@ -30,9 +30,14 @@
                 <button class="btn btn-ghost btn-sm rounded-full border border-outline-variant/30"><span>Amenities</span><span class="material-symbols-outlined text-[18px]">expand_more</span></button>
             </div>
         </div>
+        <form method="get" class="mt-6 flex gap-2" role="search">
+            <label class="sr-only" for="explore-search">Search stays</label>
+            <input id="explore-search" name="q" value="{{ search_query }}" class="input flex-1 rounded-xl" type="search" placeholder="Search hotels, locations, or amenities...">
+            <button class="btn btn-primary" type="submit"><span class="material-symbols-outlined">search</span><span class="hidden sm:inline">Search</span></button>
+        </form>
     </section>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="card group">
+        <div class="card group" data-stay-card>
             <div class="relative h-72 w-full overflow-hidden">
                 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="{% static 'frontend/img/7113f748cb477fa2fec71cdca34d7400.jpg' %}" alt="La Palm Royal Beach Hotel" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -57,7 +62,7 @@
                 </div>
             </div>
         </div>
-        <div class="card group">
+        <div class="card group" data-stay-card>
             <div class="relative h-72 w-full overflow-hidden">
                 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="{% static 'frontend/img/d903519e676e485832027f1ced40bc7b.jpg' %}" alt="Kempinski Hotel Gold Coast City" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -81,7 +86,7 @@
                 </div>
             </div>
         </div>
-        <div class="card group">
+        <div class="card group" data-stay-card>
             <div class="relative h-72 w-full overflow-hidden">
                 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="{% static 'frontend/img/0958f6955f4703f8ee177b4f3d3be348.jpg' %}" alt="Royal Senchi Resort" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -105,7 +110,7 @@
                 </div>
             </div>
         </div>
-        <div class="card group lg:col-span-1">
+        <div class="card group lg:col-span-1" data-stay-card>
             <div class="relative h-72 w-full overflow-hidden">
                 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="{% static 'frontend/img/961517923804f2e48a85a5c1ac83e837.jpg' %}" alt="Busua Beach Resort" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -129,26 +134,29 @@
                 </div>
             </div>
         </div>
-        <div class="card-glass rounded-[24px] p-8 border border-white/40 shadow-sm flex flex-col justify-center items-center text-center lg:col-span-2">
+        {% if not user.is_authenticated %}<div class="card-glass rounded-[24px] p-8 border border-white/40 shadow-sm flex flex-col justify-center items-center text-center lg:col-span-2">
             <div class="w-16 h-16 bg-primary-fixed-dim rounded-full flex items-center justify-center mb-4">
                 <span class="material-symbols-outlined text-primary text-3xl">loyalty</span>
             </div>
             <h4 class="font-headline-lg text-headline-lg text-primary mb-2">StayHub Rewards</h4>
             <p class="text-on-surface-variant max-w-md mx-auto font-body-lg text-body-lg mb-6">Join our exclusive members club to unlock 15% off your first booking at any Ghanaian hotel.</p>
             <a href="{% url 'create_account' %}" class="btn btn-primary btn-lg rounded-full">Join for Free</a>
-        </div>
-    </div>
-    <div class="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 md:bottom-12">
-        <button class="btn btn-primary flex items-center gap-2 rounded-full shadow-2xl" onclick="window.open('https://www.google.com/maps/search/?api=1&query=Accra%2C+Ghana', '_blank', 'noopener')">
-            <span class="material-symbols-outlined">map</span>
-            <span>Show Map</span>
-        </button>
+        </div>{% endif %}
     </div>
 </main>
 {% include "frontend/components/_guest_nav.html" %}
 {% endblock %}
 {% block extra_scripts %}
 <script>
+    const query = (document.getElementById('explore-search')?.value || '').trim().toLowerCase();
+    const cards = document.querySelectorAll('[data-stay-card]');
+    cards.forEach(card => card.hidden = !!query && !card.textContent.toLowerCase().includes(query));
+    if (query && !Array.from(cards).some(card => !card.hidden)) {
+        const empty = document.createElement('p');
+        empty.className = 'col-span-full rounded-2xl bg-surface-container p-8 text-center text-on-surface-variant';
+        empty.textContent = 'No stays matched your search.';
+        document.querySelector('.grid').appendChild(empty);
+    }
     const filterButtons = document.querySelectorAll('.flex.gap-3 button:not(:first-child)');
     filterButtons.forEach(btn => { btn.addEventListener('click', () => { btn.classList.toggle('bg-primary'); btn.classList.toggle('text-white'); btn.classList.toggle('bg-white'); btn.classList.toggle('text-on-surface'); }); });
 </script>
