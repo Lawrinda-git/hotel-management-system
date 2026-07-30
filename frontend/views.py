@@ -287,58 +287,6 @@ def create_account(request):
     return render(request, "frontend/create_account.html")
 
 
-def password_reset(request):
-    """Email a reset link for password reset."""
-    staff_login = request.GET.get("staff_login") == "1"
-    if request.method == "POST":
-        identifier = (request.POST.get("username") or request.POST.get("email") or "").strip()
-        
-        if not identifier:
-            return render(request, "frontend/password_reset.html", {"error": "Username or email is required.", "staff_login": staff_login})
-        
-        # Keep the two login surfaces account-specific.  A guest reset request
-        # must never resolve a staff account (and vice versa).
-        # Staff accounts use their department role (manager, receptionist,
-        # accountant, etc.); guests are the only accounts with role=guest.
-        role_filter = {"role__isnull": False} if staff_login else {"role": "guest"}
-        user = None
-        if "@" in identifier:
-            query = Staff.objects.filter(email__iexact=identifier, **role_filter)
-            user = query.exclude(role="guest").first() if staff_login else query.first()
-        if user is None:
-            query = Staff.objects.filter(username__iexact=identifier, **role_filter)
-            user = query.exclude(role="guest").first() if staff_login else query.first()
-        
-        if user is None:
-            # Don't reveal whether the account exists
-            return redirect("password_reset_done" if not staff_login else "/password-reset/done/?staff_login=1")
-        
-        # Use Django's built-in password reset with email
-        from django.contrib.auth.tokens import default_token_generator
-        from django.utils.http import urlsafe_base64_encode
-        from django.utils.encoding import force_bytes
-        
-        token = default_token_generator.make_token(user)
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_url = request.build_absolute_uri(f"/reset/{uid}/{token}/")
-        if staff_login:
-            reset_url += "?staff_login=1"
-        
-        try:
-            from django.core.mail import send_mail
-            send_mail(
-                "Your StayHub password reset link",
-                f"Click the link to reset your password: {reset_url}",
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
-            )
-        except Exception:
-            pass  # Silent fail like login
-        
-        return redirect("password_reset_done" if not staff_login else "/password-reset/done/?staff_login=1")
-    
-    return render(request, "frontend/password_reset.html", {"staff_login": staff_login})
 
 
 def two_factor(request):
