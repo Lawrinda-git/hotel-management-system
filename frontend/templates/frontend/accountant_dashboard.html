@@ -67,11 +67,11 @@
 
   <!-- Quick Actions -->
   <section class="grid grid-cols-2 gap-3 mb-6">
-    <button class="btn btn-primary py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg" onclick="document.getElementById('app-toast').textContent='Invoice creation coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+    <button class="btn btn-primary py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg" data-toast="Invoice creation coming soon">
       <span class="material-symbols-outlined">add</span>
       <span>New Invoice</span>
     </button>
-    <button class="btn btn-outline py-4 rounded-xl flex items-center justify-center gap-2" onclick="document.getElementById('app-toast').textContent='Report export coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+    <button class="btn btn-outline py-4 rounded-xl flex items-center justify-center gap-2" data-toast="Report export coming soon">
       <span class="material-symbols-outlined">download</span>
       <span>Export</span>
     </button>

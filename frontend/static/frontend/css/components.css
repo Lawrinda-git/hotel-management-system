@@ -101,6 +101,48 @@
   height: 48px;
 }
 
+/* --- Tabs (data-tab-group / data-tab) --- */
+.hotel-filter-chip {
+  background: var(--color-surface-container);
+  color: var(--color-on-surface-variant);
+  border: 1px solid transparent;
+}
+.hotel-filter-chip:hover {
+  background: var(--color-surface-container-high);
+  color: var(--color-on-surface);
+}
+.hotel-filter-chip.tab-active {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-container);
+  color: var(--color-on-surface-variant);
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-base);
+}
+.tab-btn:hover {
+  background: var(--color-surface-container-high);
+  color: var(--color-on-surface);
+}
+.tab-btn.tab-active {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-sm);
+}
+
 /* --- Cards --- */
 .card {
   background: var(--color-surface-container-lowest);

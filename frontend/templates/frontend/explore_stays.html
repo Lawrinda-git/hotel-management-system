@@ -25,8 +25,8 @@
             </div>
             <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2 -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0">
                 <button class="btn btn-primary btn-sm rounded-full"><span class="material-symbols-outlined text-[18px]">tune</span><span>Filters</span></button>
-                <button class="btn btn-ghost btn-sm rounded-full border border-outline-variant/30"><span>Price</span><span class="material-symbols-outlined text-[18px]">expand_more</span></button>
-                <button class="btn btn-ghost btn-sm rounded-full border border-outline-variant/30"><span>Rating</span><span class="material-symbols-outlined text-[18px]">expand_more</span></button>
+                <button class="btn btn-ghost btn-sm rounded-full border border-outline-variant/30" data-sort="price"><span>Price</span><span class="material-symbols-outlined text-[18px]">expand_more</span></button>
+                <button class="btn btn-ghost btn-sm rounded-full border border-outline-variant/30" data-sort="rating"><span>Rating</span><span class="material-symbols-outlined text-[18px]">expand_more</span></button>
                 <button class="btn btn-ghost btn-sm rounded-full border border-outline-variant/30"><span>Amenities</span><span class="material-symbols-outlined text-[18px]">expand_more</span></button>
             </div>
         </div>
@@ -44,8 +44,8 @@
             {% endfor %}
         </div>
     </section>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="card group" data-stay-card data-category="RESORT">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="stay-grid">
+        <div class="card group" data-stay-card data-category="RESORT" data-price="250" data-rating="4.9">
             <div class="relative h-72 w-full overflow-hidden">
                 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="{% static 'frontend/img/7113f748cb477fa2fec71cdca34d7400.jpg' %}" alt="La Palm Royal Beach Hotel" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -67,11 +67,11 @@
                         <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">pool</span></div>
                         <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">fitness_center</span></div>
                     </div>
-                    <a href="{% url 'hotel_details' %}" class="btn btn-primary btn-sm">View Hotel</a>
+                    <a href="{% url 'hotel_details' %}?hotel=1" class="btn btn-primary btn-sm">View Hotel</a>
                 </div>
             </div>
         </div>
-        <div class="card group" data-stay-card data-category="HOTEL">
+        <div class="card group" data-stay-card data-category="HOTEL" data-price="400" data-rating="4.7">
             <div class="relative h-72 w-full overflow-hidden">
                 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="{% static 'frontend/img/d903519e676e485832027f1ced40bc7b.jpg' %}" alt="Kempinski Hotel Gold Coast City" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -92,11 +92,11 @@
                         <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">restaurant</span></div>
                         <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">spa</span></div>
                     </div>
-                    <a href="{% url 'hotel_details' %}" class="btn btn-primary btn-sm">View Hotel</a>
+                    <a href="{% url 'hotel_details' %}?hotel=2" class="btn btn-primary btn-sm">View Hotel</a>
                 </div>
             </div>
         </div>
-        <div class="card group" data-stay-card data-category="RESORT">
+        <div class="card group" data-stay-card data-category="RESORT" data-price="350" data-rating="4.5">
             <div class="relative h-72 w-full overflow-hidden">
                 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="{% static 'frontend/img/0958f6955f4703f8ee177b4f3d3be348.jpg' %}" alt="Royal Senchi Resort" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -117,11 +117,11 @@
                         <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">fitness_center</span></div>
                         <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">cabin</span></div>
                     </div>
-                    <a href="{% url 'hotel_details' %}" class="btn btn-primary btn-sm">View Hotel</a>
+                    <a href="{% url 'hotel_details' %}?hotel=3" class="btn btn-primary btn-sm">View Hotel</a>
                 </div>
             </div>
         </div>
-        <div class="card group lg:col-span-1" data-stay-card data-category="RESORT">
+        <div class="card group lg:col-span-1" data-stay-card data-category="RESORT" data-price="250" data-rating="5.0">
             <div class="relative h-72 w-full overflow-hidden">
                 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="{% static 'frontend/img/961517923804f2e48a85a5c1ac83e837.jpg' %}" alt="Busua Beach Resort" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -141,7 +141,7 @@
                         <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">concierge</span></div>
                         <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">beach_access</span></div>
                     </div>
-                    <a href="{% url 'hotel_details' %}" class="btn btn-primary btn-sm">View Hotel</a>
+                    <a href="{% url 'hotel_details' %}?hotel=4" class="btn btn-primary btn-sm">View Hotel</a>
                 </div>
             </div>
         </div>
@@ -199,5 +199,44 @@
 
     // Initial filter
     filterCards();
+
+    // Functional Price / Rating sorting
+    (function initSort() {
+        const sortButtons = document.querySelectorAll('[data-sort]');
+        if (!sortButtons.length) return;
+        const grid = document.getElementById('stay-grid') || document.querySelector('.grid');
+        if (!grid) return;
+
+        const toArray = () => Array.from(grid.querySelectorAll('[data-stay-card]'));
+        const applyOrder = (order) => {
+            order.forEach(card => grid.appendChild(card));
+            filterCards();
+        };
+
+        sortButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sort = btn.getAttribute('data-sort');
+                const isActive = btn.classList.contains('btn-primary');
+                sortButtons.forEach(b => {
+                    b.classList.remove('btn-primary');
+                    b.classList.add('btn-ghost', 'border', 'border-outline-variant/30');
+                });
+                if (isActive) {
+                    // Toggled off: reset to DOM order
+                    applyOrder(toArray());
+                    return;
+                }
+                btn.classList.add('btn-primary');
+                btn.classList.remove('btn-ghost', 'border', 'border-outline-variant/30');
+                const cards = toArray();
+                if (sort === 'price') {
+                    cards.sort((a, b) => (Number(a.dataset.price) || 0) - (Number(b.dataset.price) || 0));
+                } else if (sort === 'rating') {
+                    cards.sort((a, b) => (Number(b.dataset.rating) || 0) - (Number(a.dataset.rating) || 0));
+                }
+                applyOrder(cards);
+            });
+        });
+    })();
 </script>
 {% endblock %}

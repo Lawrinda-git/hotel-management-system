@@ -18,7 +18,7 @@
         <div class="flex h-full overflow-x-auto snap-x snap-mandatory scroll-hide">
             {% if hotel_image %}
             <div class="min-w-full h-full snap-start relative">
-                <img class="w-full h-full object-cover" src="{{ hotel_image }}" alt="{{ hotel_name }}" loading="lazy">
+                <img class="w-full h-full object-cover" src="{% static hotel_image %}" alt="{{ hotel_name }}" loading="lazy">
             </div>
             {% endif %}
             <div class="min-w-full h-full snap-start relative">

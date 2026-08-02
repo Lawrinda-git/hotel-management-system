@@ -228,6 +228,50 @@
     }
   };
 
+  // ===================== COOKIE HELPER =====================
+  // Single source of truth for reading cookies (used for CSRF tokens).
+  function getCookie(name) {
+    const cookieValue = `; ${document.cookie}`;
+    const parts = cookieValue.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return '';
+  }
+
+  // ===================== DATA-ATTRIBUTE HANDLERS =====================
+  // data-toast="Message"  → show an info toast on click (replaces the old
+  // verbose inline document.getElementById('app-toast') snippets everywhere).
+  // data-tab-group + data-tab="panel-id" → lightweight tab switching that
+  // works on any page without per-page inline scripts.
+  const DataAttrs = {
+    init: function() {
+      document.addEventListener('click', function(e) {
+        // data-toast
+        var toastEl = e.target.closest('[data-toast]');
+        if (toastEl) {
+          // Only swallow default behaviour for buttons; anchors keep navigating.
+          if (toastEl.tagName !== 'A') e.preventDefault();
+          Toast.info(toastEl.getAttribute('data-toast'));
+          return;
+        }
+        // data-tab (only when inside a declared group). Panels are siblings
+        // of the group (not descendants), so match them document-wide by id.
+        var tabBtn = e.target.closest('[data-tab-group] [data-tab]');
+        if (tabBtn) {
+          var group = tabBtn.closest('[data-tab-group]');
+          var target = tabBtn.getAttribute('data-tab');
+          group.querySelectorAll('[data-tab]').forEach(function(btn) {
+            var isActive = btn === tabBtn;
+            btn.classList.toggle('tab-active', isActive);
+            btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          });
+          document.querySelectorAll('[data-tab-panel]').forEach(function(panel) {
+            panel.classList.toggle('hidden', panel.id !== target);
+          });
+        }
+      });
+    }
+  };
+
   // ===================== DATE PICKER STYLING =====================
   // Fix date input styling by setting min date
   document.addEventListener('DOMContentLoaded', function() {
@@ -254,6 +298,7 @@
     BottomNav.init();
     HeaderScroll.init();
     SearchHandler.init();
+    DataAttrs.init();
     document.querySelectorAll('img:not([loading])').forEach(function(img) {
       img.loading = 'lazy';
       img.decoding = 'async';
@@ -277,7 +322,8 @@
     Modal: Modal,
     DarkMode: DarkMode,
     Dropdown: Dropdown,
-    Api: Api
+    Api: Api,
+    getCookie: getCookie
   };
 
 })();

@@ -71,7 +71,7 @@
       <span class="material-symbols-outlined">add</span>
       <span>New Booking</span>
     </a>
-    <button class="btn btn-outline py-4 rounded-xl flex items-center justify-center gap-2" onclick="document.getElementById('app-toast').textContent='Room assignment coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+    <button class="btn btn-outline py-4 rounded-xl flex items-center justify-center gap-2" data-toast="Room assignment coming soon">
       <span class="material-symbols-outlined">meeting_room</span>
       <span>Assign Room</span>
     </button>
@@ -94,7 +94,7 @@
             <p class="text-xs text-on-surface-variant">#{{ reservation.id }} · {{ reservation.check_in|date:"H:i" }}</p>
           </div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="document.getElementById('app-toast').textContent='Check-in for {{ reservation.guest.guest_name }} completed';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+        <button class="btn btn-primary btn-sm" data-toast="Check-in for {{ reservation.guest.guest_name }} completed">
           Check In
         </button>
       </div>
@@ -121,7 +121,7 @@
             <p class="text-xs text-on-surface-variant">#{{ reservation.id }} · {{ reservation.check_out|date:"H:i" }}</p>
           </div>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="document.getElementById('app-toast').textContent='Check-out for {{ reservation.guest.guest_name }} completed';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+        <button class="btn btn-outline btn-sm" data-toast="Check-out for {{ reservation.guest.guest_name }} completed">
           Check Out
         </button>
       </div>
@@ -144,7 +144,7 @@
         {% elif room.status == 'OCCUPIED' or room.status == 'RESERVED' %}bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20
         {% elif room.status == 'MAINTENANCE' %}bg-red-100 text-red-700 border border-red-300 hover:bg-red-200
         {% else %}bg-surface-container text-on-surface-variant border border-outline-variant{% endif %}"
-        onclick="document.getElementById('app-toast').textContent='Room {{ room.room_number }}: {{ room.status|title }}';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);"
+        data-toast="Room {{ room.room_number }}: {{ room.status|title }}"
         title="Room {{ room.room_number }} - {{ room.status|title }}">
         <span>{{ room.room_number }}</span>
       </div>

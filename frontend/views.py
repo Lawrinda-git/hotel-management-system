@@ -501,6 +501,7 @@ def hotel_details(request):
         "1": {"name": "La Palm Royal Beach Hotel", "location": "Liberation Road, Accra", "rating": "5.0", "price": "GH₵250", "image": "frontend/img/008833018260f8f9343a80c63b5be476.jpg", "category": "RESORT", "description": "Luxury beachfront resort with ocean views and premium amenities."},
         "2": {"name": "Kempinski Hotel Gold Coast City", "location": "Gamel Abdul Nasser Avenue, Accra", "rating": "4.9", "price": "GH₵400", "image": "frontend/img/d903519e676e485832027f1ced40bc7b.jpg", "category": "HOTEL", "description": "Five-star urban hotel in the heart of Accra's business district."},
         "3": {"name": "Royal Senchi Resort", "location": "Senchi, Eastern Region", "rating": "4.8", "price": "GH₵350", "image": "frontend/img/acb50fa45400182975c5ad13e56831a3.jpg", "category": "RESORT", "description": "Serene resort nestled along the Volta River with lush gardens."},
+        "4": {"name": "Busua Beach Resort", "location": "Busua, Western Region", "rating": "5.0", "price": "GH₵250", "image": "frontend/img/961517923804f2e48a85a5c1ac83e837.jpg", "category": "RESORT", "description": "Beachfront resort with golden sands, surf lessons, and fresh seafood."},
     }
     hotel_info = hotels.get(hotel_id, hotels["1"])
     return render(request, "frontend/hotel_details.html", {

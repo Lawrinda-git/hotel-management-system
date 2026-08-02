@@ -59,5 +59,8 @@ class BranchScopedQuerysetMixin:
             return qs.none()
 
         # Apply the branch filter using the configured field path.
+        # branch_field = None means the viewset scopes the queryset itself.
+        if self.branch_field is None:
+            return qs
         filter_key = {self.branch_field: hotel_id}
         return qs.filter(**filter_key)

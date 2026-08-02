@@ -67,11 +67,11 @@
 
   <!-- Quick Actions -->
   <section class="grid grid-cols-2 gap-3 mb-6">
-    <button class="btn btn-primary py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg" onclick="document.getElementById('app-toast').textContent='Room cleaner coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+    <button class="btn btn-primary py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg" data-toast="Room cleaner coming soon">
       <span class="material-symbols-outlined">cleaning_services</span>
       <span>Clean Room</span>
     </button>
-    <button class="btn btn-outline py-4 rounded-xl flex items-center justify-center gap-2" onclick="document.getElementById('app-toast').textContent='Inspection tool coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+    <button class="btn btn-outline py-4 rounded-xl flex items-center justify-center gap-2" data-toast="Inspection tool coming soon">
       <span class="material-symbols-outlined">verified</span>
       <span>Inspect</span>
     </button>
@@ -94,7 +94,7 @@
             <p class="text-xs text-on-surface-variant">{{ room.room_type.type_name|default:"Standard" }} · {{ room.hotel.hotel_name|default:"-" }}</p>
           </div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="document.getElementById('app-toast').textContent='Room {{ room.room_number }} marked as clean';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+        <button class="btn btn-primary btn-sm" data-toast="Room {{ room.room_number }} marked as clean">
           Mark Clean
         </button>
       </div>
@@ -140,7 +140,7 @@
     <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
       {% for room in clean_rooms %}
       <div class="aspect-square rounded-lg bg-green-100 text-green-700 border border-green-300 flex flex-col items-center justify-center text-xs font-bold hover:bg-green-200 transition-colors cursor-pointer"
-           onclick="document.getElementById('app-toast').textContent='Room {{ room.room_number }} is clean and ready';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+           data-toast="Room {{ room.room_number }} is clean and ready">
         <span>{{ room.room_number }}</span>
       </div>
       {% endfor %}

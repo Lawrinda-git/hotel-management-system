@@ -78,13 +78,6 @@
 {% endblock %}
 {% block extra_scripts %}
 <script>
-    function getCookie(name) {
-        const cookieValue = `; ${document.cookie}`;
-        const parts = cookieValue.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return '';
-    }
-
     function togglePassword() {
         const pass = document.getElementById('password');
         const icon = document.getElementById('pass-icon');
@@ -118,7 +111,7 @@
         try {
             const response = await fetch('{% url "api_login" %}', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': StayHub.getCookie('csrftoken') },
                 body: JSON.stringify({ email, password }),
             });
             const data = await response.json();

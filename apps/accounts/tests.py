@@ -268,5 +268,3 @@ class BranchScopedAPIAccessTests(TestCase):
         ids = [s["id"] for s in data]
         self.assertIn(self.receptionist_a.id, ids)
         self.assertNotIn(self.receptionist_b.id, ids)
-</file_content>
-</write_to_file>

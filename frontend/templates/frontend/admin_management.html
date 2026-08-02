@@ -37,28 +37,28 @@
   </section>
 
   <!-- Tabs -->
-  <section class="flex gap-2 mb-6 overflow-x-auto pb-2">
-    <button onclick="document.getElementById('tab-rooms').classList.remove('hidden');document.getElementById('tab-staff').classList.add('hidden');document.getElementById('tab-hotels').classList.add('hidden');document.getElementById('tab-maintenance').classList.add('hidden');this.classList.add('bg-primary','text-white');this.classList.remove('bg-surface-container','text-on-surface');" class="btn btn-primary btn-sm whitespace-nowrap" id="tab-rooms-btn">
+  <section class="flex gap-2 mb-6 overflow-x-auto pb-2" role="tablist" data-tab-group>
+    <button class="tab-btn tab-active" data-tab="tab-rooms" role="tab" aria-selected="true">
       <span class="material-symbols-outlined text-sm">meeting_room</span> Rooms
     </button>
-    <button onclick="document.getElementById('tab-staff').classList.remove('hidden');document.getElementById('tab-rooms').classList.add('hidden');document.getElementById('tab-hotels').classList.add('hidden');document.getElementById('tab-maintenance').classList.add('hidden');this.classList.add('bg-primary','text-white');this.classList.remove('bg-surface-container','text-on-surface');" class="btn btn-ghost btn-sm whitespace-nowrap bg-surface-container text-on-surface" id="tab-staff-btn">
+    <button class="tab-btn" data-tab="tab-staff" role="tab" aria-selected="false">
       <span class="material-symbols-outlined text-sm">badge</span> Employees
     </button>
-    <button onclick="document.getElementById('tab-hotels').classList.remove('hidden');document.getElementById('tab-rooms').classList.add('hidden');document.getElementById('tab-staff').classList.add('hidden');document.getElementById('tab-maintenance').classList.add('hidden');this.classList.add('bg-primary','text-white');this.classList.remove('bg-surface-container','text-on-surface');" class="btn btn-ghost btn-sm whitespace-nowrap bg-surface-container text-on-surface" id="tab-hotels-btn">
+    <button class="tab-btn" data-tab="tab-hotels" role="tab" aria-selected="false">
       <span class="material-symbols-outlined text-sm">hotel</span> Hotels
     </button>
-    <button onclick="document.getElementById('tab-maintenance').classList.remove('hidden');document.getElementById('tab-rooms').classList.add('hidden');document.getElementById('tab-staff').classList.add('hidden');document.getElementById('tab-hotels').classList.add('hidden');this.classList.add('bg-primary','text-white');this.classList.remove('bg-surface-container','text-on-surface');" class="btn btn-ghost btn-sm whitespace-nowrap bg-surface-container text-on-surface" id="tab-maintenance-btn">
+    <button class="tab-btn" data-tab="tab-maintenance" role="tab" aria-selected="false">
       <span class="material-symbols-outlined text-sm">build</span> Maintenance
     </button>
   </section>
 
   <!-- Rooms Tab -->
-  <section id="tab-rooms" class="card p-5 mb-4">
+  <section id="tab-rooms" class="card p-5 mb-4" data-tab-panel>
     <div class="flex items-center justify-between mb-4">
       <h3 class="font-headline-md text-headline-md text-primary font-bold flex items-center gap-2">
         <span class="material-symbols-outlined text-lg">meeting_room</span> Room Management
       </h3>
-      <button class="btn btn-primary btn-sm" onclick="document.getElementById('app-toast').textContent='Add room form coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+      <button class="btn btn-primary btn-sm" data-toast="Add room form coming soon">
         <span class="material-symbols-outlined text-sm">add</span> Add Room
       </button>
     </div>
@@ -90,8 +90,8 @@
             </td>
             <td class="py-3 text-sm font-medium">GH₵{{ room.price_per_night|default:room.room_type.price_per_night|default:0 }}</td>
             <td class="py-3 text-right">
-              <button class="text-primary text-xs font-semibold hover:underline mr-2" onclick="document.getElementById('app-toast').textContent='Edit room {{ room.room_number }} coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">Edit</button>
-              <button class="text-error text-xs font-semibold hover:underline" onclick="document.getElementById('app-toast').textContent='Delete room {{ room.room_number }} coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">Delete</button>
+              <button class="text-primary text-xs font-semibold hover:underline mr-2" data-toast="Edit room {{ room.room_number }} coming soon">Edit</button>
+              <button class="text-error text-xs font-semibold hover:underline" data-toast="Delete room {{ room.room_number }} coming soon">Delete</button>
             </td>
           </tr>
           {% empty %}
@@ -103,12 +103,12 @@
   </section>
 
   <!-- Staff Tab -->
-  <section id="tab-staff" class="card p-5 mb-4 hidden">
+  <section id="tab-staff" class="card p-5 mb-4 hidden" data-tab-panel>
     <div class="flex items-center justify-between mb-4">
       <h3 class="font-headline-md text-headline-md text-primary font-bold flex items-center gap-2">
         <span class="material-symbols-outlined text-lg">badge</span> Employees
       </h3>
-      <button class="btn btn-primary btn-sm" onclick="document.getElementById('app-toast').textContent='Add employee form coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+      <button class="btn btn-primary btn-sm" data-toast="Add employee form coming soon">
         <span class="material-symbols-outlined text-sm">add</span> Add Employee
       </button>
     </div>
@@ -128,7 +128,7 @@
           <tr class="hover:bg-surface-container-low transition-colors">
             <td class="py-3">
               <div class="flex items-center gap-2">
-                <div class="avatar avatar-initialis w-8 h-8 text-xs">{{ staff.staff_name|first|upper }}</div>
+                <div class="avatar avatar-initials w-8 h-8 text-xs">{{ staff.staff_name|first|upper }}</div>
                 <span class="font-medium text-sm">{{ staff.staff_name }}</span>
               </div>
             </td>
@@ -140,9 +140,9 @@
             </td>
             <td class="py-3 text-sm">{{ staff.staff_phone|default:"-" }}</td>
             <td class="py-3 text-right">
-              <button class="text-primary text-xs font-semibold hover:underline mr-2" onclick="document.getElementById('app-toast').textContent='Edit employee coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">Edit</button>
+              <button class="text-primary text-xs font-semibold hover:underline mr-2" data-toast="Edit employee coming soon">Edit</button>
               {% if staff.role != 'admin' %}
-              <button class="text-error text-xs font-semibold hover:underline" onclick="document.getElementById('app-toast').textContent='Remove employee coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">Remove</button>
+              <button class="text-error text-xs font-semibold hover:underline" data-toast="Remove employee coming soon">Remove</button>
               {% endif %}
             </td>
           </tr>
@@ -155,33 +155,27 @@
   </section>
 
   <!-- Hotels Tab -->
-  <section id="tab-hotels" class="card p-5 mb-4 hidden">
+  <section id="tab-hotels" class="card p-5 mb-4 hidden" data-tab-panel>
     <div class="flex items-center justify-between mb-4">
       <h3 class="font-headline-md text-headline-md text-primary font-bold flex items-center gap-2">
         <span class="material-symbols-outlined text-lg">hotel</span> Hotels & Resorts
       </h3>
-      <button class="btn btn-primary btn-sm" onclick="document.getElementById('app-toast').textContent='Add hotel form coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">
+      <button class="btn btn-primary btn-sm" data-toast="Add hotel form coming soon">
         <span class="material-symbols-outlined text-sm">add</span> Add Property
       </button>
     </div>
 
     <!-- Category Filter -->
-    <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
-      <button class="btn btn-primary btn-sm">All</button>
+    <div class="flex gap-2 mb-4 overflow-x-auto pb-2" id="hotel-category-filter">
+      <button class="btn btn-sm hotel-filter-chip" data-filter="ALL">All</button>
       {% for code, label in hotel_categories %}
-      <button class="btn btn-ghost btn-sm">{{ label }}</button>
+      <button class="btn btn-sm hotel-filter-chip" data-filter="{{ code }}">{{ label }}</button>
       {% endfor %}
     </div>
 
-    <!-- Grouped by Category -->
-    {% for category_code, category_label in hotel_categories %}
-    {% with category_hotels=hotels|dictsort:"category" %}
-    {% endif %}
-    {% endfor %}
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="hotel-grid">
       {% for hotel in hotels %}
-      <div class="card p-4">
+      <div class="card p-4" data-hotel-category="{{ hotel.category }}">
         <div class="aspect-video rounded-xl bg-surface-container mb-3 flex items-center justify-center overflow-hidden relative">
           {% if hotel.hotel_image %}
           <img src="{{ hotel.hotel_image.url }}" alt="{{ hotel.hotel_name }}" class="w-full h-full object-cover">
@@ -194,7 +188,7 @@
         <p class="text-sm text-on-surface-variant mb-1">{{ hotel.hotel_address|truncatechars:60 }}</p>
         <p class="text-sm text-on-surface-variant">{{ hotel.hotel_phone }}</p>
         <div class="flex gap-2 mt-3">
-          <button class="btn btn-outline btn-sm flex-1" onclick="document.getElementById('app-toast').textContent='Edit hotel coming soon';document.getElementById('app-toast').classList.remove('hidden');setTimeout(function(){document.getElementById('app-toast').classList.add('hidden');},3200);">Edit</button>
+          <button class="btn btn-outline btn-sm flex-1" data-toast="Edit hotel coming soon">Edit</button>
         </div>
       </div>
       {% empty %}
@@ -204,7 +198,7 @@
   </section>
 
   <!-- Maintenance Tab -->
-  <section id="tab-maintenance" class="card p-5 mb-4 hidden">
+  <section id="tab-maintenance" class="card p-5 mb-4 hidden" data-tab-panel>
     <h3 class="font-headline-md text-headline-md text-primary font-bold mb-4 flex items-center gap-2">
       <span class="material-symbols-outlined text-lg">build</span> Open Maintenance Tasks
     </h3>
@@ -252,4 +246,26 @@
     </a>
   </div>
 </nav>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Functional hotel category filter on the Hotels tab
+    (function () {
+        var grid = document.getElementById('hotel-grid');
+        var chips = document.querySelectorAll('.hotel-filter-chip');
+        if (!grid || !chips.length) return;
+        chips.forEach(function (chip) {
+            if (chip.getAttribute('data-filter') === 'ALL') chip.classList.add('tab-active');
+            chip.addEventListener('click', function () {
+                var filter = chip.getAttribute('data-filter');
+                chips.forEach(function (c) { c.classList.toggle('tab-active', c === chip); });
+                grid.querySelectorAll('[data-hotel-category]').forEach(function (card) {
+                    var show = filter === 'ALL' || card.getAttribute('data-hotel-category') === filter;
+                    card.classList.toggle('hidden', !show);
+                });
+            });
+        });
+    })();
+</script>
 {% endblock %}
