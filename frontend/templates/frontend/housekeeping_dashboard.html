@@ -3,8 +3,9 @@
 {% block title %}StayHub | Housekeeping{% endblock %}
 {% block body_class %}bg-background text-on-surface pb-20{% endblock %}
 {% block content %}
+{% include "frontend/components/_staff_sidebar.html" %}
 <!-- ===== TOP HEADER ===== -->
-<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm md:left-[260px] md:right-0 md:w-auto">
   <div class="flex items-center justify-between px-4 h-16 max-w-6xl mx-auto">
     <div class="flex items-center gap-3">
       <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md">
@@ -26,7 +27,7 @@
   </div>
 </header>
 
-<main class="pt-20 pb-8 px-4 max-w-6xl mx-auto">
+<main class="pt-20 pb-8 px-4 max-w-6xl mx-auto md:ml-[260px]">
   <!-- Welcome -->
   <section class="mb-6">
     <h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">Housekeeping Tasks</h2>
@@ -67,11 +68,11 @@
 
   <!-- Quick Actions -->
   <section class="grid grid-cols-2 gap-3 mb-6">
-    <button class="btn btn-primary py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg" data-toast="Room cleaner coming soon">
+    <button class="btn btn-primary py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg" data-open-housekeeping="DIRTY">
       <span class="material-symbols-outlined">cleaning_services</span>
       <span>Clean Room</span>
     </button>
-    <button class="btn btn-outline py-4 rounded-xl flex items-center justify-center gap-2" data-toast="Inspection tool coming soon">
+    <button class="btn btn-outline py-4 rounded-xl flex items-center justify-center gap-2" data-open-housekeeping="CLEAN">
       <span class="material-symbols-outlined">verified</span>
       <span>Inspect</span>
     </button>
@@ -94,7 +95,7 @@
             <p class="text-xs text-on-surface-variant">{{ room.room_type.type_name|default:"Standard" }} · {{ room.hotel.hotel_name|default:"-" }}</p>
           </div>
         </div>
-        <button class="btn btn-primary btn-sm" data-toast="Room {{ room.room_number }} marked as clean">
+        <button class="btn btn-primary btn-sm" data-housekeeping-update="{{ room.pk }}" data-new-status="CLEAN" data-room-label="{{ room.room_number }}">
           Mark Clean
         </button>
       </div>
@@ -121,9 +122,17 @@
             <p class="text-xs text-on-surface-variant">{{ task.issue|truncatechars:50 }}</p>
           </div>
         </div>
-        <span class="badge {% if task.status == 'OPEN' %}badge-error{% elif task.status == 'IN_PROGRESS' %}badge-warning{% else %}badge-outline{% endif %} text-[10px]">
-          {{ task.status|title }}
-        </span>
+        <div class="flex items-center gap-2">
+          <span class="badge {% if task.status == 'OPEN' %}badge-error{% elif task.status == 'IN_PROGRESS' %}badge-warning{% else %}badge-outline{% endif %} text-[10px]">
+            {{ task.status|title }}
+          </span>
+          {% if task.status == 'OPEN' %}
+          <button class="btn btn-outline btn-sm" data-maintenance-update="{{ task.pk }}" data-new-status="IN_PROGRESS" data-room-label="{{ task.room.room_number }}">Start</button>
+          {% endif %}
+          {% if task.status == 'IN_PROGRESS' %}
+          <button class="btn btn-primary btn-sm" data-maintenance-update="{{ task.pk }}" data-new-status="RESOLVED" data-room-label="{{ task.room.room_number }}">Resolve</button>
+          {% endif %}
+        </div>
       </div>
       {% empty %}
       <p class="text-sm text-green-600 text-center py-4 font-medium">No maintenance tasks.</p>
@@ -140,7 +149,8 @@
     <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
       {% for room in clean_rooms %}
       <div class="aspect-square rounded-lg bg-green-100 text-green-700 border border-green-300 flex flex-col items-center justify-center text-xs font-bold hover:bg-green-200 transition-colors cursor-pointer"
-           data-toast="Room {{ room.room_number }} is clean and ready">
+           data-housekeeping-update="{{ room.pk }}" data-new-status="INSPECTED" data-room-label="{{ room.room_number }}"
+           title="Mark Room {{ room.room_number }} as inspected">
         <span>{{ room.room_number }}</span>
       </div>
       {% endfor %}
@@ -149,8 +159,24 @@
   {% endif %}
 </main>
 
-<!-- ===== BOTTOM NAV ===== -->
-<nav class="fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+{{ rooms_json|json_script:"hk-rooms-data" }}
+
+<!-- ===== HOUSEKEEPING PICKER MODAL ===== -->
+<div id="hk-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="hk-modal-title">
+  <div class="modal" style="max-width:560px">
+    <h3 class="modal-title" id="hk-modal-title">Select a Room</h3>
+    <div class="modal-body" id="hk-modal-body" style="margin-bottom:16px">
+      <p class="text-sm text-on-surface-variant mb-3">Choose a room to update its housekeeping status.</p>
+      <div class="grid grid-cols-3 sm:grid-cols-4 gap-2" id="hk-room-grid"></div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" data-close-modal="hk-modal">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BOTTOM NAV ===== */
+<nav class="hide-desktop fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
   <div class="flex items-center justify-around h-16 max-w-lg mx-auto">
     <a href="{% url 'housekeeping_dashboard' %}" class="flex flex-col items-center gap-0.5 text-primary">
       <span class="material-symbols-outlined" style="font-variation-settings:'FILL'1;">dashboard</span>
@@ -170,4 +196,97 @@
     </a>
   </div>
 </nav>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  'use strict';
+  var csrfToken = StayHub.getCookie('csrftoken');
+
+  function post(url, payload) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken },
+      body: JSON.stringify(payload || {}),
+    }).then(function (r) {
+      return r.json().then(function (data) {
+        if (!r.ok) throw new Error(data.detail || 'Something went wrong.');
+        return data;
+      });
+    });
+  }
+
+  // Inline housekeeping status changes (Mark Clean / Inspect)
+  document.querySelectorAll('[data-housekeeping-update]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var roomId = el.getAttribute('data-housekeeping-update');
+      var status = el.getAttribute('data-new-status');
+      var label = el.getAttribute('data-room-label');
+      post('{% url "staff_housekeeping_update" %}', { room_id: roomId, status: status })
+        .then(function () {
+          StayHub.Toast.success('Room ' + label + ' updated');
+          setTimeout(function () { window.location.reload(); }, 700);
+        })
+        .catch(function (e) { StayHub.Toast.error(e.message); });
+    });
+  });
+
+  // Maintenance status changes (Start / Resolve)
+  document.querySelectorAll('[data-maintenance-update]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var taskId = el.getAttribute('data-maintenance-update');
+      var status = el.getAttribute('data-new-status');
+      var label = el.getAttribute('data-room-label');
+      post('{% url "staff_maintenance_update" %}', { task_id: taskId, status: status })
+        .then(function () {
+          StayHub.Toast.success('Maintenance for Room ' + label + ' updated');
+          setTimeout(function () { window.location.reload(); }, 700);
+        })
+        .catch(function (e) { StayHub.Toast.error(e.message); });
+    });
+  });
+
+  // Room picker modal (Clean Room / Inspect)
+  var hkRooms = JSON.parse(document.getElementById('hk-rooms-data').textContent);
+  function openHkModal(mode) {
+    var title = mode === 'DIRTY' ? 'Clean a Room' : 'Inspect a Room';
+    var target = mode === 'DIRTY' ? 'DIRTY' : 'CLEAN';
+    var next = mode === 'DIRTY' ? 'CLEAN' : 'INSPECTED';
+    document.getElementById('hk-modal-title').textContent = title;
+    var grid = document.getElementById('hk-room-grid');
+    grid.innerHTML = '';
+    var shown = hkRooms.filter(function (r) { return r.housekeeping_status === target && r.status !== 'OCCUPIED'; });
+    if (!shown.length) {
+      grid.innerHTML = '<p class="col-span-full text-sm text-on-surface-variant text-center py-4">No rooms need ' + (mode === 'DIRTY' ? 'cleaning' : 'inspection') + ' right now.</p>';
+    } else {
+      shown.forEach(function (room) {
+        var tile = document.createElement('button');
+        tile.type = 'button';
+        tile.className = 'aspect-square rounded-lg bg-surface-container flex flex-col items-center justify-center text-xs font-bold text-on-surface hover:bg-primary hover:text-on-primary transition-colors cursor-pointer';
+        tile.innerHTML = '<span>' + room.room_number + '</span>';
+        tile.addEventListener('click', function () {
+          post('{% url "staff_housekeeping_update" %}', { room_id: room.id, status: next })
+            .then(function () {
+              StayHub.Toast.success('Room ' + room.room_number + ' updated');
+              setTimeout(function () { window.location.reload(); }, 700);
+            })
+            .catch(function (e) { StayHub.Toast.error(e.message); });
+        });
+        grid.appendChild(tile);
+      });
+    }
+    document.getElementById('hk-modal').classList.add('active');
+  }
+
+  document.querySelectorAll('[data-open-housekeeping]').forEach(function (btn) {
+    btn.addEventListener('click', function () { openHkModal(btn.getAttribute('data-open-housekeeping')); });
+  });
+  document.querySelectorAll('[data-close-modal]').forEach(function (btn) {
+    btn.addEventListener('click', function () { document.getElementById(btn.getAttribute('data-close-modal')).classList.remove('active'); });
+  });
+  var hkOverlay = document.getElementById('hk-modal');
+  hkOverlay.addEventListener('click', function (e) { if (e.target === hkOverlay) hkOverlay.classList.remove('active'); });
+})();
+</script>
 {% endblock %}

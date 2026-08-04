@@ -134,14 +134,15 @@ Copy the values below into a `.env` file in the project root (see [Configuration
 ```bash
 python manage.py migrate
 
-# Optional: realistic demo data (6 Ghanaian hotels, 8 room types, ~45 rooms)
-python manage.py seed_demo_data
+# Optional: full demo dataset — 3 hotels, 18 staff, 15 guests, 42 rooms,
+# 20 reservations, invoices, payments, services, feedback, maintenance, notifications
+# (merge-safe: re-running updates existing rows and never deletes other data)
+python manage.py seed_full_demo
 
-# Optional: operational data (check-ins, invoices, maintenance) for dashboards
-python manage.py seed_operations_data
-
-# Optional: sample staff accounts for testing (see table below)
-python manage.py create_sample_accounts
+# Legacy smaller seeds (optional, superseded by seed_full_demo)
+# python manage.py seed_demo_data
+# python manage.py seed_operations_data
+# python manage.py create_sample_accounts
 ```
 
 ### 4. Create an admin (if you didn't use the sample accounts)
@@ -200,11 +201,12 @@ All settings are read from environment variables via `python-decouple` (put them
 
 | Command | What it creates |
 |---------|-----------------|
-| `python manage.py seed_demo_data` | 6 Ghanaian hotels (La Palm, Kempinski, Royal Senchi, Busua Beach, Mövenpick, Cape Coast Castle), 3 departments per hotel, 8 room types, ~45 rooms (some pre-marked occupied/reserved/maintenance) |
-| `python manage.py seed_operations_data` | Today's check-in / check-out / upcoming reservations, matching invoices, and a maintenance task (run `seed_demo_data` first) |
-| `python manage.py create_sample_accounts` | One staff account per role (admin, manager, receptionist, accountant, housekeeping) |
+| `python manage.py seed_full_demo` | **Full dataset (recommended):** 3 real Ghanaian hotels (Kempinski, Labadi Beach, Elmina Beach), 5 departments each, 18 staff across all roles & hotels, 15 guests, 11 room types, 42 rooms (mix of occupied/reserved/maintenance), 20 reservations (checked-in/confirmed/pending/checked-out/cancelled), room-reservations, 18 invoices, 11 payments (Cash/Card/Mobile Money/Paystack), 20 services, 16 service requests, feedback, 11 maintenance tasks, 15 notifications |
+| `python manage.py seed_demo_data` | Legacy: 6 hotels, 3 departments per hotel, 8 room types, ~45 rooms |
+| `python manage.py seed_operations_data` | Legacy: today's check-in / check-out / upcoming reservations, invoices, maintenance (run `seed_demo_data` first) |
+| `python manage.py create_sample_accounts` | Legacy: one staff account per role (admin, manager, receptionist, accountant, housekeeping) |
 
-All commands are idempotent (`update_or_create` / `get_or_create`) and safe to re-run.
+All commands are merge-safe (`update_or_create` / `get_or_create`) and safe to re-run. Staff passwords set by the seeds: `admin123456` (admin), `manager123`, `reception123`, `accountant123`, `housekeeping123`.
 
 ---
 

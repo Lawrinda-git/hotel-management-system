@@ -3,8 +3,9 @@
 {% block title %}StayHub | Receptionist{% endblock %}
 {% block body_class %}bg-background text-on-surface pb-20{% endblock %}
 {% block content %}
+{% include "frontend/components/_staff_sidebar.html" %}
 <!-- ===== TOP HEADER ===== -->
-<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm md:left-[260px] md:right-0 md:w-auto">
   <div class="flex items-center justify-between px-4 h-16 max-w-6xl mx-auto">
     <div class="flex items-center gap-3">
       <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md">
@@ -26,7 +27,7 @@
   </div>
 </header>
 
-<main class="pt-20 pb-8 px-4 max-w-6xl mx-auto">
+<main class="pt-20 pb-8 px-4 max-w-6xl mx-auto md:ml-[260px]">
   <!-- Welcome -->
   <section class="mb-6">
     <h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">Welcome, {{ request.user.staff_name|default:"Receptionist" }}</h2>
@@ -71,7 +72,7 @@
       <span class="material-symbols-outlined">add</span>
       <span>New Booking</span>
     </a>
-    <button class="btn btn-outline py-4 rounded-xl flex items-center justify-center gap-2" data-toast="Room assignment coming soon">
+    <button class="btn btn-outline py-4 rounded-xl flex items-center justify-center gap-2" data-open-assign-modal>
       <span class="material-symbols-outlined">meeting_room</span>
       <span>Assign Room</span>
     </button>
@@ -94,7 +95,7 @@
             <p class="text-xs text-on-surface-variant">#{{ reservation.id }} · {{ reservation.check_in|date:"H:i" }}</p>
           </div>
         </div>
-        <button class="btn btn-primary btn-sm" data-toast="Check-in for {{ reservation.guest.guest_name }} completed">
+        <button class="btn btn-primary btn-sm" data-checkin="{{ reservation.id }}" data-guest-label="{{ reservation.guest.guest_name }}">
           Check In
         </button>
       </div>
@@ -121,7 +122,7 @@
             <p class="text-xs text-on-surface-variant">#{{ reservation.id }} · {{ reservation.check_out|date:"H:i" }}</p>
           </div>
         </div>
-        <button class="btn btn-outline btn-sm" data-toast="Check-out for {{ reservation.guest.guest_name }} completed">
+        <button class="btn btn-outline btn-sm" data-checkout="{{ reservation.id }}" data-guest-label="{{ reservation.guest.guest_name }}">
           Check Out
         </button>
       </div>
@@ -161,8 +162,37 @@
   </section>
 </main>
 
+{{ reservations_json|json_script:"reception-reservations-data" }}
+{{ rooms_json|json_script:"reception-rooms-data" }}
+
+<!-- ===== ASSIGN ROOM MODAL ===== -->
+<div id="assign-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="assign-modal-title">
+  <div class="modal" style="max-width:560px">
+    <h3 class="modal-title" id="assign-modal-title">Assign Room to Reservation</h3>
+    <div class="modal-body" style="margin-bottom:16px">
+      <label class="label" for="assign-reservation">Reservation</label>
+      <div class="relative mb-4">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">receipt_long</span>
+        <select id="assign-reservation" class="input pl-10">
+          <option value="">Select an upcoming reservation…</option>
+        </select>
+      </div>
+      <label class="label" for="assign-room">Available Room</label>
+      <div class="grid grid-cols-3 sm:grid-cols-4 gap-2" id="assign-room-grid">
+        <p class="col-span-full text-sm text-on-surface-variant">Loading rooms…</p>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" data-close-modal="assign-modal">Cancel</button>
+      <button type="button" class="btn btn-primary" id="assign-confirm" disabled>
+        <span class="material-symbols-outlined text-lg">meeting_room</span> Assign
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== BOTTOM NAV ===== -->
-<nav class="fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+<nav class="hide-desktop fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
   <div class="flex items-center justify-around h-16 max-w-lg mx-auto">
     <a href="{% url 'receptionist_dashboard' %}" class="flex flex-col items-center gap-0.5 text-primary">
       <span class="material-symbols-outlined" style="font-variation-settings:'FILL'1;">dashboard</span>
@@ -182,4 +212,150 @@
     </a>
   </div>
 </nav>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  'use strict';
+  var csrfToken = StayHub.getCookie('csrftoken');
+
+  function post(url, payload) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken },
+      body: JSON.stringify(payload || {}),
+    }).then(function (r) {
+      return r.json().then(function (data) {
+        if (!r.ok) throw new Error(data.detail || 'Something went wrong.');
+        return data;
+      });
+    });
+  }
+
+  function reloadSoon() { setTimeout(function () { window.location.reload(); }, 700); }
+
+  // Check-in
+  document.querySelectorAll('[data-checkin]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var reservationId = el.getAttribute('data-checkin');
+      var guest = el.getAttribute('data-guest-label') || 'guest';
+      el.disabled = true;
+      post('{% url "staff_checkin" %}', { reservation_id: reservationId })
+        .then(function (data) {
+          StayHub.Toast.success(data.detail || guest + ' checked in');
+          reloadSoon();
+        })
+        .catch(function (e) {
+          StayHub.Toast.error(e.message);
+          el.disabled = false;
+        });
+    });
+  });
+
+  // Check-out
+  document.querySelectorAll('[data-checkout]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var reservationId = el.getAttribute('data-checkout');
+      var guest = el.getAttribute('data-guest-label') || 'guest';
+      el.disabled = true;
+      post('{% url "staff_checkout" %}', { reservation_id: reservationId })
+        .then(function (data) {
+          StayHub.Toast.success(data.detail || guest + ' checked out');
+          reloadSoon();
+        })
+        .catch(function (e) {
+          StayHub.Toast.error(e.message);
+          el.disabled = false;
+        });
+    });
+  });
+
+  // Assign Room modal
+  var reservations = JSON.parse(document.getElementById('reception-reservations-data').textContent);
+  var rooms = JSON.parse(document.getElementById('reception-rooms-data').textContent);
+  var selectedRoomId = null;
+
+  function renderAssignModal() {
+    var resSel = document.getElementById('assign-reservation');
+    var active = reservations.filter(function (r) {
+      var s = String(r.status).toUpperCase();
+      return s === 'PENDING' || s === 'CONFIRMED';
+    });
+    resSel.innerHTML = '<option value="">Select an upcoming reservation…</option>';
+    active.forEach(function (r) {
+      var opt = document.createElement('option');
+      opt.value = r.id;
+      opt.textContent = '#' + r.id + ' · ' + r.guest_name + ' (' + r.check_in + ' → ' + r.check_out + ')';
+      resSel.appendChild(opt);
+    });
+    if (!active.length) {
+      resSel.innerHTML = '<option value="">No upcoming reservations to assign</option>';
+      resSel.disabled = true;
+    }
+    renderRoomGrid();
+  }
+
+  function renderRoomGrid() {
+    var grid = document.getElementById('assign-room-grid');
+    var resSel = document.getElementById('assign-reservation');
+    var res = reservations.filter(function (r) { return String(r.id) === String(resSel.value); })[0];
+    var available = rooms.filter(function (rm) { return rm.status === 'AVAILABLE'; });
+    if (res) available = available.filter(function (rm) { return rm.hotel_id === res.hotel_id; });
+
+    selectedRoomId = null;
+    document.getElementById('assign-confirm').disabled = true;
+    grid.innerHTML = '';
+    if (!available.length) {
+      grid.innerHTML = '<p class="col-span-full text-sm text-on-surface-variant text-center py-4">No available rooms' + (res ? ' at this hotel' : '') + ' right now.</p>';
+      return;
+    }
+    available.forEach(function (room) {
+      var tile = document.createElement('button');
+      tile.type = 'button';
+      tile.className = 'aspect-square rounded-lg bg-surface-container flex flex-col items-center justify-center text-xs font-bold text-on-surface hover:bg-primary hover:text-on-primary transition-colors cursor-pointer';
+      tile.innerHTML = '<span>' + room.room_number + '</span>';
+      tile.addEventListener('click', function () {
+        selectedRoomId = room.id;
+        document.getElementById('assign-confirm').disabled = false;
+        grid.querySelectorAll('button').forEach(function (b) {
+          b.classList.remove('bg-primary', 'text-on-primary');
+          b.classList.add('bg-surface-container', 'text-on-surface');
+        });
+        tile.classList.add('bg-primary', 'text-on-primary');
+        tile.classList.remove('bg-surface-container', 'text-on-surface');
+      });
+      grid.appendChild(tile);
+    });
+  }
+
+  document.getElementById('assign-reservation').addEventListener('change', renderRoomGrid);
+  document.querySelectorAll('[data-open-assign-modal]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      renderAssignModal();
+      document.getElementById('assign-modal').classList.add('active');
+    });
+  });
+  document.querySelectorAll('[data-close-modal]').forEach(function (btn) {
+    btn.addEventListener('click', function () { document.getElementById(btn.getAttribute('data-close-modal')).classList.remove('active'); });
+  });
+  document.getElementById('assign-confirm').addEventListener('click', function () {
+    var resSel = document.getElementById('assign-reservation');
+    if (!resSel.value || !selectedRoomId) return;
+    var btn = this;
+    btn.disabled = true;
+    post('{% url "staff_assign_room" %}', { reservation_id: resSel.value, room_id: selectedRoomId })
+      .then(function (data) {
+        StayHub.Toast.success(data.detail || 'Room assigned');
+        setTimeout(function () { window.location.reload(); }, 700);
+      })
+      .catch(function (e) {
+        StayHub.Toast.error(e.message);
+        btn.disabled = false;
+      });
+  });
+  var assignOverlay = document.getElementById('assign-modal');
+  assignOverlay.addEventListener('click', function (e) { if (e.target === assignOverlay) assignOverlay.classList.remove('active'); });
+})();
+</script>
 {% endblock %}

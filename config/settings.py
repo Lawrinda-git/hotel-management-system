@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import sys
 from pathlib import Path
 
 from decouple import config
@@ -22,12 +23,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-01ky-fhel2(q*!u&v4dj6vc(ivnq*vzxi0p9jtebl#g)_fr7i6'
+_DEFAULT_DEV_SECRET = "django-insecure-01ky-fhel2(q*!u&v4dj6vc(ivnq*vzxi0p9jtebl#g)_fr7i6"
+SECRET_KEY = config("SECRET_KEY", default=_DEFAULT_DEV_SECRET)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = ["*"]
+# Fail loudly instead of serving production traffic with the known dev key.
+if not DEBUG and SECRET_KEY == _DEFAULT_DEV_SECRET:
+    sys.stderr.write(
+        "ERROR: DEBUG=False requires a real SECRET_KEY in the environment. "
+        "Set SECRET_KEY before starting the server.\n"
+    )
+    sys.exit(1)
+
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in config("ALLOWED_HOSTS", default="*").split(",")
+    if host.strip()
+]
 
 
 # Application definition

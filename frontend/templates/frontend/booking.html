@@ -46,11 +46,11 @@
     <!-- Staff Quick Actions (only visible to staff) -->
     {% if is_staff %}
     <div class="card p-4 mb-6 flex flex-wrap gap-3">
-      <input id="walkin-guest-search" class="input flex-1 min-w-[220px]" placeholder="Search guest by email or phone..." type="search">
-      <button class="btn btn-primary" data-toast="Guest search coming soon">
+      <input id="walkin-guest-search" class="input flex-1 min-w-[220px]" placeholder="Search guest by name, email or phone..." type="search">
+      <button class="btn btn-primary" id="find-guest-btn">
         <span class="material-symbols-outlined text-lg">search</span> Find Guest
       </button>
-      <button class="btn btn-outline" data-toast="Walk-in guest mode activated">
+      <button class="btn btn-outline" id="walkin-btn">
         <span class="material-symbols-outlined text-lg">person_add</span> New Walk-in
       </button>
     </div>
@@ -656,5 +656,72 @@
     completePaystackReturn().then(function (handled) {
         if (!handled) { loadRooms(); updateSummary(); }
     });
+
+    // Staff: find an existing guest and prefill the guest details form.
+    var findGuestBtn = document.getElementById('find-guest-btn');
+    var walkinBtn = document.getElementById('walkin-btn');
+    var guestSearch = document.getElementById('walkin-guest-search');
+    if (findGuestBtn && guestSearch) {
+        findGuestBtn.addEventListener('click', function () {
+            var q = guestSearch.value.trim();
+            if (!q) {
+                if (window.StayHub) StayHub.Toast.error('Enter a name, email, or phone to search.');
+                return;
+            }
+            findGuestBtn.disabled = true;
+            fetch('{% url "staff_guest_search" %}?q=' + encodeURIComponent(q), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            }).then(function (r) {
+                return r.json().then(function (d) {
+                    if (!r.ok) throw new Error(d.detail || 'Search failed.');
+                    return d;
+                });
+            }).then(function (data) {
+                var results = data.results || [];
+                if (!results.length) {
+                    if (window.StayHub) StayHub.Toast.error('No guest found for "' + q + '". Try the walk-in form below.');
+                    return;
+                }
+                var guest = results[0];
+                document.getElementById('guest-name').value = guest.guest_name || '';
+                document.getElementById('guest-email').value = guest.guest_email || '';
+                var phone = guest.guest_phone || '';
+                var code = '+233';
+                var local = phone;
+                ['+233', '+234', '+254', '+27', '+44', '+1'].forEach(function (c) {
+                    if (phone.indexOf(c) === 0) { code = c; local = phone.slice(c.length); }
+                });
+                var ccSelect = document.getElementById('country-code');
+                if (ccSelect && Array.prototype.some.call(ccSelect.options, function (o) { return o.value === code; })) {
+                    ccSelect.value = code;
+                }
+                document.getElementById('guest-phone').value = local.replace(/^0+/, '');
+                document.getElementById('id-number').value = guest.id_number || '';
+                if (guest.nationality) {
+                    var nat = document.getElementById('nationality');
+                    if (nat && Array.prototype.some.call(nat.options, function (o) { return o.value === guest.nationality; })) {
+                        nat.value = guest.nationality;
+                    }
+                }
+                if (window.StayHub) {
+                    StayHub.Toast.success(results.length > 1 ? 'Multiple matches — using the first result.' : 'Guest found — details prefilled.');
+                }
+            }).catch(function (e) {
+                if (window.StayHub) StayHub.Toast.error(e.message);
+            }).then(function () {
+                findGuestBtn.disabled = false;
+            });
+        });
+
+        walkinBtn.addEventListener('click', function () {
+            guestSearch.value = '';
+            document.getElementById('guest-name').value = '';
+            document.getElementById('guest-email').value = '';
+            document.getElementById('guest-phone').value = '';
+            document.getElementById('id-number').value = '';
+            document.getElementById('nationality').value = 'Ghana';
+            if (window.StayHub) StayHub.Toast.success('Walk-in mode — enter the guest details below.');
+        });
+    }
 </script>
 {% endblock %}

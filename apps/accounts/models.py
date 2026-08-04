@@ -20,6 +20,7 @@ class Staff(AbstractUser):
     role        = models.CharField(max_length=50)
     hired_at    = models.DateTimeField(auto_now_add=True)
     profile_picture = models.FileField(upload_to="profile_pictures/", blank=True, null=True)
+    two_factor_enabled = models.BooleanField(default=False, help_text="Require a one-time code by email/SMS when signing in.")
  
     class Meta:
         db_table = "staff"

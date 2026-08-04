@@ -3,8 +3,9 @@
 {% block title %}StayHub | Manager Dashboard{% endblock %}
 {% block body_class %}bg-background text-on-surface pb-20{% endblock %}
 {% block content %}
+{% include "frontend/components/_staff_sidebar.html" %}
 <!-- ===== TOP HEADER ===== -->
-<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm md:left-[260px] md:right-0 md:w-auto">
   <div class="flex items-center justify-between px-4 h-16 max-w-6xl mx-auto">
     <div class="flex items-center gap-3">
       <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md">
@@ -26,7 +27,7 @@
   </div>
 </header>
 
-<main class="pt-20 pb-8 px-4 max-w-6xl mx-auto">
+<main class="pt-20 pb-8 px-4 max-w-6xl mx-auto md:ml-[260px]">
   <!-- Welcome -->
   <section class="mb-6">
     <h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">Good {{ request.user.staff_name|default:"Admin" }}</h2>
@@ -66,10 +67,14 @@
   </section>
 
   <!-- Quick Actions -->
-  <section class="grid grid-cols-2 gap-3 mb-6">
+  <section class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
     <a href="{% url 'booking' %}" class="btn btn-primary py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg">
       <span class="material-symbols-outlined">add</span>
       <span>New Booking</span>
+    </a>
+    <a href="{% url 'admin_management' %}" class="btn btn-secondary py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg">
+      <span class="material-symbols-outlined">admin_panel_settings</span>
+      <span>Manage Property</span>
     </a>
     <a href="{% url 'explore_stays' %}" class="btn btn-outline py-4 rounded-xl flex items-center justify-center gap-2">
       <span class="material-symbols-outlined">search</span>
@@ -201,11 +206,15 @@
 </main>
 
 <!-- ===== BOTTOM NAV ===== -->
-<nav class="fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+<nav class="hide-desktop fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
   <div class="flex items-center justify-around h-16 max-w-lg mx-auto">
     <a href="{% url 'manager_dashboard' %}" class="flex flex-col items-center gap-0.5 text-primary">
       <span class="material-symbols-outlined" style="font-variation-settings:'FILL'1;">dashboard</span>
       <span class="text-[10px] font-semibold">Dashboard</span>
+    </a>
+    <a href="{% url 'admin_management' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">admin_panel_settings</span>
+      <span class="text-[10px] font-semibold">Manage</span>
     </a>
     <a href="{% url 'booking' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
       <span class="material-symbols-outlined">calendar_add_on</span>

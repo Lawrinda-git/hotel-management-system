@@ -123,6 +123,38 @@
     </form>
   </section>
 
+  <!-- Two-Factor Authentication -->
+  <section class="card p-8 mt-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary">verified_user</span>
+      </div>
+      <div>
+        <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Two-Factor Authentication</h2>
+        <p class="text-on-surface-variant text-sm">Add an extra layer of security to your account</p>
+      </div>
+    </div>
+    <form method="post" class="flex items-center justify-between gap-4 rounded-xl bg-surface-container/60 p-4">
+      {% csrf_token %}
+      <div>
+        <p class="font-semibold text-on-surface text-sm">Require a verification code at sign-in</p>
+        <p class="text-xs text-on-surface-variant mt-0.5">We'll email or SMS you a one-time code every time you sign in.</p>
+      </div>
+      <label class="switch relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" name="two_factor_enabled" value="1" class="sr-only peer" {% if two_factor_enabled %}checked{% endif %}
+               onchange="this.form.submit()">
+        <span class="w-11 h-6 bg-surface-container-high rounded-full peer-checked:bg-primary after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></span>
+      </label>
+    </form>
+    <p class="text-xs text-on-surface-variant mt-3">
+      {% if two_factor_enabled %}
+      <span class="inline-flex items-center gap-1 text-green-600 font-medium"><span class="material-symbols-outlined text-sm">check_circle</span> Enabled — you'll be asked for a code on your next sign-in.</span>
+      {% else %}
+      Sign-in uses only your password. Toggle this on to add a second step.
+      {% endif %}
+    </p>
+  </section>
+
   <!-- Account Actions -->
   <section class="card p-8 mt-6">
     <div class="flex items-center gap-3 mb-4">

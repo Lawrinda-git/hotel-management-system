@@ -1,25 +1,72 @@
-{% comment %}Role-aware staff navigation.{% endcomment %}
+{% comment %}Role-aware desktop sidebar for staff dashboards. Each dashboard supplies an "active" context variable for highlighting.{% endcomment %}
+{% with role=request.user.role|lower %}
 <aside class="sidebar hide-mobile" role="navigation" aria-label="Staff navigation">
     <div class="sidebar-header">
         {% if request.user.profile_picture %}<img src="{{ request.user.profile_picture.url }}" alt="{{ request.user.get_full_name }}" class="avatar">
         {% else %}<div class="avatar avatar-initials">{{ request.user.first_name|default:request.user.username|first|upper }}</div>{% endif %}
-        <div><p class="font-label-md text-on-surface font-semibold">{{ display_name|default:request.user.get_full_name }}</p><p class="font-label-sm text-on-surface-variant">{{ role|title }}</p></div>
+        <div>
+            <p class="font-label-md text-on-surface font-semibold">{{ request.user.staff_name|default:request.user.get_full_name }}</p>
+            <p class="font-label-sm text-on-surface-variant">{{ request.user.role|title }}</p>
+        </div>
     </div>
     <nav class="sidebar-nav">
-        {% if role == 'admin' or role == 'manager' %}
-        <div class="sidebar-section"><p class="sidebar-section-title">Overview</p>
-            <a class="sidebar-link {% if active == 'dashboard' %}active{% endif %}" href="{% url 'manager_dashboard' %}"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
-            <a class="sidebar-link {% if active == 'bookings' %}active{% endif %}" href="#"><span class="material-symbols-outlined">calendar_today</span>Bookings</a>
-            <a class="sidebar-link {% if active == 'rooms' %}active{% endif %}" href="#"><span class="material-symbols-outlined">meeting_room</span>Rooms</a>
-            <a class="sidebar-link {% if active == 'guests' %}active{% endif %}" href="#"><span class="material-symbols-outlined">groups</span>Guests</a>
-        </div>{% endif %}
+        <div class="sidebar-section">
+            <p class="sidebar-section-title">Overview</p>
+            <a class="sidebar-link {% if active == 'dashboard' %}active{% endif %}"
+               href="{% if role == 'admin' or role == 'manager' %}{% url 'manager_dashboard' %}{% elif role == 'receptionist' %}{% url 'receptionist_dashboard' %}{% elif role == 'accountant' %}{% url 'accountant_dashboard' %}{% else %}{% url 'housekeeping_dashboard' %}{% endif %}">
+                <span class="material-symbols-outlined">dashboard</span>Dashboard
+            </a>
+            <a class="sidebar-link {% if active == 'bookings' %}active{% endif %}" href="{% url 'booking' %}">
+                <span class="material-symbols-outlined">calendar_today</span>Bookings
+            </a>
+            {% if role == 'admin' or role == 'manager' %}
+            <a class="sidebar-link {% if active == 'manage' %}active{% endif %}" href="{% url 'admin_management' %}">
+                <span class="material-symbols-outlined">meeting_room</span>Rooms &amp; Staff
+            </a>
+            <a class="sidebar-link {% if active == 'housekeeping' %}active{% endif %}" href="{% url 'housekeeping_dashboard' %}">
+                <span class="material-symbols-outlined">cleaning_services</span>Housekeeping
+            </a>
+            {% endif %}
+        </div>
         {% if role == 'admin' or role == 'manager' or role == 'accountant' %}
-        <div class="sidebar-section"><p class="sidebar-section-title">Finance</p>
-            {% if role == 'admin' or role == 'accountant' %}<a class="sidebar-link" href="#"><span class="material-symbols-outlined">receipt_long</span>Invoices</a><a class="sidebar-link" href="#"><span class="material-symbols-outlined">payments</span>Payments</a>{% endif %}
-            {% if role == 'admin' or role == 'manager' %}<a class="sidebar-link" href="#"><span class="material-symbols-outlined">bar_chart</span>Reports</a>{% endif %}
-        </div>{% endif %}
-        {% if role == 'admin' or role == 'manager' %}<div class="sidebar-section"><p class="sidebar-section-title">Staff</p><a class="sidebar-link" href="{% url 'team' %}"><span class="material-symbols-outlined">badge</span>Team</a><a class="sidebar-link" href="{% url 'housekeeping_dashboard' %}"><span class="material-symbols-outlined">cleaning_services</span>Housekeeping</a></div>{% endif %}
+        <div class="sidebar-section">
+            <p class="sidebar-section-title">Finance</p>
+            <a class="sidebar-link {% if active == 'finance' %}active{% endif %}" href="{% url 'accountant_dashboard' %}">
+                <span class="material-symbols-outlined">receipt_long</span>Invoices &amp; Payments
+            </a>
+            <a class="sidebar-link" href="{% url 'accountant_export' %}">
+                <span class="material-symbols-outlined">bar_chart</span>Export CSV
+            </a>
+        </div>
+        {% endif %}
+        {% if role == 'admin' or role == 'manager' %}
+        <div class="sidebar-section">
+            <p class="sidebar-section-title">Staff</p>
+            <a class="sidebar-link" href="{% url 'team' %}">
+                <span class="material-symbols-outlined">badge</span>Team
+            </a>
+        </div>
+        {% endif %}
+        {% if role == 'receptionist' %}
+        <div class="sidebar-section">
+            <p class="sidebar-section-title">Operations</p>
+            <a class="sidebar-link {% if active == 'assign' %}active{% endif %}" href="{% url 'receptionist_dashboard' %}">
+                <span class="material-symbols-outlined">meeting_room</span>Assign Room
+            </a>
+        </div>
+        {% endif %}
+        {% if role == 'housekeeping' %}
+        <div class="sidebar-section">
+            <p class="sidebar-section-title">Operations</p>
+            <a class="sidebar-link {% if active == 'maintenance' %}active{% endif %}" href="{% url 'housekeeping_dashboard' %}">
+                <span class="material-symbols-outlined">build</span>Maintenance
+            </a>
+        </div>
+        {% endif %}
     </nav>
-    <div class="sidebar-footer"><a class="sidebar-link" href="{% url 'profile' %}"><span class="material-symbols-outlined">person</span>Profile</a><a class="sidebar-link" href="{% url 'logout' %}"><span class="material-symbols-outlined">logout</span>Sign Out</a></div>
+    <div class="sidebar-footer">
+        <a class="sidebar-link" href="{% url 'profile' %}"><span class="material-symbols-outlined">person</span>Profile</a>
+        <a class="sidebar-link" href="{% url 'logout' %}"><span class="material-symbols-outlined">logout</span>Sign Out</a>
+    </div>
 </aside>
-<nav class="bottom-nav hide-desktop" role="navigation" aria-label="Staff navigation"><div class="bottom-nav-inner"><a class="nav-link" href="{% url 'manager_dashboard' %}"><span class="material-symbols-outlined">dashboard</span><span>Home</span></a><a class="nav-link" href="#"><span class="material-symbols-outlined">calendar_today</span><span>Bookings</span></a><a class="nav-link" href="{% url 'profile' %}"><span class="material-symbols-outlined">person</span><span>Profile</span></a></div></nav>
+{% endwith %}

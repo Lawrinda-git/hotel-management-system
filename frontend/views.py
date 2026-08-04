@@ -19,12 +19,13 @@ from django.db import connection, transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 
 from apps.guests.models import Guest
 from apps.billing.models import Invoice
 from apps.reservations.models import Reservation, RoomReservation
-from apps.rooms.models import Room
+from apps.rooms.models import Room, RoomType
 from apps.hotels.models import Hotel
 
 
@@ -108,7 +109,15 @@ def _send_verification_sms(phone_number, code):
 
 
 def _complete_or_challenge_login(request, user):
-    """Login the user directly - 2FA is optional and configured in profile."""
+    """Log the user in, or start 2FA when they enabled it in profile settings."""
+    if getattr(user, "two_factor_enabled", False):
+        request.session["pending_login_user_id"] = user.id
+        request.session["pending_login_channel"] = "email"
+        return JsonResponse({
+            "detail": "Two-factor verification required.",
+            "verification_method_required": True,
+            "redirect_url": "/verification-method/",
+        }, status=202)
     login(request, user)
     return JsonResponse({
         "detail": "Signed in successfully.",
@@ -174,6 +183,7 @@ def profile(request):
         context = {
             "phone_country_code": phone_country_code,
             "phone_number": phone_number,
+            "two_factor_enabled": user.two_factor_enabled,
         }
         context.update(extra)
         return render(request, template, context)
@@ -194,6 +204,7 @@ def profile(request):
         user.email = email
         user.username = email
         user.staff_phone = staff_phone
+        user.two_factor_enabled = request.POST.get("two_factor_enabled") == "1"
         if request.POST.get("clear_picture") == "1" and user.profile_picture:
             user.profile_picture.delete(save=False)
             user.profile_picture = None
@@ -411,6 +422,10 @@ def google_callback(request):
                 user.save(update_fields=["password"])
     except Exception:
         return redirect("staff_login" if staff_login_flow else "signin")
+    if getattr(user, "two_factor_enabled", False):
+        request.session["pending_login_user_id"] = user.id
+        request.session["pending_login_channel"] = "email"
+        return redirect("verification_method")
     login(request, user)
     return redirect(_redirect_for_role(user.role))
 
@@ -782,6 +797,7 @@ def manager_dashboard(request):
     
     today = timezone.localdate()
     context = {
+        "active": "dashboard",
         "total_staff": staff_qs.count(),
         "total_rooms": room_qs.count(),
         "available_rooms": room_qs.filter(status=Room.RoomStatus.AVAILABLE).count(),
@@ -797,6 +813,7 @@ def manager_dashboard(request):
     return render(request, "frontend/manager_dashboard.html", context)
 
 
+@ensure_csrf_cookie
 @_role_required("receptionist")
 def receptionist_dashboard(request):
     """Receptionist operations dashboard."""
@@ -808,16 +825,29 @@ def receptionist_dashboard(request):
         reservations = reservations.filter(hotel_id=request.user.hotel_id)
         rooms = rooms.filter(hotel_id=request.user.hotel_id)
     return render(request, "frontend/receptionist_dashboard.html", {
+        "active": "dashboard",
         "available_rooms_count": rooms.filter(status=Room.RoomStatus.AVAILABLE).count(),
         "ready_rooms_count": rooms.filter(status=Room.RoomStatus.AVAILABLE, housekeeping_status=Room.HousekeepingStatus.CLEAN).count(),
         "today_checkins": reservations.filter(check_in__date=today).select_related("guest")[:20],
         "today_checkouts": reservations.filter(check_out__date=today).select_related("guest")[:20],
         "upcoming_reservations": reservations.filter(check_in__date__gte=today).order_by("check_in")[:20],
         "all_rooms": rooms.select_related("room_type").order_by("room_number")[:30],
+        "available_rooms": rooms.filter(status=Room.RoomStatus.AVAILABLE).select_related("room_type").order_by("room_number")[:30],
+        "reservations_json": json.dumps([{
+            "id": r.id, "guest_name": r.guest.guest_name, "status": r.status,
+            "check_in": r.check_in.strftime("%b %d, %Y"), "check_out": r.check_out.strftime("%b %d, %Y"),
+            "hotel_id": r.hotel_id,
+        } for r in reservations.filter(check_in__date__gte=today).order_by("check_in")[:20]]),
+        "rooms_json": json.dumps([{
+            "id": rm.id, "room_number": rm.room_number, "status": rm.status,
+            "housekeeping_status": rm.housekeeping_status, "hotel_id": rm.hotel_id,
+            "room_type": rm.room_type.type_name if rm.room_type else "Standard",
+        } for rm in rooms.order_by("room_number")[:30]]),
     })
 
 
-@_role_required("accountant")
+@ensure_csrf_cookie
+@_role_required("accountant", "manager", "admin")
 def accountant_dashboard(request):
     """Accountant/financial dashboard."""
     from apps.billing.models import Payment
@@ -827,15 +857,25 @@ def accountant_dashboard(request):
         invoices = invoices.filter(hotel_id=request.user.hotel_id)
         payments = payments.filter(hotel_id=request.user.hotel_id)
     return render(request, "frontend/accountant_dashboard.html", {
+        "active": "finance",
         "invoice_count": invoices.count(),
         "unpaid_invoice_count": invoices.filter(status=Invoice.InvoiceStatus.UNPAID).count(),
         "paid_invoice_count": invoices.filter(status=Invoice.InvoiceStatus.PAID).count(),
         "recent_invoices": invoices[:10],
         "recent_payments": payments[:10],
+        "invoices_json": json.dumps([{
+            "id": i.id,
+            "guest_name": i.reservation.guest.guest_name if i.reservation and i.reservation.guest else "-",
+            "total_amount": str(i.total_amount),
+            "balance_due": str(i.balance_due),
+            "status": i.status,
+        } for i in invoices[:10]]),
+        "payment_methods": Payment.PaymentMethod.choices,
     })
 
 
-@_role_required("housekeeping")
+@ensure_csrf_cookie
+@_role_required("housekeeping", "manager", "admin")
 def housekeeping_dashboard(request):
     """Housekeeping operations dashboard."""
     from apps.rooms.models import Maintenance
@@ -845,14 +885,20 @@ def housekeeping_dashboard(request):
         rooms = rooms.filter(hotel_id=request.user.hotel_id)
         maintenance = maintenance.filter(room__hotel_id=request.user.hotel_id)
     return render(request, "frontend/housekeeping_dashboard.html", {
+        "active": "dashboard",
         "dirty_rooms": rooms.filter(housekeeping_status=Room.HousekeepingStatus.DIRTY).order_by("room_number"),
         "clean_rooms": rooms.filter(housekeeping_status=Room.HousekeepingStatus.CLEAN).order_by("room_number"),
         "inspected_rooms": rooms.filter(housekeeping_status=Room.HousekeepingStatus.INSPECTED).order_by("room_number"),
         "maintenance_tasks": maintenance.order_by("-report_date")[:20],
         "room_inventory": rooms.order_by("room_number")[:40],
+        "rooms_json": json.dumps([{
+            "id": rm.id, "room_number": rm.room_number, "status": rm.status,
+            "housekeeping_status": rm.housekeeping_status, "hotel_id": rm.hotel_id,
+        } for rm in rooms.order_by("room_number")[:40]]),
     })
 
 
+@ensure_csrf_cookie
 @_role_required("admin", "manager")
 def admin_management(request):
     """Admin management page for rooms, images, and employees."""
@@ -874,16 +920,649 @@ def admin_management(request):
         maintenance_qs = maintenance_qs.filter(room__hotel_id=user.hotel_id)
     
     context = {
+        "active": "manage",
         "staff_members": staff_qs.order_by("role", "staff_name"),
         "rooms": rooms_qs.order_by("room_number"),
         "hotels": hotels_qs.order_by("category", "hotel_name"),
         "maintenance_tasks": maintenance_qs,
         "is_admin": is_admin,
+        "user_hotel_id": user.hotel_id,
+        "room_types": RoomType.objects.select_related("hotel").order_by("type_name"),
         "hotel_categories": Hotel.Category.choices,
+        "rooms_json": json.dumps([{
+            "id": r.id,
+            "room_number": r.room_number,
+            "floor": r.floor,
+            "price_per_night": str(r.price_per_night or (r.room_type.price_per_night if r.room_type else 0)),
+            "status": r.status,
+            "housekeeping_status": r.housekeeping_status,
+            "room_type_id": r.room_type_id,
+            "hotel_id": r.hotel_id,
+        } for r in rooms_qs]),
+        "staff_json": json.dumps([{
+            "id": s.id,
+            "staff_name": s.staff_name,
+            "email": s.email,
+            "staff_phone": s.staff_phone,
+            "role": s.role,
+            "hotel_id": s.hotel_id,
+        } for s in staff_qs]),
+        "hotels_json": json.dumps([{
+            "id": h.id,
+            "hotel_name": h.hotel_name,
+            "hotel_email": h.hotel_email,
+            "hotel_phone": h.hotel_phone,
+            "hotel_address": h.hotel_address,
+            "category": h.category,
+            "has_image": bool(h.hotel_image),
+            "image_url": h.hotel_image.url if h.hotel_image else "",
+        } for h in hotels_qs]),
     }
     return render(request, "frontend/admin_management.html", context)
+
+
+# ─── Admin Management CRUD API (JSON, session-auth, CSRF-protected) ───
+
+ROOM_STATUSES = Room.RoomStatus.choices
+ROOM_HOUSEKEEPING = Room.HousekeepingStatus.choices
+STAFF_ROLES = ("admin", "manager", "receptionist", "accountant", "housekeeping")
+
+
+def _admin_manage_context(request):
+    """Return (is_admin, hotel_id) for admin/manager API callers, else None."""
+    if not request.user.is_authenticated:
+        return None
+    role = (request.user.role or "").lower()
+    if role not in ("admin", "manager"):
+        return None
+    return role == "admin", request.user.hotel_id
+
+
+def _payload_json(request):
+    try:
+        return json.loads(request.body.decode("utf-8")) if request.body else {}
+    except json.JSONDecodeError:
+        return None
+
+
+@require_http_methods(["POST"])
+def admin_room_save(request):
+    """Create or update a room. Managers are scoped to their own hotel."""
+    ctx = _admin_manage_context(request)
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to manage rooms."}, status=403)
+    is_admin, hotel_id = ctx
+    payload = _payload_json(request)
+    if payload is None:
+        return JsonResponse({"detail": "Invalid JSON payload."}, status=400)
+
+    room_id = payload.get("id")
+    room = None
+    if room_id:
+        room = Room.objects.filter(pk=room_id).first()
+        if room is None:
+            return JsonResponse({"detail": "Room not found."}, status=404)
+        if not is_admin and room.hotel_id != hotel_id:
+            return JsonResponse({"detail": "You can only edit rooms at your hotel."}, status=403)
+
+    target_hotel_id = payload.get("hotel_id")
+    if not is_admin:
+        target_hotel_id = hotel_id
+    if not target_hotel_id:
+        return JsonResponse({"detail": "You are not assigned to a hotel. Ask an admin to assign you first."}, status=400)
+    hotel = Hotel.objects.filter(pk=target_hotel_id).first()
+    if hotel is None:
+        return JsonResponse({"detail": "Choose a valid hotel."}, status=400)
+
+    room_number = (payload.get("room_number") or "").strip()
+    floor_raw = payload.get("floor")
+    price_raw = payload.get("price_per_night")
+    status = (payload.get("status") or "").strip().upper()
+    housekeeping = (payload.get("housekeeping_status") or "").strip().upper()
+    room_type_id = payload.get("room_type_id")
+
+    if not room_number:
+        return JsonResponse({"detail": "Room number is required."}, status=400)
+    if not all(c.isalnum() or c in "-/" for c in room_number):
+        return JsonResponse({"detail": "Room number may only contain letters, numbers, dashes, and slashes."}, status=400)
+    if Room.objects.filter(hotel=hotel, room_number__iexact=room_number).exclude(pk=room.pk if room else None).exists():
+        return JsonResponse({"detail": f"A room numbered {room_number} already exists at {hotel.hotel_name}."}, status=409)
+
+    floor = None
+    if floor_raw not in (None, ""):
+        try:
+            floor = int(floor_raw)
+        except (TypeError, ValueError):
+            return JsonResponse({"detail": "Floor must be a whole number."}, status=400)
+    try:
+        price = Decimal(price_raw) if price_raw not in (None, "") else Decimal(0)
+        if price < 0:
+            raise ValueError
+    except Exception:
+        return JsonResponse({"detail": "Price must be a positive number."}, status=400)
+    if status not in dict(ROOM_STATUSES):
+        status = Room.RoomStatus.AVAILABLE
+    if housekeeping not in dict(ROOM_HOUSEKEEPING):
+        housekeeping = Room.HousekeepingStatus.DIRTY
+
+    room_type = None
+    if room_type_id:
+        # Scoped to the target hotel so a manager cannot attach another hotel's type.
+        room_type = RoomType.objects.filter(pk=room_type_id, hotel=hotel).first()
+        if room_type is None:
+            return JsonResponse({"detail": "Selected room type does not belong to this hotel."}, status=400)
+
+    if room is None:
+        room = Room(hotel=hotel)
+    room.hotel = hotel
+    room.room_type = room_type
+    room.room_number = room_number.upper()
+    room.floor = floor
+    room.price_per_night = price
+    room.status = status
+    room.housekeeping_status = housekeeping
+    room.save()
+    return JsonResponse({"detail": f"Room {room.room_number} saved.", "id": room.pk})
+
+
+@require_http_methods(["POST"])
+def admin_room_delete(request):
+    """Delete a room. Occupied/reserved rooms cannot be removed."""
+    ctx = _admin_manage_context(request)
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to manage rooms."}, status=403)
+    is_admin, hotel_id = ctx
+    payload = _payload_json(request)
+    if payload is None:
+        return JsonResponse({"detail": "Invalid JSON payload."}, status=400)
+
+    room = Room.objects.filter(pk=payload.get("id")).first()
+    if room is None:
+        return JsonResponse({"detail": "Room not found."}, status=404)
+    from apps.rooms.models import Maintenance
+
+    if not is_admin and room.hotel_id != hotel_id:
+        return JsonResponse({"detail": "You can only delete rooms at your hotel."}, status=403)
+    if room.status in (Room.RoomStatus.OCCUPIED, Room.RoomStatus.RESERVED):
+        return JsonResponse({"detail": f"Room {room.room_number} has an active booking and cannot be deleted."}, status=409)
+    if Maintenance.objects.filter(room=room).exclude(status__in=(Maintenance.MaintenanceStatus.RESOLVED, Maintenance.MaintenanceStatus.CLOSED)).exists():
+        return JsonResponse({"detail": f"Room {room.room_number} has open maintenance tasks. Resolve them first."}, status=409)
+    label = room.room_number
+    room.delete()
+    return JsonResponse({"detail": f"Room {label} deleted."})
+
+
+@require_http_methods(["POST"])
+def admin_staff_save(request):
+    """Create or update an employee. Managers are scoped to their own hotel."""
+    ctx = _admin_manage_context(request)
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to manage employees."}, status=403)
+    is_admin, hotel_id = ctx
+    payload = _payload_json(request)
+    if payload is None:
+        return JsonResponse({"detail": "Invalid JSON payload."}, status=400)
+
+    from apps.accounts.models import Staff
+
+    staff_id = payload.get("id")
+    staff = None
+    if staff_id:
+        staff = Staff.objects.filter(pk=staff_id).first()
+        if staff is None:
+            return JsonResponse({"detail": "Employee not found."}, status=404)
+        if not is_admin and staff.hotel_id != hotel_id:
+            return JsonResponse({"detail": "You can only edit employees at your hotel."}, status=403)
+        if staff.role == "admin" and not is_admin:
+            return JsonResponse({"detail": "Only admins can edit admin accounts."}, status=403)
+
+    staff_name = (payload.get("staff_name") or "").strip()
+    email = (payload.get("email") or "").strip().lower()
+    role = (payload.get("role") or "").strip().lower()
+    password = payload.get("password") or ""
+    staff_phone = _phone_value(payload.get("country_code"), payload.get("staff_phone"))
+
+    if not staff_name or not email:
+        return JsonResponse({"detail": "Name and email are required."}, status=400)
+    if role not in STAFF_ROLES:
+        return JsonResponse({"detail": "Choose a valid role."}, status=400)
+    if role == "admin" and not is_admin:
+        return JsonResponse({"detail": "Only admins can create admin accounts."}, status=403)
+    if Staff.objects.filter(email__iexact=email).exclude(pk=staff.pk if staff else None).exists():
+        return JsonResponse({"detail": "An account with that email already exists."}, status=409)
+
+    target_hotel_id = payload.get("hotel_id")
+    if not is_admin:
+        target_hotel_id = hotel_id
+    hotel = Hotel.objects.filter(pk=target_hotel_id).first() if target_hotel_id else None
+
+    if staff is None:
+        if len(password) < 8:
+            return JsonResponse({"detail": "New employees need a password of at least 8 characters."}, status=400)
+        parts = staff_name.split(maxsplit=1)
+        staff = Staff.objects.create_user(
+            username=email, email=email, password=password, staff_name=staff_name,
+            staff_phone=staff_phone, role=role, hotel=hotel,
+            first_name=parts[0], last_name=parts[1] if len(parts) > 1 else "",
+        )
+    else:
+        staff.staff_name = staff_name
+        staff.email = email
+        staff.username = email
+        staff.staff_phone = staff_phone
+        staff.role = role
+        staff.hotel = hotel
+        if password:
+            if len(password) < 8:
+                return JsonResponse({"detail": "Password must be at least 8 characters."}, status=400)
+            staff.set_password(password)
+        staff.save()
+    return JsonResponse({"detail": f"{staff.staff_name} saved.", "id": staff.pk})
+
+
+@require_http_methods(["POST"])
+def admin_staff_delete(request):
+    """Remove an employee. Admins and the current user cannot be removed."""
+    ctx = _admin_manage_context(request)
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to manage employees."}, status=403)
+    is_admin, hotel_id = ctx
+    payload = _payload_json(request)
+    if payload is None:
+        return JsonResponse({"detail": "Invalid JSON payload."}, status=400)
+
+    from apps.accounts.models import Staff
+
+    staff = Staff.objects.filter(pk=payload.get("id")).first()
+    if staff is None:
+        return JsonResponse({"detail": "Employee not found."}, status=404)
+    if staff.pk == request.user.pk:
+        return JsonResponse({"detail": "You cannot remove your own account."}, status=400)
+    if staff.role == "admin":
+        return JsonResponse({"detail": "Admin accounts cannot be removed."}, status=403)
+    if not is_admin and staff.hotel_id != hotel_id:
+        return JsonResponse({"detail": "You can only remove employees at your hotel."}, status=403)
+    name = staff.staff_name
+    staff.delete()
+    return JsonResponse({"detail": f"{name} removed."})
+
+
+@require_http_methods(["POST"])
+def admin_hotel_save(request):
+    """Create or update a hotel (admins only). Accepts JSON or multipart (image)."""
+    ctx = _admin_manage_context(request)
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to manage hotels."}, status=403)
+    is_admin, _ = ctx
+    if not is_admin:
+        return JsonResponse({"detail": "Only admins can add or edit hotels."}, status=403)
+
+    if request.content_type and request.content_type.startswith("multipart"):
+        payload = request.POST
+        upload = request.FILES.get("hotel_image")
+    else:
+        payload = _payload_json(request)
+        upload = None
+    if payload is None:
+        return JsonResponse({"detail": "Invalid form data."}, status=400)
+
+    hotel_id = payload.get("id")
+    hotel = None
+    if hotel_id:
+        hotel = Hotel.objects.filter(pk=hotel_id).first()
+        if hotel is None:
+            return JsonResponse({"detail": "Hotel not found."}, status=404)
+
+    hotel_name = (payload.get("hotel_name") or "").strip()
+    hotel_email = (payload.get("hotel_email") or "").strip().lower()
+    hotel_phone = (payload.get("hotel_phone") or "").strip()
+    hotel_address = (payload.get("hotel_address") or "").strip()
+    category = (payload.get("category") or "").strip().upper()
+
+    if not all([hotel_name, hotel_email, hotel_phone, hotel_address]):
+        return JsonResponse({"detail": "Name, email, phone, and address are required."}, status=400)
+    if category not in dict(Hotel.Category.choices):
+        return JsonResponse({"detail": "Choose a valid category."}, status=400)
+    if Hotel.objects.filter(hotel_email__iexact=hotel_email).exclude(pk=hotel.pk if hotel else None).exists():
+        return JsonResponse({"detail": "A hotel with that email already exists."}, status=409)
+
+    if hotel is None:
+        hotel = Hotel()
+    hotel.hotel_name = hotel_name
+    hotel.hotel_email = hotel_email
+    hotel.hotel_phone = hotel_phone
+    hotel.hotel_address = hotel_address
+    hotel.category = category
+    if upload:
+        if upload.size > 5 * 1024 * 1024 or not (upload.content_type or "").startswith("image/"):
+            return JsonResponse({"detail": "Use an image file smaller than 5 MB."}, status=400)
+        hotel.hotel_image = upload
+    if payload.get("clear_image") == "1" and hotel.hotel_image:
+        hotel.hotel_image.delete(save=False)
+        hotel.hotel_image = None
+    hotel.save()
+    return JsonResponse({"detail": f"{hotel.hotel_name} saved.", "id": hotel.pk})
+
+
+@require_http_methods(["POST"])
+def admin_hotel_delete(request):
+    """Delete a hotel (admins only)."""
+    ctx = _admin_manage_context(request)
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to manage hotels."}, status=403)
+    is_admin, _ = ctx
+    if not is_admin:
+        return JsonResponse({"detail": "Only admins can delete hotels."}, status=403)
+    payload = _payload_json(request)
+    if payload is None:
+        return JsonResponse({"detail": "Invalid JSON payload."}, status=400)
+
+    hotel = Hotel.objects.filter(pk=payload.get("id")).first()
+    if hotel is None:
+        return JsonResponse({"detail": "Hotel not found."}, status=404)
+    if hotel.rooms.exists() or hotel.staff_members.exists():
+        return JsonResponse({"detail": "Move or remove this hotel's rooms and staff before deleting it."}, status=409)
+    name = hotel.hotel_name
+    hotel.delete()
+    return JsonResponse({"detail": f"{name} removed."})
 
 
 def design_system(request):
     """Design system / hero welcome page."""
     return render(request, "frontend/design_system.html")
+
+
+# ─── Staff Dashboard Operations API (JSON, session-auth, CSRF-protected) ───
+
+def _dashboard_context(request, *allowed_roles):
+    """Return (is_manager, hotel_id) for staff API callers, else None."""
+    if not request.user.is_authenticated:
+        return None
+    role = (request.user.role or "").lower()
+    if role not in allowed_roles:
+        return None
+    return role in ("admin", "manager"), request.user.hotel_id
+
+
+NO_HOTEL_MESSAGE = "You are not assigned to a hotel. Ask an admin to assign you first."
+
+
+@require_http_methods(["POST"])
+def staff_checkin(request):
+    """Check a reservation into its room (receptionist / manager / admin)."""
+    ctx = _dashboard_context(request, "receptionist", "manager", "admin")
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to check in guests."}, status=403)
+    is_manager, hotel_id = ctx
+    if not is_manager and not hotel_id:
+        return JsonResponse({"detail": NO_HOTEL_MESSAGE}, status=400)
+    payload = _payload_json(request)
+    if payload is None:
+        return JsonResponse({"detail": "Invalid JSON payload."}, status=400)
+
+    reservation = Reservation.objects.select_related("guest", "hotel").filter(pk=payload.get("reservation_id")).first()
+    if reservation is None:
+        return JsonResponse({"detail": "Reservation not found."}, status=404)
+    if not is_manager and reservation.hotel_id != hotel_id:
+        return JsonResponse({"detail": "You can only check in reservations at your hotel."}, status=403)
+    if reservation.status == Reservation.ReservationStatus.CHECKED_IN:
+        return JsonResponse({"detail": "Guest is already checked in."}, status=409)
+    if reservation.status in (Reservation.ReservationStatus.CHECKED_OUT, Reservation.ReservationStatus.CANCELLED, Reservation.ReservationStatus.NO_SHOW):
+        return JsonResponse({"detail": f"This reservation is {reservation.status} and cannot be checked in."}, status=409)
+
+    room = Room.objects.filter(reservation=reservation).first()
+    if room is None:
+        room = Room.objects.filter(room_reservations__resv=reservation).first()
+    if room is None:
+        return JsonResponse({"detail": "No room is assigned to this reservation."}, status=409)
+
+    reservation.status = Reservation.ReservationStatus.CHECKED_IN
+    reservation.actual_check_in = timezone.now()
+    reservation.save(update_fields=["status", "actual_check_in"])
+    room.status = Room.RoomStatus.OCCUPIED
+    room.housekeeping_status = Room.HousekeepingStatus.OUT_OF_SERVICE
+    room.save(update_fields=["status", "housekeeping_status"])
+    return JsonResponse({"detail": f"{reservation.guest.guest_name} checked in to Room {room.room_number}."})
+
+
+@require_http_methods(["POST"])
+def staff_checkout(request):
+    """Check a guest out and mark the room dirty for housekeeping."""
+    ctx = _dashboard_context(request, "receptionist", "manager", "admin")
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to check out guests."}, status=403)
+    is_manager, hotel_id = ctx
+    if not is_manager and not hotel_id:
+        return JsonResponse({"detail": NO_HOTEL_MESSAGE}, status=400)
+    payload = _payload_json(request)
+    if payload is None:
+        return JsonResponse({"detail": "Invalid JSON payload."}, status=400)
+
+    reservation = Reservation.objects.select_related("guest", "hotel").filter(pk=payload.get("reservation_id")).first()
+    if reservation is None:
+        return JsonResponse({"detail": "Reservation not found."}, status=404)
+    if not is_manager and reservation.hotel_id != hotel_id:
+        return JsonResponse({"detail": "You can only check out reservations at your hotel."}, status=403)
+    if reservation.status != Reservation.ReservationStatus.CHECKED_IN:
+        return JsonResponse({"detail": "Guest must be checked in before checking out."}, status=409)
+
+    rooms = list(Room.objects.filter(reservation=reservation)) or list(Room.objects.filter(room_reservations__resv=reservation))
+    reservation.status = Reservation.ReservationStatus.CHECKED_OUT
+    reservation.actual_check_out = timezone.now()
+    reservation.save(update_fields=["status", "actual_check_out"])
+    for room in rooms:
+        room.status = Room.RoomStatus.AVAILABLE
+        room.reservation = None
+        room.housekeeping_status = Room.HousekeepingStatus.DIRTY
+        room.save(update_fields=["status", "reservation", "housekeeping_status"])
+    return JsonResponse({"detail": f"{reservation.guest.guest_name} checked out."})
+
+
+@require_http_methods(["POST"])
+def staff_housekeeping_update(request):
+    """Update a room's housekeeping status (housekeeping / receptionist / manager / admin)."""
+    ctx = _dashboard_context(request, "housekeeping", "receptionist", "manager", "admin")
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to update room status."}, status=403)
+    is_manager, hotel_id = ctx
+    if not is_manager and not hotel_id:
+        return JsonResponse({"detail": NO_HOTEL_MESSAGE}, status=400)
+    payload = _payload_json(request)
+    if payload is None:
+        return JsonResponse({"detail": "Invalid JSON payload."}, status=400)
+
+    room = Room.objects.select_related("hotel").filter(pk=payload.get("room_id")).first()
+    if room is None:
+        return JsonResponse({"detail": "Room not found."}, status=404)
+    if not is_manager and room.hotel_id != hotel_id:
+        return JsonResponse({"detail": "You can only update rooms at your hotel."}, status=403)
+
+    status = (payload.get("status") or "").strip().upper()
+    if status not in dict(Room.HousekeepingStatus.choices):
+        return JsonResponse({"detail": "Invalid housekeeping status."}, status=400)
+    room.housekeeping_status = status
+    room.save(update_fields=["housekeeping_status"])
+    return JsonResponse({"detail": f"Room {room.room_number} marked {status.replace('_', ' ').title()}."})
+
+
+@require_http_methods(["POST"])
+def staff_maintenance_update(request):
+    """Advance a maintenance task's status (housekeeping / manager / admin)."""
+    ctx = _dashboard_context(request, "housekeeping", "manager", "admin")
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to update maintenance."}, status=403)
+    is_manager, hotel_id = ctx
+    if not is_manager and not hotel_id:
+        return JsonResponse({"detail": NO_HOTEL_MESSAGE}, status=400)
+    payload = _payload_json(request)
+    if payload is None:
+        return JsonResponse({"detail": "Invalid JSON payload."}, status=400)
+
+    from apps.rooms.models import Maintenance
+
+    task = Maintenance.objects.select_related("room", "room__hotel").filter(pk=payload.get("task_id")).first()
+    if task is None:
+        return JsonResponse({"detail": "Maintenance task not found."}, status=404)
+    if not is_manager and task.room.hotel_id != hotel_id:
+        return JsonResponse({"detail": "You can only update tasks at your hotel."}, status=403)
+
+    status = (payload.get("status") or "").strip().upper()
+    if status not in dict(Maintenance.MaintenanceStatus.choices):
+        return JsonResponse({"detail": "Invalid maintenance status."}, status=400)
+    task.status = status
+    if status in (Maintenance.MaintenanceStatus.RESOLVED, Maintenance.MaintenanceStatus.CLOSED):
+        task.resolve_date = timezone.localdate()
+    task.save(update_fields=["status", "resolve_date"])
+    return JsonResponse({"detail": f"Task for Room {task.room.room_number} marked {status.replace('_', ' ').title()}."})
+
+
+@require_http_methods(["POST"])
+def staff_assign_room(request):
+    """Assign an available room to a reservation (receptionist / manager / admin)."""
+    ctx = _dashboard_context(request, "receptionist", "manager", "admin")
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to assign rooms."}, status=403)
+    is_manager, hotel_id = ctx
+    if not is_manager and not hotel_id:
+        return JsonResponse({"detail": NO_HOTEL_MESSAGE}, status=400)
+    payload = _payload_json(request)
+    if payload is None:
+        return JsonResponse({"detail": "Invalid JSON payload."}, status=400)
+
+    reservation = Reservation.objects.filter(pk=payload.get("reservation_id")).first()
+    room = Room.objects.select_related("hotel").filter(pk=payload.get("room_id")).first()
+    if reservation is None:
+        return JsonResponse({"detail": "Reservation not found."}, status=404)
+    if room is None:
+        return JsonResponse({"detail": "Room not found."}, status=404)
+    if not is_manager and (reservation.hotel_id != hotel_id or room.hotel_id != hotel_id):
+        return JsonResponse({"detail": "You can only assign rooms at your hotel."}, status=403)
+    if room.status != Room.RoomStatus.AVAILABLE:
+        return JsonResponse({"detail": f"Room {room.room_number} is not available."}, status=409)
+    if reservation.status in (Reservation.ReservationStatus.CHECKED_IN, Reservation.ReservationStatus.CHECKED_OUT):
+        return JsonResponse({"detail": "Reservation is already checked in or out."}, status=409)
+
+    RoomReservation.objects.get_or_create(resv=reservation, room=room)
+    room.status = Room.RoomStatus.RESERVED
+    room.reservation = reservation
+    room.save(update_fields=["status", "reservation"])
+    return JsonResponse({"detail": f"Room {room.room_number} assigned to reservation #{reservation.id}."})
+
+
+@require_http_methods(["GET"])
+def accountant_export(request):
+    """Download invoices + payments as a CSV report (accountant / manager / admin)."""
+    ctx = _dashboard_context(request, "accountant", "manager", "admin")
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to export reports."}, status=403)
+    is_manager, hotel_id = ctx
+    if not is_manager and not hotel_id:
+        return JsonResponse({"detail": NO_HOTEL_MESSAGE}, status=400)
+
+    import csv
+    from django.http import HttpResponse
+
+    invoices = Invoice.objects.select_related("reservation", "reservation__guest").order_by("-issue_date")
+    if not is_manager and hotel_id:
+        invoices = invoices.filter(hotel_id=hotel_id)
+
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="stayhub-invoices.csv"'
+    writer = csv.writer(response)
+    writer.writerow(["Invoice #", "Guest", "Hotel", "Amount (GHS)", "Status", "Issued"])
+    for invoice in invoices:
+        writer.writerow([
+            invoice.id,
+            invoice.reservation.guest.guest_name if invoice.reservation and invoice.reservation.guest else "-",
+            invoice.hotel.hotel_name if invoice.hotel else "-",
+            invoice.total_amount,
+            invoice.status,
+            invoice.issue_date.strftime("%Y-%m-%d %H:%M"),
+        ])
+    return response
+
+
+@require_http_methods(["GET"])
+def staff_guest_search(request):
+    """Search guests by name/email/phone so reception can prefill a walk-in booking."""
+    ctx = _dashboard_context(request, "receptionist", "manager", "admin")
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to search guests."}, status=403)
+    query = (request.GET.get("q") or "").strip()
+    if not query:
+        return JsonResponse({"results": []})
+    from django.db.models import Q
+
+    guests = Guest.objects.filter(
+        Q(guest_name__icontains=query) | Q(guest_email__icontains=query) | Q(guest_phone__icontains=query)
+    )[:10]
+    return JsonResponse({"results": [{
+        "id": g.id,
+        "guest_name": g.guest_name,
+        "guest_email": g.guest_email,
+        "guest_phone": g.guest_phone,
+        "id_number": g.id_number,
+        "nationality": g.nationality,
+    } for g in guests]})
+
+
+@require_http_methods(["POST"])
+def staff_record_payment(request):
+    """Record a payment against an invoice and update its status (accountant / manager / admin)."""
+    ctx = _dashboard_context(request, "accountant", "manager", "admin")
+    if ctx is None:
+        return JsonResponse({"detail": "You do not have permission to record payments."}, status=403)
+    is_manager, hotel_id = ctx
+    if not is_manager and not hotel_id:
+        return JsonResponse({"detail": NO_HOTEL_MESSAGE}, status=400)
+    payload = _payload_json(request)
+    if payload is None:
+        return JsonResponse({"detail": "Invalid JSON payload."}, status=400)
+
+    from apps.billing.models import Payment
+
+    invoice = (
+        Invoice.objects.select_related("reservation", "reservation__guest", "hotel")
+        .filter(pk=payload.get("invoice_id"))
+        .first()
+    )
+    if invoice is None:
+        return JsonResponse({"detail": "Invoice not found."}, status=404)
+    if not is_manager and invoice.hotel_id != hotel_id:
+        return JsonResponse({"detail": "You can only record payments at your hotel."}, status=403)
+
+    amount_raw = payload.get("amount")
+    try:
+        amount = Decimal(amount_raw) if amount_raw not in (None, "") else Decimal(0)
+        if amount <= 0:
+            raise ValueError
+    except Exception:
+        return JsonResponse({"detail": "Amount must be a positive number."}, status=400)
+
+    method = (payload.get("method") or "").strip()
+    if method not in dict(Payment.PaymentMethod.choices):
+        return JsonResponse({"detail": "Choose a valid payment method."}, status=400)
+
+    if invoice.status == Invoice.InvoiceStatus.VOID:
+        return JsonResponse({"detail": "Voided invoices cannot receive payments."}, status=409)
+    if invoice.status == Invoice.InvoiceStatus.PAID:
+        return JsonResponse({"detail": f"Invoice #{invoice.pk} is already fully paid."}, status=409)
+
+    balance = invoice.balance_due
+    if amount > balance:
+        return JsonResponse({"detail": f"Amount exceeds the balance of GH₵{balance}."}, status=400)
+
+    Payment.objects.create(
+        hotel=invoice.hotel,
+        invoice=invoice,
+        amount=amount,
+        method=method,
+        status=Payment.PaymentStatus.SUCCESS,
+    )
+    paid = invoice.amount_paid
+    if paid >= invoice.total_amount:
+        invoice.status = Invoice.InvoiceStatus.PAID
+    elif paid > 0:
+        invoice.status = Invoice.InvoiceStatus.PARTIAL
+    invoice.save(update_fields=["status"])
+    return JsonResponse({"detail": f"GH₵{amount} recorded for Invoice #{invoice.pk}."})
