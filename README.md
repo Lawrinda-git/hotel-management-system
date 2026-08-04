@@ -36,13 +36,15 @@ A full-stack hotel management platform that lets guests discover and book rooms 
 - Browse hotels with **category filters** (Resort, Hotel, Cabin, Villa, Apartment, Homestay, Guest House) and search
 - Hotel details pages with ratings, pricing, and category badges
 - **4-step booking flow** (dates → room → guest details → confirm) with auto-generated invoice
-- **Paystack** payment from the reservation confirmation page
+- **Paystack** payment (card, or mobile money for walk-ins) during the booking flow, with a live reservation-confirmation screen
+- **My Bookings** tab (`/bookings/`) listing the signed-in guest's reservations, each linking to a full **reservation detail** page
 - Reservation status polling and guest profile management
 - Google OAuth sign-in, password reset, 2FA verification
 
 ### Staff (Role-Based Dashboards)
 - **Admin / Manager:** KPIs, today's check-ins/check-outs, live room grid, recent reservations & maintenance, tabbed admin management (Rooms, Employees, Hotels, Maintenance)
-- **Receptionist:** arrivals/departures, room grid, Find Guest / New Walk-in booking actions
+- **Receptionist:** arrivals/departures, room grid, Find Guest / New Walk-in actions, plus a dedicated **walk-in booking** page (`/staff/walkin/`) that captures the client's details (name, email, phone, national ID, nationality) and takes **mobile-money-only** Paystack payment
+- **Admin / Manager / Receptionist / Accountant:** full **staff reservations** list (`/staff/reservations/`) with status filters, and per-reservation details (guest ID, invoice, payments, check-in/out)
 - **Accountant:** invoices, payments, paid/unpaid financial overview
 - **Housekeeping:** dirty/clean/inspected room buckets, open maintenance tasks
 - Staff profiles with picture upload and change password
@@ -179,7 +181,7 @@ All settings are read from environment variables via `python-decouple` (put them
 |----------|---------|---------|
 | `DB_ENGINE` | `sqlite` | `postgres` (or `postgresql`) switches to PostgreSQL |
 | `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | — | PostgreSQL connection (used when `DB_ENGINE=postgres`) |
-| `PAYSTACK_PUBLIC_KEY` | `` | Paystack public key (frontend popup) |
+| `PAYSTACK_PUBLIC_KEY` | `` | Paystack public key (configured; checkout is server-side redirect) |
 | `PAYSTACK_SECRET_KEY` | `` | Paystack secret key (checkout init, webhook verification) |
 | `PAYSTACK_RETURN_URL` | `http://localhost:8000/booking/` | Where Paystack sends the guest after payment |
 | `BREVO_API_KEY` | `` | Brevo API key (transactional SMS + optional email) |
@@ -252,7 +254,7 @@ Base paths are mounted in `config/urls.py` under `/api/…`. Most resources are 
 | Billing | `/api/billing/invoices/`, `/api/billing/payments/` | |
 | Feedback | `/api/feedback/feedback/` | |
 | Mobile | `/api/mobile/rooms/`, `/api/mobile/checkin/`, `/api/mobile/checkout/`, `/api/mobile/housekeeping/update/` | For the RN app |
-| Web helpers | `POST /api/auth/login/`, `POST /api/auth/register/`, `POST /api/auth/two-factor/verify/`, `GET /api/auth/google/`, `GET /api/auth/google/callback/`, `GET /api/booking/options/`, `POST /api/booking/create/`, `GET /api/reservations/<id>/status/`, `GET /api/health/database/` | Session-based (web) |
+| Web helpers | `POST /api/auth/login/`, `POST /api/auth/register/`, `POST /api/auth/two-factor/verify/`, `GET /api/auth/google/`, `GET /api/auth/google/callback/`, `GET /api/booking/options/` (supports `?hotel=` scoping for walk-ins), `POST /api/booking/create/`, `GET /api/reservations/<id>/status/`, `GET /api/health/database/` | Session-based (web) |
 
 API docs: `drf-spectacular` is configured as the DRF default schema class. The OpenAPI schema is live at **`/api/schema/`** and Swagger UI at **`/api/schema/swagger-ui/`**.
 
@@ -260,9 +262,9 @@ API docs: `drf-spectacular` is configured as the DRF default schema class. The O
 
 ## Payments (Paystack)
 
-1. **Checkout init** — `POST /api/billing/paystack/checkout/` with `{"invoice_id": …}` returns an `authorization_url`.
-2. **Webhook** — Paystack sends `charge.success` events to `/api/billing/paystack/webhook/`. The endpoint verifies the `x-paystack-signature` (HMAC-SHA512) before recording the payment, updating the invoice status (paid/partial) and confirming the reservation.
-3. **Verification** — `GET /api/billing/paystack/verify/<reference>/` polls Paystack as a fallback when webhooks are delayed.
+1. **Checkout init** — `POST /api/billing/paystack/checkout/` with `{"invoice_id": …}` returns an `authorization_url`. Walk-in bookings pass `payment_method: "mobile_money"` (plus `mobile_money_phone` / `mobile_money_provider` / `callback_url_name`) to restrict the charge to **Ghana mobile money**.
+2. **Webhook** — Paystack sends `charge.success` events to `/api/billing/paystack/webhook/`. The endpoint verifies the `x-paystack-signature` (HMAC-SHA512) before recording the payment and updating the invoice status (paid/partial).
+3. **Verification** — `GET /api/billing/paystack/verify/<reference>/` polls Paystack as a fallback when webhooks are delayed; on success it records the payment, marks the invoice `PAID`, and confirms the reservation.
 
 Invoices are auto-created at booking time with `(nightly rate × nights) + ₵45 service fee + 12% tax`. Partial payments are supported — an invoice becomes `PAID` only when the sum of payments covers `total_amount`.
 

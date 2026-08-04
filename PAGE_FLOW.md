@@ -25,6 +25,13 @@ splash/ (/)
                                 └── [Confirm Booking] → reservation-confirmed/
                                 └── [Paystack] → reservation-confirmed/?paid=1
 
+Logged-in Guest Flow:
+    signin/ → [Login Success] → guest_home/
+        ├── bookings/            (My Bookings — the guest's reservation list)
+        │       └── reservations/<id>/  (full reservation details + payment info)
+        ├── explore/ → hotel-details/ → booking/ → reservation-confirmed/
+        └── profile/
+
 Password Reset Flow:
     signin/ → [Forgot Password] → password-reset/
         └── [Enter Email] → password-reset/done/
@@ -39,6 +46,8 @@ staff-login/
     └── [Login Success - Role Based]
         ├── admin → manager_dashboard/
         │           ├── booking/ (New Booking)
+        │           ├── staff/reservations/ (All Reservations with status filters)
+        │           ├── staff/walkin/ (Walk-in Booking — mobile money only)
         │           ├── admin-management/
         │           │       ├── tab: Rooms
         │           │       ├── tab: Employees
@@ -57,6 +66,8 @@ staff-login/
         │
         ├── receptionist → receptionist_dashboard/
         │           ├── booking/ (With "Find Guest" & "New Walk-in" actions)
+        │           ├── staff/reservations/ (All Reservations)
+        │           ├── staff/walkin/ (Walk-in Booking — primary action)
         │           ├── explore/ (Redirects to dashboard if staff)
         │       │   ├── hotel-details/ (Redirects to dashboard if staff)
         │       │   └── guest_home/ (Redirects to dashboard if staff)
@@ -94,6 +105,8 @@ staff-login/
 | `/hotel-details/` | `hotel_details.html` | Hotel details + book button |
 | `/booking/` | `booking.html` | Multi-step booking process |
 | `/reservation-confirmed/` | `reservation_confirmed.html` | Booking success + Paystack |
+| `/bookings/` | `my_bookings.html` | Signed-in guest's reservation list (Bookings tab) |
+| `/reservations/<id>/` | `reservation_detail.html` | Full reservation details (owner or staff) |
 | `/team/` | `team.html` | About StayHub team |
 
 ### Password Reset Pages
@@ -118,6 +131,8 @@ staff-login/
 | `/accountant/` | `accountant_dashboard.html` | accountant | Invoices, payments, financial overview |
 | `/housekeeping/` | `housekeeping_dashboard.html` | housekeeping | Dirty/clean rooms, tasks, inspection |
 | `/admin-management/` | `admin_management.html` | admin, manager | Tabbed: Rooms, Employees, Hotels, Maintenance |
+| `/staff/reservations/` | `staff_reservations.html` | admin, manager, receptionist, accountant | All reservations with status filter chips + details links |
+| `/staff/walkin/` | `walkin_booking.html` | receptionist, manager, admin | Walk-in booking: client details (name, email, phone, national ID, nationality), stay details, mobile-money-only Paystack |
 | `/staff-profile/` | `staff_profile.html` | all staff | Edit profile, picture, password |
 
 ## Navigation Structure
@@ -128,18 +143,25 @@ staff-login/
 ```
 - Home → `/home/`
 - Explore → `/explore/`
-- Bookings → (shows guest bookings if logged in)
+- Bookings → `/bookings/` (My Bookings) when logged in, otherwise `/booking/` (new booking)
 - Profile → `/profile/` or login prompt
 
 ### Staff Bottom Navigation (on all dashboard pages)
 ```
-[Dashboard] [Bookings] [Manage/Explore] [Profile]
+[Dashboard] [Reservations] [Walk-in/Bookings] [Profile]
 ```
 - Dashboard → Role-specific dashboard
-- Bookings → `/booking/`
-- Manage (admin/manager) → `/admin-management/`
-- Explore (other roles) → `/booking/`
+- Reservations → `/staff/reservations/` (all staff roles except housekeeping; housekeeping → `/booking/`)
+- Walk-in → `/staff/walkin/` (receptionist, manager, admin)
+- Bookings → `/booking/` (staff quick booking with Find Guest / New Walk-in actions)
 - Profile → `/staff-profile/`
+
+### Staff Sidebar (desktop, all dashboard pages)
+- Dashboard → Role-specific dashboard
+- Reservations → `/staff/reservations/` (housekeeping → `/booking/`)
+- Walk-in Booking → `/staff/walkin/` (receptionist, manager, admin)
+- Rooms & Staff / Housekeeping / Invoices & Payments / Export CSV → role-specific dashboards
+- Profile → `/staff-profile/` · Sign Out → `/logout/`
 
 ### Staff Top Navigation (all dashboard pages)
 - Back arrow to dashboard
@@ -150,9 +172,14 @@ staff-login/
 ## Guards & Redirects
 
 ### Staff Protection
-- All `/manager/`, `/receptionist/`, `/accountant/`, `/housekeeping/`, `/admin-management/`, `/staff-profile/` URLs require login
+- All `/manager/`, `/receptionist/`, `/accountant/`, `/housekeeping/`, `/admin-management/`, `/staff/reservations/`, `/staff/walkin/`, `/staff-profile/` URLs require login
 - Unauthorized roles → `access_denied.html`
 - Not logged in → `staff-login/`
+
+### Reservation Detail Protection (`/reservations/<id>/`)
+- Owner (guest email matches the reservation) can view
+- Staff can view; non-admin staff are scoped to reservations at their own hotel
+- Everyone else → `access_denied.html`
 
 ### Guest Protection
 - Staff pages redirect to role-specific dashboard if accessed by staff
@@ -220,14 +247,20 @@ staff-login/
 
 ### Staff Booking Flow (Receptionist)
 ```
-/booking/
-    ├── [Find Guest] button (search by email/phone) ← NEW
-    ├── [New Walk-in] button ← NEW
+/booking/                      (general staff booking — Find Guest / New Walk-in actions)
+    ├── [Find Guest] button (search by name/email/phone → prefill)
+    ├── [New Walk-in] button (clears the form)
     ├── Step 1: Select Dates
     ├── Step 2: Choose Room
-    ├── Step 3: Guest Details (pre-filled for walk-in)
-    └── Step 4: Confirm & Pay
+    ├── Step 3: Guest Details
+    └── Step 4: Confirm & Pay (Paystack)
         └── /reservation-confirmed/
+
+/staff/walkin/                 (dedicated walk-in booking — different structure)
+    ├── Step 1: Client Details (name, email, phone, national ID, nationality + Find Client)
+    ├── Step 2: Stay Details (dates + room grid scoped to the staff member's hotel)
+    └── Step 3: Mobile Money Payment (MTN / Vodafone / AirtelTigo) — Paystack mobile-money only
+        └── [Client confirms on phone] → /reservation-confirmed/
 ```
 
 ## Data Models & Relationships
@@ -296,6 +329,8 @@ Staff (User model)
 | `/hotel-details/` | `hotel_details` | Public (staff redirect) |
 | `/booking/` | `booking` | All |
 | `/reservation-confirmed/` | `reservation_confirmed` | All |
+| `/bookings/` | `my_bookings` | Guest (login required) |
+| `/reservations/<id>/` | `reservation_detail` | Owner or staff (hotel-scoped) |
 | `/staff-login/` | `staff_login` | Public |
 | `/admin-signup/` | `admin_signup` | Public (first admin only) |
 | `/logout/` | `logout_view` | Authenticated |
@@ -306,6 +341,8 @@ Staff (User model)
 | `/accountant/` | `accountant_dashboard` | Accountant |
 | `/housekeeping/` | `housekeeping_dashboard` | Housekeeping |
 | `/admin-management/` | `admin_management` | Admin/Manager |
+| `/staff/reservations/` | `staff_reservations` | Admin, Manager, Receptionist, Accountant |
+| `/staff/walkin/` | `walkin_booking` | Receptionist, Manager, Admin |
 | `/password-reset/` | PasswordResetView | Public |
 | `/password-reset/done/` | PasswordResetDoneView | Public |
 | `/reset/<uidb64>/<token>/` | PasswordResetConfirmView | Public |
@@ -322,9 +359,10 @@ Staff (User model)
 | `/api/auth/two-factor/verify/` | POST | 2FA verification |
 | `/api/auth/google/` | GET | Google OAuth start |
 | `/api/auth/google/callback/` | GET | Google OAuth callback |
-| `/api/booking/options/` | GET | Get available rooms |
+| `/api/booking/options/` | GET | Get available rooms (`?hotel=` scopes to one hotel for walk-ins) |
 | `/api/booking/create/` | POST | Create booking |
-| `/api/reservations/<id>/status/` | GET | Reservation status |
+| `/api/billing/paystack/checkout/` | POST | Start Paystack checkout (`payment_method: "mobile_money"` + provider/phone for walk-ins) |
+| `/api/reservations/<id>/status/` | GET | Reservation status (guest owner or staff) |
 | `/api/health/database/` | GET | Health check |
 
 ## Hotel Categories
@@ -356,6 +394,8 @@ frontend/templates/frontend/
 ├── hotel_details.html (category display)
 ├── booking.html (staff quick actions)
 ├── reservation_confirmed.html
+├── my_bookings.html (guest Bookings tab)
+├── reservation_detail.html (guest/staff reservation details)
 ├── profile.html (guest profile)
 ├── staff_profile.html (staff profile)
 ├── manager_dashboard.html
@@ -363,6 +403,8 @@ frontend/templates/frontend/
 ├── accountant_dashboard.html
 ├── housekeeping_dashboard.html
 ├── admin_management.html (tabbed interface)
+├── staff_reservations.html (all reservations + status filters)
+├── walkin_booking.html (dedicated walk-in booking, mobile money)
 ├── team.html
 ├── access_denied.html
 ├── password_reset.html
@@ -373,7 +415,8 @@ frontend/templates/frontend/
 ├── verification.html
 ├── verification_method.html
 └── components/
-    └── _guest_nav.html
+    ├── _guest_nav.html
+    └── _staff_sidebar.html
 ```
 
 ## Color System (Material Design 3)

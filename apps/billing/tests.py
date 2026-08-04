@@ -50,19 +50,17 @@ class PaystackBillingTests(TestCase):
 
 	@override_settings(PAYSTACK_SECRET_KEY="test-secret", PAYSTACK_RETURN_URL="http://testserver/booking/")
 	def test_paystack_checkout_initializes(self):
-		response_body = json.dumps({
+		mock_response = Mock()
+		mock_response.ok = True
+		mock_response.json.return_value = {
 			"status": True,
 			"data": {
 				"authorization_url": "https://paystack.example/checkout",
 				"reference": "ref-123",
 			},
-		}).encode("utf-8")
-		mock_response = Mock()
-		mock_response.__enter__ = Mock(return_value=mock_response)
-		mock_response.__exit__ = Mock(return_value=None)
-		mock_response.read.return_value = response_body
+		}
 
-		with patch("apps.billing.views.urlopen", return_value=mock_response):
+		with patch("apps.billing.views.requests.post", return_value=mock_response) as mock_post:
 			response = self.client.post(
 				reverse("paystack_checkout"),
 				data=json.dumps({"invoice_id": self.invoice.id}),
@@ -72,6 +70,12 @@ class PaystackBillingTests(TestCase):
 		self.assertEqual(response.status_code, 201)
 		self.assertEqual(response.json()["reference"], "ref-123")
 		self.assertEqual(response.json()["authorization_url"], "https://paystack.example/checkout")
+		# The standard checkout stays on the booking callback, uses GHS, and does
+		# not force a payment channel (card / mobile money choice is left to Paystack).
+		sent_payload = mock_post.call_args.kwargs["json"]
+		self.assertEqual(sent_payload["currency"], "GHS")
+		self.assertNotIn("channels", sent_payload)
+		self.assertIn("/booking/", sent_payload["callback_url"])
 
 	@override_settings(PAYSTACK_SECRET_KEY="test-secret")
 	def test_paystack_webhook_records_successful_payment(self):

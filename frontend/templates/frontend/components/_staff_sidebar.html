@@ -16,9 +16,15 @@
                href="{% if role == 'admin' or role == 'manager' %}{% url 'manager_dashboard' %}{% elif role == 'receptionist' %}{% url 'receptionist_dashboard' %}{% elif role == 'accountant' %}{% url 'accountant_dashboard' %}{% else %}{% url 'housekeeping_dashboard' %}{% endif %}">
                 <span class="material-symbols-outlined">dashboard</span>Dashboard
             </a>
-            <a class="sidebar-link {% if active == 'bookings' %}active{% endif %}" href="{% url 'booking' %}">
-                <span class="material-symbols-outlined">calendar_today</span>Bookings
+            <a class="sidebar-link {% if active == 'bookings' %}active{% endif %}"
+               href="{% if role == 'housekeeping' %}{% url 'booking' %}{% else %}{% url 'staff_reservations' %}{% endif %}">
+                <span class="material-symbols-outlined">calendar_today</span>Reservations
             </a>
+            {% if role == 'receptionist' or role == 'manager' or role == 'admin' %}
+            <a class="sidebar-link {% if active == 'walkin' %}active{% endif %}" href="{% url 'walkin_booking' %}">
+                <span class="material-symbols-outlined">person_add</span>Walk-in Booking
+            </a>
+            {% endif %}
             {% if role == 'admin' or role == 'manager' %}
             <a class="sidebar-link {% if active == 'manage' %}active{% endif %}" href="{% url 'admin_management' %}">
                 <span class="material-symbols-outlined">meeting_room</span>Rooms &amp; Staff

@@ -22,10 +22,14 @@
                 </div>
                 <div>
                     <p class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Reservation ID</p>
-                    <p class="font-headline-md text-headline-md text-primary font-bold">#{{ reservation_id|default:"---" }}</p>
+                    <p class="font-headline-md text-headline-md text-primary font-bold">#{{ reservation_id|default:reservation.id|default:"---" }}</p>
                 </div>
             </div>
+            {% if reservation %}
+            <span class="badge {% if reservation.status == 'Confirmed' %}badge-success{% elif reservation.status == 'Pending' %}badge-warning{% elif reservation.status == 'Checked_In' %}badge-primary{% elif reservation.status == 'Checked_Out' %}badge-outline{% elif reservation.status == 'Cancelled' or reservation.status == 'No_Show' %}badge-error{% else %}badge-success{% endif %}" id="reservation-status">{{ status_display|default:reservation.status|default:"Confirmed" }}</span>
+            {% else %}
             <span class="badge badge-success" id="reservation-status">Confirmed</span>
+            {% endif %}
         </div>
 
         <!-- Hotel & Room -->
@@ -34,8 +38,14 @@
                 <span class="material-symbols-outlined text-primary" style="font-size: 32px;">hotel</span>
             </div>
             <div>
-                <p class="font-label-md text-label-md text-on-surface font-semibold">{{ hotel_name|default:"StayHub Hotel" }}</p>
-                <p class="text-sm text-on-surface-variant" id="reservation-room">{{ room_type|default:"Room" }}{% if room_number %} • Room {{ room_number }}{% endif %}</p>
+                <p class="font-label-md text-label-md text-on-surface font-semibold">{{ reservation.hotel.hotel_name|default:hotel_name|default:"StayHub Hotel" }}</p>
+                <p class="text-sm text-on-surface-variant" id="reservation-room">
+                    {% if first_room %}
+                        {{ first_room.room_type.type_name|default:"Room" }}{% if first_room.room_number %} • Room {{ first_room.room_number }}{% endif %}
+                    {% else %}
+                        {{ room_type|default:"Room" }}{% if room_number %} • Room {{ room_number }}{% endif %}
+                    {% endif %}
+                </p>
             </div>
         </div>
 
@@ -43,11 +53,11 @@
         <div class="grid grid-cols-2 gap-3">
             <div class="bg-surface-container rounded-xl p-3">
                 <p class="text-xs text-on-surface-variant mb-1">Check-in</p>
-                <p class="text-sm font-semibold text-on-surface" id="reservation-checkin">-</p>
+                <p class="text-sm font-semibold text-on-surface" id="reservation-checkin">{{ check_in_display|default:check_in|default:"-" }}</p>
             </div>
             <div class="bg-surface-container rounded-xl p-3">
                 <p class="text-xs text-on-surface-variant mb-1">Check-out</p>
-                <p class="text-sm font-semibold text-on-surface" id="reservation-checkout">-</p>
+                <p class="text-sm font-semibold text-on-surface" id="reservation-checkout">{{ check_out_display|default:check_out|default:"-" }}</p>
             </div>
         </div>
 
@@ -58,21 +68,21 @@
                     <span class="material-symbols-outlined text-sm">person</span>
                     Guest
                 </span>
-                <span class="text-sm font-medium text-on-surface" id="reservation-guest">-</span>
+                <span class="text-sm font-medium text-on-surface" id="reservation-guest">{{ reservation.guest.guest_name|default:guest_name|default:user_name|default:"-" }}</span>
             </div>
             <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
                 <span class="text-sm text-on-surface-variant flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">nights</span>
                     Nights
                 </span>
-                <span class="text-sm font-medium text-on-surface" id="reservation-nights">-</span>
+                <span class="text-sm font-medium text-on-surface" id="reservation-nights">{% if nights %}{{ nights }}{% else %}-{% endif %}</span>
             </div>
             <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
                 <span class="text-sm text-on-surface-variant flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">groups</span>
                     Guests
                 </span>
-                <span class="text-sm font-medium text-on-surface" id="reservation-guests">-</span>
+                <span class="text-sm font-medium text-on-surface" id="reservation-guests">{{ guests|default:"1" }}</span>
             </div>
         </div>
 
@@ -80,7 +90,7 @@
         <div class="bg-surface-container rounded-xl p-4 space-y-2">
             <div class="flex items-center justify-between">
                 <span class="text-sm text-on-surface-variant">Invoice ID</span>
-                <span class="text-sm font-mono font-medium text-on-surface">#{{ invoice_id|default:invoice.id|default:"---" }}</span>
+                <span class="text-sm font-mono font-medium text-on-surface">#{{ invoice.id|default:invoice_id|default:"---" }}</span>
             </div>
             <div class="flex items-center justify-between">
                 <span class="text-sm text-on-surface-variant">Total Paid</span>
@@ -88,17 +98,29 @@
             </div>
             <div class="flex items-center justify-between">
                 <span class="text-sm text-on-surface-variant">Status</span>
-                <span class="badge badge-success">{{ invoice.status|default:"Paid" }}</span>
+                <span class="badge badge-success">{{ invoice.status|default:reservation.status|default:"Confirmed" }}</span>
             </div>
         </div>
 
         <!-- Actions -->
         <div class="space-y-3 pt-2">
+            {% if user.is_authenticated %}
+            {% if reservation_id %}
+            <a href="{% url 'reservation_detail' reservation_id=reservation_id %}" class="btn btn-outline w-full justify-center">
+                <span class="material-symbols-outlined">receipt_long</span>
+                View Reservation Details
+            </a>
+            {% endif %}
+            <a href="{% url 'my_bookings' %}" class="btn btn-outline w-full justify-center">
+                <span class="material-symbols-outlined">calendar_month</span>
+                View My Bookings
+            </a>
+            {% endif %}
             <a href="{% url 'booking' %}" class="btn btn-primary w-full justify-center">
                 <span class="material-symbols-outlined">add</span>
                 Book Another Stay
             </a>
-            <a href="{% url 'guest_home' %}" class="btn btn-outline w-full justify-center">
+            <a href="{% url 'guest_home' %}" class="btn btn-ghost w-full justify-center">
                 <span class="material-symbols-outlined">home</span>
                 Back to Home
             </a>
@@ -118,6 +140,7 @@
 
 {% block extra_scripts %}
 <script>
+    // Live status polling for the reservation.
     const statusId = '{{ reservation_id|default:"" }}';
     if (statusId) {
         const statusBadge = document.getElementById('reservation-status');
@@ -128,18 +151,12 @@
         window.setInterval(refreshStatus, 30000);
     }
 
+    // Fallback: if the server could not resolve the reservation (e.g. the page
+    // was opened directly with query params), fill the card from the URL.
     function getParam(name) {
         const params = new URLSearchParams(window.location.search);
         return params.get(name) || '';
     }
-
-    const checkIn = getParam('check_in');
-    const checkOut = getParam('check_out');
-    const guests = getParam('guests');
-    const total = getParam('total');
-    const roomNumber = getParam('room_number');
-    const roomType = getParam('room_type');
-    const hotelName = getParam('hotel_name');
 
     function formatDate(dateStr) {
         if (!dateStr) return '-';
@@ -152,17 +169,27 @@
         return 'GH₵' + amount.toLocaleString('en-US', { maximumFractionDigits: 0 });
     }
 
-    document.getElementById('reservation-checkin').textContent = formatDate(checkIn);
-    document.getElementById('reservation-checkout').textContent = formatDate(checkOut);
-    document.getElementById('reservation-guest').textContent = '{{ user_name|default:"Guest" }}';
-    document.getElementById('reservation-guests').textContent = guests || '1';
-    document.getElementById('reservation-total').textContent = formatCurrency(total);
-    document.getElementById('reservation-room').textContent = roomType && roomNumber
-        ? roomType + ' • Room ' + roomNumber
-        : (hotelName || 'Your selected room');
-    if (checkIn && checkOut) {
-        const nights = Math.max(1, Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24)));
-        document.getElementById('reservation-nights').textContent = nights;
+    function fillIfEmpty(id, value) {
+        const el = document.getElementById(id);
+        if (el && (el.textContent.trim() === '' || el.textContent.trim() === '-')) el.textContent = value;
+    }
+
+    fillIfEmpty('reservation-checkin', formatDate(getParam('check_in')));
+    fillIfEmpty('reservation-checkout', formatDate(getParam('check_out')));
+    const ci = getParam('check_in');
+    const co = getParam('check_out');
+    if (ci && co) {
+        fillIfEmpty('reservation-nights', Math.max(1, Math.ceil((new Date(co) - new Date(ci)) / (1000 * 60 * 60 * 24))));
+    }
+    fillIfEmpty('reservation-guests', getParam('guests') || '1');
+    fillIfEmpty('reservation-total', formatCurrency(getParam('total')));
+    const roomNumber = getParam('room_number');
+    const roomType = getParam('room_type');
+    if (roomType && roomNumber) {
+        const roomEl = document.getElementById('reservation-room');
+        if (roomEl && (roomEl.textContent.trim() === '' || roomEl.textContent.trim() === 'Room')) {
+            roomEl.textContent = roomType + ' • Room ' + roomNumber;
+        }
     }
 </script>
 {% endblock %}

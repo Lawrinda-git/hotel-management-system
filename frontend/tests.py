@@ -324,6 +324,243 @@ class PublicJourneyTests(TestCase):
         )
         self.assertEqual(duplicate.status_code, 409)
 
+
+@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+class BookingJourneyTests(TestCase):
+    """The guest booking journey: confirmation screen, my bookings tab, details."""
+
+    def setUp(self):
+        self.hotel = Hotel.objects.create(
+            hotel_name="Journey Hotel", hotel_email="journey@test.example",
+            hotel_address="1 Journey St", hotel_phone="+233200000099",
+        )
+        self.room_type = RoomType.objects.create(
+            type_name="Journey Suite", price_per_night="220.00"
+        )
+        self.room = Room.objects.create(
+            hotel=self.hotel, room_type=self.room_type, room_number="301", floor=3
+        )
+        self.guest_email = "journey-guest@example.com"
+
+    def _book(self, guest_email=None):
+        response = self.client.post(
+            reverse("create_booking"),
+            data=json.dumps({
+                "guest_name": "Journey Guest",
+                "guest_email": guest_email or self.guest_email,
+                "guest_phone": "+233201234567",
+                "id_number": "GHA-123456789-0",
+                "nationality": "Ghana",
+                "room_id": self.room.id,
+                "check_in": "2027-08-01T14:00:00Z",
+                "check_out": "2027-08-04T11:00:00Z",
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 201)
+        return Reservation.objects.get()
+
+    def _guest_user(self, email, name="Journey Guest"):
+        return Staff.objects.create_user(
+            username=email, email=email, password="SafePass123",
+            staff_name=name, role="guest",
+        )
+
+    def test_reservation_confirmed_shows_real_reservation_id(self):
+        reservation = self._book()
+        response = self.client.get(
+            reverse("reservation_confirmed"), {"reservation_id": reservation.id}
+        )
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn(f"#{reservation.id}", body)
+        self.assertIn("Journey Hotel", body)
+        self.assertIn("Room 301", body)
+
+    def test_my_bookings_requires_login(self):
+        response = self.client.get(reverse("my_bookings"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_my_bookings_lists_only_own_reservations(self):
+        reservation = self._book()
+        reservation_badge = f">#{reservation.id}<"
+        self.client.force_login(self._guest_user(self.guest_email))
+        response = self.client.get(reverse("my_bookings"))
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn(reservation_badge, body)
+        self.assertIn("Journey Hotel", body)
+        self.assertNotIn("No bookings yet", body)
+
+        # A different account does not see this reservation.
+        self.client.force_login(self._guest_user("someone-else@example.com", "Someone Else"))
+        response = self.client.get(reverse("my_bookings"))
+        body = response.content.decode()
+        self.assertNotIn(reservation_badge, body)
+        self.assertNotIn("Journey Hotel", body)
+        self.assertIn("No bookings yet", body)
+
+    def test_reservation_detail_owner_and_staff_can_view(self):
+        reservation = self._book()
+        url = reverse("reservation_detail", args=[reservation.id])
+
+        # Anonymous is denied.
+        denied = self.client.get(url)
+        self.assertEqual(denied.status_code, 200)
+        self.assertContains(denied, "Access Denied")
+
+        # Owner sees the full details.
+        self.client.force_login(self._guest_user(self.guest_email))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn(f"Reservation #{reservation.id}", body)
+        self.assertIn("Journey Hotel", body)
+
+        # A different guest is denied.
+        self.client.force_login(self._guest_user("someone-else@example.com", "Someone Else"))
+        denied = self.client.get(url)
+        self.assertContains(denied, "Access Denied")
+
+        # A manager at the same hotel can view.
+        manager = Staff.objects.create_user(
+            username="journey-manager@example.com", email="journey-manager@example.com",
+            password="SafePass123", staff_name="Journey Manager", role="manager",
+            hotel=self.hotel,
+        )
+        self.client.force_login(manager)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f"Reservation #{reservation.id}")
+
+    def test_staff_reservations_list_renders_for_manager(self):
+        reservation = self._book()
+        manager = Staff.objects.create_user(
+            username="journey-manager@example.com", email="journey-manager@example.com",
+            password="SafePass123", staff_name="Journey Manager", role="manager",
+            hotel=self.hotel,
+        )
+        self.client.force_login(manager)
+        response = self.client.get(reverse("staff_reservations"))
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn(f"#{reservation.id}", body)
+        self.assertIn("Journey Guest", body)
+
+@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+class WalkinBookingTests(TestCase):
+    """Staff walk-in booking: page access and mobile-money-only Paystack checkout."""
+
+    def setUp(self):
+        self.hotel = Hotel.objects.create(
+            hotel_name="Walkin Hotel", hotel_email="walkin@test.example",
+            hotel_address="1 Walkin St", hotel_phone="+233200000077",
+        )
+        self.room_type = RoomType.objects.create(
+            hotel=self.hotel, type_name="Walkin Suite", price_per_night="200.00"
+        )
+        self.room = Room.objects.create(
+            hotel=self.hotel, room_type=self.room_type, room_number="401", floor=4
+        )
+        self.receptionist = Staff.objects.create_user(
+            username="walkin-reception@test.example", email="walkin-reception@test.example",
+            password="ReceptionPass123", staff_name="Walkin Receptionist",
+            role="receptionist", hotel=self.hotel,
+        )
+
+    def test_walkin_page_requires_staff_role(self):
+        # Anonymous is redirected to the staff login.
+        anon = self.client.get(reverse("walkin_booking"))
+        self.assertEqual(anon.status_code, 302)
+
+        # A guest user is denied.
+        guest = Staff.objects.create_user(
+            username="walkin-guest@example.com", email="walkin-guest@example.com",
+            password="SafePass123", staff_name="Walkin Guest", role="guest",
+        )
+        self.client.force_login(guest)
+        denied = self.client.get(reverse("walkin_booking"))
+        self.assertContains(denied, "Access Denied")
+
+        # A receptionist sees the walk-in client structure.
+        self.client.force_login(self.receptionist)
+        response = self.client.get(reverse("walkin_booking"))
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn("Client Details", body)
+        self.assertIn("National ID Number", body)
+        self.assertIn("Mobile Money Payment", body)
+
+    def test_booking_options_filter_by_hotel(self):
+        other_hotel = Hotel.objects.create(
+            hotel_name="Other Hotel", hotel_email="other@test.example",
+            hotel_address="2 Other St", hotel_phone="+233200000078",
+        )
+        other_room = Room.objects.create(
+            hotel=other_hotel, room_number="501", floor=5
+        )
+
+        # With no hotel param, all available rooms are returned (backwards compatible).
+        all_rooms = self.client.get(reverse("booking_options")).json()["results"]
+        self.assertTrue(any(r["id"] == self.room.id for r in all_rooms))
+        self.assertTrue(any(r["id"] == other_room.id for r in all_rooms))
+
+        # With a hotel param, only that hotel's rooms are returned (walk-in scoping).
+        scoped = self.client.get(reverse("booking_options"), {"hotel": self.hotel.id}).json()["results"]
+        self.assertTrue(any(r["id"] == self.room.id for r in scoped))
+        self.assertFalse(any(r["id"] == other_room.id for r in scoped))
+
+    def test_mobile_money_checkout_payload(self):
+        booking = self.client.post(
+            reverse("create_booking"),
+            data=json.dumps({
+                "guest_name": "Walkin Client", "guest_email": "walkin-client@example.com",
+                "guest_phone": "+233241234567", "id_number": "GHA-987654321-0",
+                "nationality": "Ghana", "room_id": self.room.id,
+                "check_in": "2027-09-01T14:00:00Z", "check_out": "2027-09-03T11:00:00Z",
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(booking.status_code, 201)
+        invoice_id = booking.json()["invoice"]["id"]
+
+        token_response = Mock()
+        token_response.status_code = 200
+        token_response.json.return_value = {
+            "status": True,
+            "data": {"authorization_url": "https://paystack.example/momo", "reference": "inv-1-1"},
+        }
+        with patch("apps.billing.views.requests.post", return_value=token_response) as mock_post:
+            response = self.client.post(
+                reverse("paystack_checkout"),
+                data=json.dumps({
+                    "invoice_id": invoice_id,
+                    "payment_method": "mobile_money",
+                    "mobile_money_phone": "+233241234567",
+                    "mobile_money_provider": "mtn",
+                    "callback_url_name": "walkin_booking",
+                }),
+                content_type="application/json",
+            )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()["authorization_url"], "https://paystack.example/momo")
+        sent_payload = mock_post.call_args.kwargs["json"]
+        self.assertEqual(sent_payload["currency"], "GHS")
+        self.assertEqual(sent_payload["channels"], ["mobile_money"])
+        self.assertEqual(sent_payload["mobile_money"], {"phone": "0241234567", "provider": "mtn"})
+        self.assertIn("/staff/walkin/", sent_payload["callback_url"])
+
+        # An invalid provider is rejected before reaching Paystack.
+        bad = self.client.post(
+            reverse("paystack_checkout"),
+            data=json.dumps({
+                "invoice_id": invoice_id, "payment_method": "mobile_money",
+                "mobile_money_phone": "+233241234567", "mobile_money_provider": "visa",
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(bad.status_code, 400)
+
 class AdminManagementCrudTests(TestCase):
     """CRUD endpoints for the admin management page (rooms, staff, hotels)."""
 

@@ -90,13 +90,16 @@
       </h3>
       <div class="space-y-2">
         {% for reservation in today_checkins %}
-        <div class="flex items-center justify-between py-2 border-b border-outline-variant/20">
+        <a href="{% url 'reservation_detail' reservation_id=reservation.id %}" class="flex items-center justify-between py-2 border-b border-outline-variant/20 group">
           <div>
             <p class="font-medium text-on-surface">{{ reservation.guest.guest_name }}</p>
             <p class="text-xs text-on-surface-variant">#{{ reservation.id }} · {{ reservation.check_in|date:"H:i" }}</p>
           </div>
-          <span class="badge badge-success text-[10px]">Arriving</span>
-        </div>
+          <span class="flex items-center gap-2">
+            <span class="badge badge-success text-[10px]">Arriving</span>
+            <span class="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-primary transition-colors">chevron_right</span>
+          </span>
+        </a>
         {% empty %}
         <p class="text-sm text-on-surface-variant text-center py-4">No arrivals scheduled today.</p>
         {% endfor %}
@@ -108,13 +111,16 @@
       </h3>
       <div class="space-y-2">
         {% for reservation in today_checkouts %}
-        <div class="flex items-center justify-between py-2 border-b border-outline-variant/20">
+        <a href="{% url 'reservation_detail' reservation_id=reservation.id %}" class="flex items-center justify-between py-2 border-b border-outline-variant/20 group">
           <div>
             <p class="font-medium text-on-surface">{{ reservation.guest.guest_name }}</p>
             <p class="text-xs text-on-surface-variant">#{{ reservation.id }} · {{ reservation.check_out|date:"H:i" }}</p>
           </div>
-          <span class="badge badge-warning text-[10px]">Departing</span>
-        </div>
+          <span class="flex items-center gap-2">
+            <span class="badge badge-warning text-[10px]">Departing</span>
+            <span class="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-primary transition-colors">chevron_right</span>
+          </span>
+        </a>
         {% empty %}
         <p class="text-sm text-on-surface-variant text-center py-4">No departures scheduled today.</p>
         {% endfor %}
@@ -145,7 +151,7 @@
   <section class="card p-5 mb-6">
     <div class="flex items-center justify-between mb-4">
       <h3 class="font-headline-md text-headline-md text-primary font-bold">Recent Reservations</h3>
-      <a href="{% url 'booking' %}" class="text-sm text-primary font-semibold hover:underline">View All</a>
+      <a href="{% url 'staff_reservations' %}" class="text-sm text-primary font-semibold hover:underline">View All</a>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-left">
@@ -171,7 +177,7 @@
               </span>
             </td>
             <td class="py-3 text-right">
-              <a href="{% url 'booking' %}" class="text-primary text-sm font-semibold hover:underline">Manage</a>
+              <a href="{% url 'reservation_detail' reservation_id=reservation.id %}" class="text-primary text-sm font-semibold hover:underline">View Details</a>
             </td>
           </tr>
           {% empty %}

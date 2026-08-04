@@ -59,7 +59,7 @@ cd ~/stayhub
 python3.12 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
-pip install -r requirements.txt gunicorn
+pip install -r requirements.txt   # gunicorn is pinned in requirements.txt — no separate install needed
 ```
 
 Create `~/stayhub/.env` (copy the shape of your local `.env`):
@@ -106,14 +106,16 @@ PAYSTACK_RETURN_URL=https://your-domain.com/booking/
 > Gmail note: if SMTP auth is the app's `EMAIL_HOST_PASSWORD`, it must be a
 > **Gmail App Password** (2FA enabled), not the account password.
 
-Then run migrations, seed, and collect static:
+Then run Django checks, migrations, seed, and collect static:
 
 ```bash
 cd ~/stayhub
 source venv/bin/activate
+python manage.py check                 # catches config errors (e.g. DEBUG=False without SECRET_KEY) before they hit the server
 python manage.py migrate --noinput
 python manage.py create_sample_accounts      # optional sample staff
-python manage.py seed_demo_data              # optional demo hotels/rooms
+python manage.py seed_full_demo              # optional full demo dataset (hotels, rooms, reservations, billing…)
+# python manage.py seed_demo_data            # smaller legacy demo (superseded by seed_full_demo)
 python manage.py collectstatic --noinput
 ```
 
@@ -155,10 +157,13 @@ sudo certbot renew --dry-run
 
 ## 8. Deploying updates later
 
+The bundled script does the same thing as the manual steps below — pull → pip → checks → migrate → collectstatic → restart:
+
 ```bash
 cd ~/stayhub && git pull
 source venv/bin/activate
 pip install -r requirements.txt
+python manage.py check
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 sudo systemctl restart stayhub-gunicorn
@@ -171,6 +176,11 @@ Or run the bundled script:
 sudo chmod +x ~/stayhub/deploy/deploy.sh
 ~/stayhub/deploy/deploy.sh
 ```
+
+> The script fails fast: it aborts with a clear message if `~/stayhub` or `~/stayhub/.env` is
+> missing, stops if `git pull --ff-only` fails (commit/stash local changes first), and runs
+> `python manage.py check` before migrating. Override the app directory with
+> `STAYHUB_DIR=/path/to/stayhub bash ~/stayhub/deploy/deploy.sh` if needed.
 
 ---
 
@@ -191,4 +201,8 @@ sudo chmod +x ~/stayhub/deploy/deploy.sh
 
 - `deploy/stayhub-gunicorn.service` — systemd unit running gunicorn on `127.0.0.1:8000`, auto-restarts on crash/boot.
 - `deploy/nginx-stayhub.conf` — nginx reverse proxy: serves `/static/` and `/media/` directly, proxies everything else to gunicorn, gzip on.
-- `deploy/deploy.sh` — pull → pip → migrate → collectstatic → restart.
+- `deploy/deploy.sh` — update deploy: `git pull --ff-only` → `pip install -r requirements.txt` (gunicorn included) → `manage.py check` → `migrate` → `collectstatic` → restart gunicorn/nginx. Fails fast if `.env` is missing and prints clear errors.
+
+> ⚠️ The `deploy/` files are **git-ignored**, so a plain `git clone` on a fresh instance
+> will not include them — copy them with the `scp -r .` / `rsync` step in section 1 (which
+> ships the whole project folder, `.git` excluded if you use the rsync tip).

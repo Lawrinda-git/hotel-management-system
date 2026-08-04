@@ -67,8 +67,12 @@ urlpatterns = [
     path("api/booking/create/", views.create_booking, name="create_booking"),
     path("reservation-confirmed/", views.reservation_confirmed, name="reservation_confirmed"),
     path("api/reservations/<int:reservation_id>/status/", views.reservation_status, name="reservation_status"),
+    path("bookings/", views.my_bookings, name="my_bookings"),
+    path("reservations/<int:reservation_id>/", views.reservation_detail, name="reservation_detail"),
     # Staff Dashboard Pages
     path("manager/", views.manager_dashboard, name="manager_dashboard"),
+    path("staff/walkin/", views.walkin_booking, name="walkin_booking"),
+    path("staff/reservations/", views.staff_reservations, name="staff_reservations"),
     path("receptionist/", views.receptionist_dashboard, name="receptionist_dashboard"),
     path("accountant/", views.accountant_dashboard, name="accountant_dashboard"),
     path("housekeeping/", views.housekeeping_dashboard, name="housekeeping_dashboard"),

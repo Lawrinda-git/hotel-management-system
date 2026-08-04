@@ -2,28 +2,77 @@
 
 ## Email and SMS authentication
 
-For real delivery, configure Brevo for email and SMS. Email verification still uses the existing mail path, while sign-in can now be sent by SMS when the user selects it.
+For real delivery, configure **Brevo** for email and SMS. The two-factor (2FA)
+verification code is sent through the channel the user picks:
 
-`BREVO_API_KEY=your_brevo_api_key`
+- **Email** — sent with Django's `send_mail`, so it follows `EMAIL_BACKEND`.
+  Point it at the bundled Brevo backend (`frontend.email_backend.BrevoEmailBackend`,
+  POSTs to `https://api.brevo.com/v3/smtp/email`) or an SMTP backend in production.
+- **SMS** — POSTs to `https://api.brevo.com/v3/transactionalSMS/send`.
 
-`BREVO_SMS_SENDER=StayHub`
+Set these:
 
-Also set `DEFAULT_FROM_EMAIL` to a sender verified in Brevo. Never commit the key or provider passwords. If a provider credential has appeared in a debug page or source control, revoke and replace it.
+```
+BREVO_API_KEY=your_brevo_api_key
+BREVO_SMS_SENDER=StayHub
+```
+
+Also set `DEFAULT_FROM_EMAIL` to a sender verified in Brevo (the Brevo backend
+parses the display name + address from it). Never commit the key or provider
+passwords. If a provider credential has appeared in a debug page or source
+control, revoke and replace it.
 
 ## Google sign-in
 
-Create a Google Cloud OAuth **Web application** client, then set the three `GOOGLE_OAUTH_*` values. Register the callback exactly as configured; locally it is:
+Create a Google Cloud OAuth **Web application** client, then set the
+`GOOGLE_OAUTH_*` values:
 
-`http://localhost:8000/api/auth/google/callback/`
+```
+GOOGLE_OAUTH_CLIENT_ID=...
+GOOGLE_OAUTH_CLIENT_SECRET=...
+GOOGLE_OAUTH_REDIRECT_URI=http://localhost:8000/api/auth/google/callback/
+GOOGLE_OAUTH_REDIRECT_URIS=http://localhost:8000/api/auth/google/callback/,https://your-domain.com/api/auth/google/callback/
+```
 
-For production, use the HTTPS deployed equivalent. Google requires the redirect URI to match exactly.
+Register the callback **exactly** as configured in Google Cloud — Google requires
+an exact match. The view picks the callback whose host matches the current
+request, so `GOOGLE_OAUTH_REDIRECT_URIS` (comma-separated) lets you support
+local, ngrok, and the production domain at once. The callback verifies the
+`state` token and the ID token's audience/issuer/email, then logs in the guest
+(or the matching staff account when the staff-login flow was used).
 
-## Payments
+## Payments (Paystack)
 
-Use your **Paystack test keys** for development. Add the public and secret keys through environment variables. The app now creates an invoice for each booking and exposes a server-side Paystack checkout plus webhook endpoint.
+Use your **Paystack test keys** for development. The app creates an invoice for
+every booking and uses a **server-side** checkout (redirect) — there is no
+client-side popup:
 
-`PAYSTACK_PUBLIC_KEY=your_paystack_public_key`
+```
+PAYSTACK_SECRET_KEY=your_paystack_secret_key
+# PAYSTACK_PUBLIC_KEY is accepted for compatibility but is not used by the
+# server-side checkout, so it can be left empty.
+# PAYSTACK_RETURN_URL is a legacy default; the app builds the callback URL from
+# the incoming request instead (the booking page, or /staff/walkin/ for walk-ins).
+```
 
-`PAYSTACK_SECRET_KEY=your_paystack_secret_key`
+### Checkout flow
 
-`PAYSTACK_RETURN_URL=http://localhost:8000/booking/`
+1. **Create the booking** — `POST /api/booking/create/` returns the new
+   `invoice.id`.
+2. **Initialize checkout** — `POST /api/billing/paystack/checkout/` with
+   `{"invoice_id": …}` returns an `authorization_url` to redirect the guest to.
+   - Standard bookings: the callback returns to `/booking/`.
+   - **Walk-in bookings (mobile money only):** pass
+     `payment_method: "mobile_money"` plus `mobile_money_phone`
+     (e.g. `+233241234567`), `mobile_money_provider` (`mtn`, `vodafone`, or
+     `atl`), and `callback_url_name: "walkin_booking"`. The charge is then
+     restricted to **Ghana mobile money** (`channels: ["mobile_money"]`,
+     `currency: GHS`) and pushed to the client's number for them to confirm.
+3. **Webhook** — register
+   `https://your-domain.com/api/billing/paystack/webhook/` in your Paystack
+   dashboard. The endpoint verifies the `x-paystack-signature` (HMAC-SHA512
+   over the raw body) before recording the payment and updating the invoice
+   status (paid/partial).
+4. **Verification fallback** — `GET /api/billing/paystack/verify/<reference>/`
+   polls Paystack when webhooks are delayed; on success it records the payment,
+   marks the invoice `PAID`, and confirms the reservation.

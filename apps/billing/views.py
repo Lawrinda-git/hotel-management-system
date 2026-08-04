@@ -23,7 +23,22 @@ from .serializers import InvoiceSerializer, PaymentSerializer
 logger = logging.getLogger(__name__)
 
 
-def _initialize_paystack_transaction(invoice, request):
+def _local_ghana_phone(value):
+	"""Convert +233241234567 / 241234567 to Paystack's local format 0241234567."""
+	phone = (value or "").strip()
+	if phone.startswith("+"):
+		phone = phone[1:]
+	if phone.startswith("233"):
+		phone = phone[3:]
+	if phone and not phone.startswith("0"):
+		phone = f"0{phone}"
+	return phone
+
+
+MOBILE_MONEY_PROVIDERS = {"mtn": "MTN Mobile Money", "vodafone": "Vodafone Cash", "atl": "AirtelTigo Money"}
+
+
+def _initialize_paystack_transaction(invoice, request, callback_url_name="booking", channels=None, mobile_money=None):
 	if not settings.PAYSTACK_SECRET_KEY:
 		raise ValueError("PAYSTACK_SECRET_KEY is not configured")
 
@@ -32,10 +47,11 @@ def _initialize_paystack_transaction(invoice, request):
 	payload = {
 		"email": guest.guest_email,
 		"amount": str(amount_kobo),
+		"currency": "GHS",
 		"reference": f"inv-{invoice.id}-{invoice.reservation_id}",
 		# Build this from the incoming request so localhost, ngrok, staging,
 		# and the eventual production domain all return to the correct host.
-		"callback_url": request.build_absolute_uri(reverse("booking")),
+		"callback_url": request.build_absolute_uri(reverse(callback_url_name)),
 		"metadata": {
 			"invoice_id": invoice.id,
 			"reservation_id": invoice.reservation_id,
@@ -43,6 +59,10 @@ def _initialize_paystack_transaction(invoice, request):
 			"guest_phone": guest.guest_phone,
 		},
 	}
+	if channels:
+		payload["channels"] = channels
+	if mobile_money:
+		payload["mobile_money"] = mobile_money
 	response = requests.post(
 		"https://api.paystack.co/transaction/initialize",
 		json=payload,
@@ -141,9 +161,47 @@ def create_paystack_checkout(request):
 	if not invoice_id:
 		return JsonResponse({"detail": "invoice_id is required."}, status=400)
 
+	# Walk-in bookings pay by mobile money only — the staff member collects
+	# the client's number and provider, then the client confirms the charge.
+	callback_url_name = payload.get("callback_url_name") or "booking"
+	if callback_url_name not in ("booking", "walkin_booking"):
+		callback_url_name = "booking"
+	payment_method = (payload.get("payment_method") or "").lower()
+	channels = None
+	mobile_money = None
+	if payment_method == "mobile_money":
+		channels = ["mobile_money"]
+		provider = (payload.get("mobile_money_provider") or "").strip().lower()
+		phone = _local_ghana_phone(payload.get("mobile_money_phone"))
+		# Ghana mobile money requires a 10-digit local number (e.g. 0241234567).
+		import re
+		if not re.fullmatch(r"0\d{9}", phone) or provider not in MOBILE_MONEY_PROVIDERS:
+			return JsonResponse({
+				"detail": "Mobile money requires a valid Ghana phone number (e.g. 024 123 4567) and a provider (MTN, Vodafone, or AirtelTigo).",
+			}, status=400)
+		mobile_money = {"phone": phone, "provider": provider}
+
 	invoice = get_object_or_404(Invoice.objects.select_related("reservation", "reservation__guest"), pk=invoice_id)
+
+	# Walk-in mobile money bookings must stay within the staff member's own hotel.
+	role = (request.user.role or "").lower() if request.user.is_authenticated else ""
+	if (
+		payment_method == "mobile_money"
+		and role in ("admin", "manager", "receptionist", "accountant", "housekeeping")
+		and request.user.hotel_id
+		and invoice.hotel_id != request.user.hotel_id
+	):
+		return JsonResponse({
+			"detail": "You can only take walk-in bookings at your own hotel.",
+		}, status=403)
+
 	try:
-		data = _initialize_paystack_transaction(invoice, request)
+		data = _initialize_paystack_transaction(
+			invoice, request,
+			callback_url_name=callback_url_name,
+			channels=channels,
+			mobile_money=mobile_money,
+		)
 	except (ValueError, requests.RequestException, OSError) as exc:
 		logger.exception("Unable to initialize Paystack payment for invoice %s", invoice.id)
 		error_message = "Payment gateway is currently unavailable. Please check your internet connection and try again."

@@ -550,6 +550,13 @@ def booking(request):
 
 
 def reservation_confirmed(request):
+    """Booking confirmation screen.
+
+    After a successful Paystack payment the user is redirected here with
+    ``reservation_id`` and ``invoice_id`` query params. When the reservation
+    exists in the database we render its REAL data (real reservation ID, dates,
+    room, totals) instead of relying on the query string.
+    """
     reservation_id = request.GET.get("reservation_id")
     invoice_id = request.GET.get("invoice_id")
     check_in = request.GET.get("check_in")
@@ -565,7 +572,11 @@ def reservation_confirmed(request):
     invoice = None
     if reservation_id:
         try:
-            reservation = Reservation.objects.select_related("hotel").get(pk=reservation_id)
+            reservation = (
+                Reservation.objects.select_related("hotel", "guest")
+                .prefetch_related("room_reservations__room__room_type")
+                .get(pk=reservation_id)
+            )
             invoice = Invoice.objects.filter(reservation=reservation).first()
             if not invoice and invoice_id:
                 try:
@@ -576,19 +587,62 @@ def reservation_confirmed(request):
             reservation = None
             invoice = None
 
+    # Prefer the real database record so the screen always shows genuine data.
+    nights = None
+    first_room = None
+    check_in_display = None
+    check_out_display = None
+    if reservation:
+        reservation_id = str(reservation.pk)
+        room_links = list(reservation.room_reservations.select_related("room", "room__room_type").all())
+        first_room = room_links[0].room if room_links else None
+        if first_room:
+            room_number = first_room.room_number
+            room_type = first_room.room_type.type_name if first_room.room_type else room_type
+        if reservation.hotel:
+            hotel_name = reservation.hotel.hotel_name
+        check_in = reservation.check_in.strftime("%Y-%m-%d")
+        check_out = reservation.check_out.strftime("%Y-%m-%d")
+        check_in_display = reservation.check_in.strftime("%b %d, %Y")
+        check_out_display = reservation.check_out.strftime("%b %d, %Y")
+        nights = max(1, (reservation.check_out.date() - reservation.check_in.date()).days)
+        if invoice and invoice.total_amount is not None:
+            total = f"{invoice.total_amount:,.2f}"
+        if reservation.guest and reservation.guest.guest_email:
+            guest_email = reservation.guest.guest_email
+
+    display_name = "Guest"
+    if request.user.is_authenticated:
+        display_name = (
+            request.user.get_full_name().strip()
+            or request.user.staff_name
+            or request.user.username
+        )
+    guest_name = reservation.guest.guest_name if reservation else (
+        guest_email.split("@")[0].title() if guest_email else display_name
+    )
+
     context = {
         "reservation": reservation,
         "invoice": invoice,
+        "status_display": (reservation.status or "Confirmed").replace("_", " ") if reservation else "Confirmed",
+        "reservation_id": reservation_id or "",
+        "invoice_id": invoice_id or (str(invoice.pk) if invoice else ""),
         "check_in": check_in,
         "check_out": check_out,
+        "check_in_display": check_in_display,
+        "check_out_display": check_out_display,
         "guests": guests,
         "total": total,
         "room_number": room_number,
         "room_type": room_type,
         "hotel_name": hotel_name,
-        "user_name": request.user.get_full_name() or request.user.username if request.user.is_authenticated else "Guest",
-        "user_email": getattr(request.user, "email", "") or "",
+        "first_room": first_room,
+        "nights": nights,
+        "guest_name": guest_name,
         "guest_email": guest_email,
+        "user_name": display_name,
+        "user_email": getattr(request.user, "email", "") or "",
     }
     return render(request, "frontend/reservation_confirmed.html", context)
 
@@ -599,11 +653,111 @@ def reservation_status(request, reservation_id):
     reservation = Reservation.objects.select_related("guest").filter(pk=reservation_id).first()
     if not reservation:
         return JsonResponse({"detail": "Reservation not found."}, status=404)
-    if not request.user.is_authenticated and request.GET.get("email", "").lower() != reservation.guest.guest_email.lower():
-        return JsonResponse({"detail": "Authentication required."}, status=403)
-    if request.user.is_authenticated and request.user.email.lower() != reservation.guest.guest_email.lower() and not request.user.is_staff:
-        return JsonResponse({"detail": "Not allowed."}, status=403)
+
+    guest_email = (reservation.guest.guest_email or "") if reservation.guest else ""
+    if not request.user.is_authenticated:
+        if not guest_email or request.GET.get("email", "").lower() != guest_email.lower():
+            return JsonResponse({"detail": "Authentication required."}, status=403)
+    else:
+        role = (request.user.role or "").lower()
+        is_staff = role in ("admin", "manager", "receptionist", "accountant", "housekeeping")
+        if not is_staff and (request.user.email or "").lower() != guest_email.lower():
+            return JsonResponse({"detail": "Not allowed."}, status=403)
+        # Non-admin staff can only poll reservations at their own hotel,
+        # mirroring the access control on reservation_detail.
+        if is_staff and role not in ("admin",) and request.user.hotel_id and reservation.hotel_id != request.user.hotel_id:
+            return JsonResponse({"detail": "Not allowed."}, status=403)
     return JsonResponse({"id": reservation.pk, "status": reservation.status})
+
+
+@login_required(login_url="signin")
+def my_bookings(request):
+    """The signed-in guest's list of reservations (their "Bookings" tab).
+
+    Reservations are matched to the account through the guest email used at
+    booking time. Staff users are sent to their own dashboard instead.
+    """
+    role = (request.user.role or "").lower()
+    if role in ("admin", "manager", "receptionist", "accountant", "housekeeping"):
+        return redirect("manager_dashboard" if role in ("admin", "manager") else f"{role}_dashboard")
+
+    guest = Guest.objects.filter(guest_email__iexact=request.user.email).first()
+    reservations = Reservation.objects.none()
+    if guest is not None:
+        reservations = (
+            Reservation.objects.filter(guest=guest)
+            .select_related("hotel", "guest")
+            .prefetch_related("room_reservations__room__room_type")
+            .order_by("-booking_date")
+        )
+
+    display_name = (
+        request.user.get_full_name().strip()
+        or request.user.staff_name
+        or request.user.username
+    )
+    return render(request, "frontend/my_bookings.html", {
+        "guest": guest,
+        "reservations": reservations,
+        "display_name": display_name,
+    })
+
+
+def reservation_detail(request, reservation_id):
+    """Full details for a single reservation.
+
+    Accessible by the guest who owns the reservation (matched by email) and by
+    staff. Non-admin staff are scoped to reservations at their own hotel.
+    """
+    reservation = (
+        Reservation.objects.select_related("hotel", "guest")
+        .prefetch_related("room_reservations__room__room_type")
+        .filter(pk=reservation_id)
+        .first()
+    )
+    if reservation is None:
+        return render(request, "frontend/access_denied.html", {
+            "required_role": "Guest or Staff",
+        }, status=404)
+
+    role = (request.user.role or "").lower() if request.user.is_authenticated else ""
+    is_staff = role in ("admin", "manager", "receptionist", "accountant", "housekeeping")
+    is_owner = (
+        request.user.is_authenticated
+        and request.user.email
+        and reservation.guest
+        and request.user.email.lower() == (reservation.guest.guest_email or "").lower()
+    )
+
+    if not (is_owner or (is_staff and request.user.is_authenticated)):
+        return render(request, "frontend/access_denied.html", {
+            "required_role": "Guest or Staff",
+        })
+    # Non-admin staff can only inspect reservations at their own hotel.
+    if is_staff and role not in ("admin",) and request.user.hotel_id and reservation.hotel_id != request.user.hotel_id:
+        return render(request, "frontend/access_denied.html", {
+            "required_role": "Manager",
+        })
+
+    invoice = Invoice.objects.filter(reservation=reservation).first()
+    payments = invoice.payments.order_by("-payment_date") if invoice else []
+    rooms = [rr.room for rr in reservation.room_reservations.select_related("room", "room__room_type").all()]
+    nights = max(1, (reservation.check_out.date() - reservation.check_in.date()).days)
+
+    can_manage_operations = (
+        is_staff
+        and request.user.is_authenticated
+        and role in ("admin", "manager", "receptionist")
+    )
+    return render(request, "frontend/reservation_detail.html", {
+        "reservation": reservation,
+        "invoice": invoice,
+        "payments": payments,
+        "rooms": rooms,
+        "nights": nights,
+        "is_staff": is_staff and request.user.is_authenticated,
+        "can_manage_operations": can_manage_operations,
+    })
 
 
 def team(request):
@@ -613,12 +767,16 @@ def team(request):
 
 @require_http_methods(["GET"])
 def booking_options(request):
-    """Return rooms that can be shown on the booking page."""
-    rooms = (
-        Room.objects.select_related("hotel", "room_type")
-        .filter(status=Room.RoomStatus.AVAILABLE)
-        .order_by("hotel__hotel_name", "price_per_night", "room_number")
-    )
+    """Return rooms that can be shown on the booking page.
+
+    Supports an optional ``hotel`` query param so staff walk-in bookings can
+    be scoped to the staff member's own hotel.
+    """
+    rooms = Room.objects.select_related("hotel", "room_type").filter(status=Room.RoomStatus.AVAILABLE)
+    hotel_id = request.GET.get("hotel")
+    if hotel_id:
+        rooms = rooms.filter(hotel_id=hotel_id)
+    rooms = rooms.order_by("hotel__hotel_name", "price_per_night", "room_number")
 
     payload = [
         {
@@ -811,6 +969,49 @@ def manager_dashboard(request):
         "recent_reservations": reservation_qs.select_related("guest", "hotel").order_by("-booking_date")[:10],
     }
     return render(request, "frontend/manager_dashboard.html", context)
+
+
+@ensure_csrf_cookie
+@_role_required("receptionist", "manager", "admin")
+def walkin_booking(request):
+    """Dedicated staff walk-in booking page.
+
+    Uses a different structure than the public booking page: the staff member
+    captures the client's details (name, phone, national ID, nationality) and
+    books a room at their own hotel. Payment is mobile-money only via Paystack.
+    """
+    hotel_id = request.user.hotel_id or ""
+    hotel_name = ""
+    if request.user.hotel_id:
+        hotel = Hotel.objects.filter(pk=request.user.hotel_id).first()
+        hotel_name = hotel.hotel_name if hotel else ""
+    return render(request, "frontend/walkin_booking.html", {
+        "active": "walkin",
+        "hotel_id": hotel_id,
+        "hotel_name": hotel_name,
+    })
+
+
+@_role_required("admin", "manager", "receptionist", "accountant")
+def staff_reservations(request):
+    """Full reservations list for staff, with a status filter."""
+    from apps.reservations.models import Reservation
+
+    role = (request.user.role or "").lower()
+    status_filter = (request.GET.get("status") or "").strip()
+    reservation_qs = Reservation.objects.select_related("guest", "hotel").prefetch_related("room_reservations__room__room_type")
+    if role not in ("admin",) and request.user.hotel_id:
+        reservation_qs = reservation_qs.filter(hotel_id=request.user.hotel_id)
+    if status_filter:
+        reservation_qs = reservation_qs.filter(status__iexact=status_filter)
+    reservations = reservation_qs.order_by("-booking_date")[:100]
+
+    return render(request, "frontend/staff_reservations.html", {
+        "active": "bookings",
+        "reservations": reservations,
+        "status_filter": status_filter,
+        "status_choices": Reservation.ReservationStatus.choices,
+    })
 
 
 @ensure_csrf_cookie
