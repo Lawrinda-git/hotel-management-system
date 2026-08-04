@@ -73,6 +73,14 @@ INSTALLED_APPS = [
 ]
 AUTH_USER_MODEL = "accounts.Staff"
 
+# Authenticate staff users (accounts.Staff via Django's ModelBackend) and
+# public web guests (apps.guests.Guest via GuestBackend). GuestBackend returns
+# a GuestUser adapter that keeps guests out of the staff table/roster.
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "apps.guests.auth.GuestBackend",
+]
+
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
@@ -198,24 +206,27 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
+# ── Base URL ────────────────────────────────────────────────────
+# Set BASE_URL in .env to the public origin of your deployment
+# (e.g. https://your-tunnel.devtunnels.ms or https://your-domain.com).
+# Changing this ONE value re-points Paystack (return + webhook),
+# Google OAuth redirect URIs, CSRF trusted origins, and every
+# externally-visible URL to the new host.
+BASE_URL = config("BASE_URL", default="http://localhost:8000").rstrip("/")
+
+# CSRF_TRUSTED_ORIGINS defaults to localhost + the BASE_URL host
+# so a single .env change keeps CSRF working on the new domain too.
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in config(
         "CSRF_TRUSTED_ORIGINS",
-        default="http://localhost:8000,https://*.devtunnels.ms",
+        default=f"http://localhost:8000,{BASE_URL}",
     ).split(",")
     if origin.strip()
 ]
 
 BREVO_API_KEY = config("BREVO_API_KEY", default="")
 BREVO_SMS_SENDER = config("BREVO_SMS_SENDER", default="StayHub")
-
-# ── Base URL ────────────────────────────────────────────────────
-# Set BASE_URL in .env to the public origin of your deployment
-# (e.g. https://your-tunnel.devtunnels.ms). All callback/webhook
-# URLs below derive from it, so changing this one value re-points
-# Paystack, Google OAuth, and every redirect to the new host.
-BASE_URL = config("BASE_URL", default="http://localhost:8000").rstrip("/")
 
 PAYSTACK_SECRET_KEY = config("PAYSTACK_SECRET_KEY", default="")
 PAYSTACK_PUBLIC_KEY = config("PAYSTACK_PUBLIC_KEY", default="")
@@ -241,17 +252,19 @@ DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="StayHub <no-reply@sta
 GOOGLE_OAUTH_CLIENT_ID = config("GOOGLE_OAUTH_CLIENT_ID", default="")
 GOOGLE_OAUTH_CLIENT_SECRET = config("GOOGLE_OAUTH_CLIENT_SECRET", default="")
 GOOGLE_OAUTH_REDIRECT_URI = config(
-    "GOOGLE_OAUTH_REDIRECT_URI", default=f"{BASE_URL}/api/auth/google/callback/"
+    "GOOGLE_OAUTH_REDIRECT_URI",
+    default=f"{BASE_URL}/api/auth/google/callback/",
 )
 # If GOOGLE_OAUTH_REDIRECT_URIS isn't set, build a sensible default from
 # BASE_URL so a single .env change re-points Google sign-in too.
 GOOGLE_OAUTH_REDIRECT_URIS = [
-    value.strip() for value in config(
+    value.strip()
+    for value in config(
         "GOOGLE_OAUTH_REDIRECT_URIS",
         default=f"http://localhost:8000/api/auth/google/callback/,{BASE_URL}/api/auth/google/callback/",
-    ).split(",") if value.strip()
+    ).split(",")
+    if value.strip()
 ]
-ADMIN_SIGNUP_KEY = config("ADMIN_SIGNUP_KEY", default="")
 ADMIN_SIGNUP_KEY = config("ADMIN_SIGNUP_KEY", default="")
 
 

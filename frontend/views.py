@@ -165,9 +165,21 @@ def database_health(request):
 
 @login_required(login_url="signin")
 def profile(request):
-    """Show and update the signed-in user's profile."""
+    """Show and update the signed-in user's profile (staff or guest)."""
     user = request.user
-    phone = user.staff_phone or ""
+    # Detect whether the signed-in user is a guest (GuestUser adapter) or staff.
+    is_staff = (getattr(user, "role", "") or "").lower() in ("admin", "manager", "receptionist", "accountant", "housekeeping")
+    guest = None
+    if not is_staff:
+        # The session user is a GuestUser adapter pointing to a Guest row.
+        from apps.guests.auth import GuestUser
+        if isinstance(user, GuestUser):
+            guest = user._guest
+        else:
+            # Fallback: look up the guest by email (for safety).
+            guest = Guest.objects.filter(guest_email__iexact=user.email).first()
+
+    phone = getattr(user, "staff_phone", "") or (guest.guest_phone if guest else "")
     phone_country_code = "+233"
     phone_number = phone
     for code in ("+233", "+234", "+254", "+27", "+44", "+1"):
@@ -175,15 +187,13 @@ def profile(request):
             phone_country_code, phone_number = code, phone[len(code):]
             break
 
-    # Use staff profile template for staff users, guest profile for guests
-    is_staff = user.is_authenticated and (user.role or "").lower() in ("admin", "manager", "receptionist", "accountant", "housekeeping")
     template = "frontend/staff_profile.html" if is_staff else "frontend/profile.html"
 
     def render_profile(**extra):
         context = {
             "phone_country_code": phone_country_code,
             "phone_number": phone_number,
-            "two_factor_enabled": user.two_factor_enabled,
+            "two_factor_enabled": getattr(user, "two_factor_enabled", False),
         }
         context.update(extra)
         return render(request, template, context)
@@ -195,8 +205,21 @@ def profile(request):
         upload = request.FILES.get("profile_picture")
         if not full_name or not email or not staff_phone:
             return render_profile(profile_error="Name, email, and a valid phone number are required.")
-        if Staff.objects.filter(email__iexact=email).exclude(pk=user.pk).exists():
+        # Prevent email collisions across the two entity kinds.
+        if Staff.objects.filter(email__iexact=email).exists() and is_staff:
+            if Staff.objects.filter(email__iexact=email).exclude(pk=user.pk).exists():
+                return render_profile(profile_error="That email is already in use.")
+        if guest is not None and Guest.objects.filter(guest_email__iexact=email).exclude(pk=guest.pk).exists():
             return render_profile(profile_error="That email is already in use.")
+
+        if guest is not None:
+            # Guest profile: persist changes to the guest table.
+            guest.guest_name = full_name
+            guest.guest_email = email
+            guest.guest_phone = staff_phone
+            guest.save(update_fields=["guest_name", "guest_email", "guest_phone"])
+            return redirect("profile")
+
         parts = full_name.split(maxsplit=1)
         user.staff_name = full_name
         user.first_name = parts[0]
@@ -243,13 +266,36 @@ def api_login(request):
     if user is None:
         user = Staff.objects.filter(username__iexact=identifier).first()
 
+    # If no staff account exists, try to authenticate a registered guest.
     if user is None:
+        guest = Guest.objects.filter(guest_email__iexact=identifier).first()
+        if guest is not None:
+            if staff_only:
+                return JsonResponse({"detail": "This account is not a staff account."}, status=403)
+            if not guest.password:
+                return JsonResponse({"detail": "This guest has no password set (they may have booked as a walk-in). Please create an account first."}, status=400)
+            if not guest.check_password(password):
+                return JsonResponse({"detail": "Invalid credentials."}, status=400)
+            # Build a GuestUser adapter and log in via Django's session auth.
+            from apps.guests.auth import GuestUser
+            authenticated_guest = GuestUser(guest)
+            login(request, authenticated_guest)
+            return JsonResponse({
+                "detail": "Signed in successfully.",
+                "redirect_url": "/home/",
+            })
         return JsonResponse({"detail": "Invalid credentials."}, status=400)
+
     if staff_only and (user.role or "").lower() == "guest":
         return JsonResponse({"detail": "This account is not a staff account."}, status=403)
 
     authenticated_user = authenticate(request, username=user.username, password=password)
     if authenticated_user is None:
+        # If authentication failed, provide clearer reasons when possible.
+        if not user.is_active:
+            return JsonResponse({"detail": "This account has been disabled. Contact support or an administrator."}, status=403)
+        if not user.has_usable_password():
+            return JsonResponse({"detail": "This account does not have a usable password (created via social login). Use the social sign-in method or reset your password."}, status=400)
         return JsonResponse({"detail": "Invalid credentials."}, status=400)
 
     return _complete_or_challenge_login(request, authenticated_user)
@@ -432,7 +478,11 @@ def google_callback(request):
 
 @require_http_methods(["POST"])
 def api_register(request):
-    """Create a guest account from the public registration form."""
+    """Create a public guest account from the registration form.
+
+    Guests are stored in the ``guest`` table (not ``staff``) so the staff
+    roster stays clean and admins never confuse guests with employees.
+    """
     try:
         payload = json.loads(request.body.decode("utf-8")) if request.body else {}
     except json.JSONDecodeError:
@@ -446,31 +496,29 @@ def api_register(request):
     if not full_name or not email or not password or not staff_phone:
         return JsonResponse({"detail": "full_name, email, phone, and password are required."}, status=400)
 
-    if Staff.objects.filter(username__iexact=email).exists() or Staff.objects.filter(email__iexact=email).exists():
+    # Guests live in the guest table, staff in the staff table.
+    if Guest.objects.filter(guest_email__iexact=email).exists() or Staff.objects.filter(email__iexact=email).exists():
         return JsonResponse({"detail": "An account with that email already exists."}, status=409)
 
-    name_parts = full_name.split(maxsplit=1)
-    first_name = name_parts[0]
-    last_name = name_parts[1] if len(name_parts) > 1 else ""
-
-    user = Staff.objects.create_user(
-        username=email,
-        email=email,
-        password=password,
-        staff_name=full_name,
-        staff_phone=staff_phone,
-        role="guest",
-        first_name=first_name,
-        last_name=last_name,
+    guest = Guest.objects.create(
+        guest_name=full_name,
+        guest_phone=staff_phone,
+        guest_email=email,
     )
+    guest.set_password(password)
+    guest.save(update_fields=["password"])
+
+    # If a walk-in guest already exists for this email (from a booking),
+    # link them by setting the password rather than duplicating.
+    # (We check uniqueness first above, so this is the fresh-registration path.)
 
     return JsonResponse(
         {
             "detail": "Account created successfully.",
             "user": {
-                "id": user.id,
-                "email": user.email,
-                "role": user.role,
+                "id": guest.id,
+                "email": guest.guest_email,
+                "role": "guest",
             },
         },
         status=201,
@@ -916,7 +964,10 @@ def _role_required(*allowed_roles):
     def decorator(view_func):
         @login_required(login_url="staff_login")
         def _wrapped_view(request, *args, **kwargs):
-            if request.user.role and request.user.role.lower() not in [r.lower() for r in allowed_roles]:
+            # Allow Django superusers to bypass role checks
+            if getattr(request.user, "is_superuser", False):
+                return view_func(request, *args, **kwargs)
+            if not getattr(request.user, "role", None) or request.user.role.lower() not in [r.lower() for r in allowed_roles]:
                 return render(request, "frontend/access_denied.html", {
                     "required_role": allowed_roles[0].title() if len(allowed_roles) == 1 else "Admin/Manager",
                 })
@@ -1176,6 +1227,9 @@ def _admin_manage_context(request):
     if not request.user.is_authenticated:
         return None
     role = (request.user.role or "").lower()
+    # Allow superusers to act as global admins
+    if getattr(request.user, "is_superuser", False):
+        return True, request.user.hotel_id
     if role not in ("admin", "manager"):
         return None
     return role == "admin", request.user.hotel_id
@@ -1481,6 +1535,9 @@ def _dashboard_context(request, *allowed_roles):
     """Return (is_manager, hotel_id) for staff API callers, else None."""
     if not request.user.is_authenticated:
         return None
+    # Allow superusers to act as managers/admins
+    if getattr(request.user, "is_superuser", False):
+        return True, request.user.hotel_id
     role = (request.user.role or "").lower()
     if role not in allowed_roles:
         return None
