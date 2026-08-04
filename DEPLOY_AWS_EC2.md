@@ -133,7 +133,8 @@ sudo systemctl status stayhub-gunicorn   # should show active (running)
 Quick sanity check on the server itself:
 
 ```bash
-curl -H "Host: your-domain.com" http://127.0.0.1:8000/   # or /health/ route
+curl -H "Host: your-domain.com" http://127.0.0.1:8000/api/health/database/   # → {"status":"ok","database":"postgresql"}
+curl http://127.0.0.1:8000/   # splash page also returns 200
 ```
 
 ## 6. nginx
@@ -178,8 +179,10 @@ sudo chmod +x ~/stayhub/deploy/deploy.sh
 ```
 
 > The script fails fast: it aborts with a clear message if `~/stayhub` or `~/stayhub/.env` is
-> missing, stops if `git pull --ff-only` fails (commit/stash local changes first), and runs
-> `python manage.py check` before migrating. Override the app directory with
+> missing, stops if `git pull --ff-only` fails (commit/stash local changes first), checks that
+> every template referenced in `frontend/views.py` / `frontend/urls.py` actually exists on disk
+> (so uncommitted templates can't 500 a page in production), and runs `python manage.py check`
+> before migrating. Override the app directory with
 > `STAYHUB_DIR=/path/to/stayhub bash ~/stayhub/deploy/deploy.sh` if needed.
 
 ---
@@ -203,6 +206,6 @@ sudo chmod +x ~/stayhub/deploy/deploy.sh
 - `deploy/nginx-stayhub.conf` — nginx reverse proxy: serves `/static/` and `/media/` directly, proxies everything else to gunicorn, gzip on.
 - `deploy/deploy.sh` — update deploy: `git pull --ff-only` → `pip install -r requirements.txt` (gunicorn included) → `manage.py check` → `migrate` → `collectstatic` → restart gunicorn/nginx. Fails fast if `.env` is missing and prints clear errors.
 
-> ⚠️ The `deploy/` files are **git-ignored**, so a plain `git clone` on a fresh instance
-> will not include them — copy them with the `scp -r .` / `rsync` step in section 1 (which
-> ships the whole project folder, `.git` excluded if you use the rsync tip).
+> ✅ The `deploy/` files are **tracked in git** (commit `1cb9c98`), so a `git clone` on a
+> fresh instance includes them — no manual copy needed. The `scp -r .` / `rsync` step in
+> section 1 is still how you get the full project onto the box before the first deploy.

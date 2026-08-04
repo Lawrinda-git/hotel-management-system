@@ -1,0 +1,21 @@
+[Unit]
+Description=StayHub ngrok tunnel (test deploy)
+# Start after gunicorn and the network are up. No hard dependency: if gunicorn
+# is briefly down the tunnel stays up (502s) and recovers on its own.
+After=network-online.target stayhub-gunicorn.service
+Wants=network-online.target
+
+[Service]
+User=admin
+Group=admin
+# Uses the authtoken saved WITHOUT sudo by:  ngrok config add-authtoken <token>
+# (sudo would store it under /root and this admin-user service could not read it.)
+ExecStart=/usr/bin/ngrok http 8000 --url=https://contrapuntal-aliyah-nontropic.ngrok-free.dev --log=stdout
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

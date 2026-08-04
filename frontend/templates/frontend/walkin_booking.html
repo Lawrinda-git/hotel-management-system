@@ -1,0 +1,595 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub | Walk-in Booking{% endblock %}
+{% block body_class %}bg-background text-on-surface pb-20{% endblock %}
+{% block content %}
+{% include "frontend/components/_staff_sidebar.html" %}
+<!-- ===== TOP HEADER ===== -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm md:left-[260px] md:right-0 md:w-auto">
+  <div class="flex items-center justify-between px-4 h-16 max-w-6xl mx-auto">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md">
+        <span class="material-symbols-outlined text-white text-xl">person_add</span>
+      </div>
+      <div>
+        <h1 class="font-headline-md text-headline-md text-primary font-bold leading-tight">Walk-in Booking</h1>
+        <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">
+          {% if hotel_name %}{{ hotel_name }}{% else %}No hotel assigned{% endif %}
+        </p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'profile' %}" class="btn btn-icon btn-ghost" aria-label="Profile">
+        <span class="material-symbols-outlined">person</span>
+      </a>
+      <a href="{% url 'logout' %}" class="btn btn-icon btn-ghost" aria-label="Log out">
+        <span class="material-symbols-outlined">logout</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="pt-20 pb-8 px-4 max-w-6xl mx-auto md:ml-[260px]">
+  {% if not hotel_id %}
+  <section class="card p-6 mb-6 text-center">
+    <span class="material-symbols-outlined text-error text-5xl mb-3">business_center</span>
+    <h2 class="font-headline-md text-headline-md text-on-surface font-bold mb-2">You are not assigned to a hotel</h2>
+    <p class="text-sm text-on-surface-variant max-w-md mx-auto">Ask an admin to assign you to a hotel before you can take walk-in bookings.</p>
+    <a href="{% url 'manager_dashboard' %}" class="btn btn-primary mt-5">
+      <span class="material-symbols-outlined">arrow_back</span> Back to Dashboard
+    </a>
+  </section>
+  {% else %}
+
+  <!-- Progress -->
+  <div class="steps mb-8 max-w-2xl mx-auto">
+    <div class="step active" id="step-client">
+      <div class="step-number">1</div>
+      <span class="step-label">Client</span>
+    </div>
+    <div class="step" id="step-stay">
+      <div class="step-number">2</div>
+      <span class="step-label">Stay</span>
+    </div>
+    <div class="step" id="step-pay">
+      <div class="step-number">3</div>
+      <span class="step-label">Mobile Money</span>
+    </div>
+  </div>
+
+  <!-- ===== STEP 1: CLIENT DETAILS ===== -->
+  <section class="card card-body mb-6" id="section-client">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary">badge</span>
+      </div>
+      <div>
+        <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Client Details</h2>
+        <p class="text-sm text-on-surface-variant">Identity of the guest you are booking for</p>
+      </div>
+    </div>
+
+    <!-- Existing client lookup -->
+    <div class="flex flex-wrap gap-3 p-4 bg-surface-container rounded-xl mb-5">
+      <input id="client-search" class="input flex-1 min-w-[220px]" type="search" placeholder="Search existing client by name, email or phone...">
+      <button class="btn btn-outline" id="find-client-btn" type="button">
+        <span class="material-symbols-outlined text-lg">search</span> Find Client
+      </button>
+      <button class="btn btn-ghost" id="new-client-btn" type="button">
+        <span class="material-symbols-outlined text-lg">person_add</span> New Client
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="label">Client Full Name</label>
+        <input id="guest-name" class="input" type="text" placeholder="e.g. Ama Mensah">
+      </div>
+      <div>
+        <label class="label">Email Address</label>
+        <input id="guest-email" class="input" type="email" placeholder="client@example.com">
+      </div>
+      <div>
+        <label class="label">Phone Number</label>
+        <div class="input-group">
+          <select id="country-code" class="select" style="width: auto; min-width: 88px;">
+            <option selected>+233</option><option>+234</option><option>+254</option><option>+27</option><option>+44</option><option>+1</option>
+          </select>
+          <input id="guest-phone" class="input" type="tel" placeholder="24 123 4567">
+        </div>
+      </div>
+      <div>
+        <label class="label">National ID Number</label>
+        <input id="id-number" class="input" type="text" placeholder="GHA-123456789-0">
+      </div>
+      <div>
+        <label class="label">Nationality</label>
+        <select id="nationality" class="select">
+          <option value="Ghana" selected>Ghana</option>
+          <option>Nigeria</option><option>Kenya</option><option>South Africa</option>
+          <option>United Kingdom</option><option>United States</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-6">
+      <button class="btn btn-primary flex-1" id="continue-to-stay" type="button">
+        Continue to Stay Details <span class="material-symbols-outlined">arrow_forward</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ===== STEP 2: STAY DETAILS ===== -->
+  <section class="card card-body mb-6 hidden" id="section-stay">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary">meeting_room</span>
+      </div>
+      <div>
+        <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Stay Details</h2>
+        <p class="text-sm text-on-surface-variant">Dates and room at {{ hotel_name }}</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+      <div>
+        <label class="label">Check-in Date</label>
+        <input id="check-in" class="input date-picker-custom" type="date">
+      </div>
+      <div>
+        <label class="label">Check-out Date</label>
+        <input id="check-out" class="input date-picker-custom" type="date">
+      </div>
+    </div>
+
+    <p id="room-status" class="mb-4 text-sm text-on-surface-variant flex items-center gap-2">
+      <span class="skeleton" style="width: 200px; height: 16px; display: inline-block;"></span>
+    </p>
+    <div id="room-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+    <div class="flex gap-3 mt-6">
+      <button class="btn btn-ghost" id="back-to-client" type="button">
+        <span class="material-symbols-outlined">arrow_back</span> Back
+      </button>
+      <button class="btn btn-primary flex-1" id="continue-to-pay" type="button" disabled>
+        Continue to Mobile Money <span class="material-symbols-outlined">arrow_forward</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ===== STEP 3: MOBILE MONEY PAYMENT ===== -->
+  <section class="card card-body mb-6 hidden" id="section-pay">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-secondary">smartphone</span>
+      </div>
+      <div>
+        <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Mobile Money Payment</h2>
+        <p class="text-sm text-on-surface-variant">The client confirms the charge on their phone</p>
+      </div>
+    </div>
+
+    <!-- Providers -->
+    <p class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-2">Select Provider</p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6" id="provider-grid">
+      <button type="button" class="provider-card relative text-left rounded-xl border-2 p-4 transition-all duration-200 border-outline-variant hover:border-secondary/60 cursor-pointer" data-provider="mtn">
+        <span class="material-symbols-outlined text-secondary text-2xl mb-1">sim_card</span>
+        <p class="font-semibold text-on-surface text-sm">MTN Mobile Money</p>
+        <p class="text-xs text-on-surface-variant">MoMo</p>
+        <span class="absolute top-3 right-3 w-5 h-5 rounded-full border-2 border-outline-variant provider-radio"></span>
+      </button>
+      <button type="button" class="provider-card relative text-left rounded-xl border-2 p-4 transition-all duration-200 border-outline-variant hover:border-secondary/60 cursor-pointer" data-provider="vodafone">
+        <span class="material-symbols-outlined text-secondary text-2xl mb-1">sim_card</span>
+        <p class="font-semibold text-on-surface text-sm">Vodafone Cash</p>
+        <p class="text-xs text-on-surface-variant">Vodafone</p>
+        <span class="absolute top-3 right-3 w-5 h-5 rounded-full border-2 border-outline-variant provider-radio"></span>
+      </button>
+      <button type="button" class="provider-card relative text-left rounded-xl border-2 p-4 transition-all duration-200 border-outline-variant hover:border-secondary/60 cursor-pointer" data-provider="atl">
+        <span class="material-symbols-outlined text-secondary text-2xl mb-1">sim_card</span>
+        <p class="font-semibold text-on-surface text-sm">AirtelTigo Money</p>
+        <p class="text-xs text-on-surface-variant">AirtelTigo</p>
+        <span class="absolute top-3 right-3 w-5 h-5 rounded-full border-2 border-outline-variant provider-radio"></span>
+      </button>
+    </div>
+
+    <div class="p-4 bg-secondary-container/20 rounded-xl flex items-center gap-3 mb-5">
+      <span class="material-symbols-outlined text-secondary">phone_android</span>
+      <p class="text-sm text-on-surface-variant">
+        A payment request will be sent to the client's number <strong id="mm-phone-display">-</strong>. The client confirms it on their phone with their mobile money PIN.
+      </p>
+    </div>
+
+    <!-- Summary -->
+    <div class="bg-surface-container rounded-xl p-4 space-y-2 mb-6">
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-on-surface-variant">Room</span>
+        <span class="text-sm font-semibold" id="summary-room">Not selected</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-on-surface-variant">Check-in → Check-out</span>
+        <span class="text-sm font-semibold" id="summary-dates">-</span>
+      </div>
+      <hr class="divider">
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-on-surface-variant">Subtotal</span>
+        <span class="text-sm font-semibold" id="summary-subtotal">GH₵0</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-on-surface-variant">Service Fee</span>
+        <span class="text-sm font-semibold" id="summary-service">GH₵0</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-on-surface-variant">Tax (12%)</span>
+        <span class="text-sm font-semibold" id="summary-tax">GH₵0</span>
+      </div>
+      <hr class="divider">
+      <div class="flex items-center justify-between">
+        <span class="font-headline-md text-headline-md text-primary font-bold">Total</span>
+        <span class="font-headline-md text-headline-md text-primary font-bold" id="summary-total">GH₵0</span>
+      </div>
+    </div>
+
+    <p id="walkin-feedback" class="text-sm mb-3 text-center text-on-surface-variant"></p>
+    <div class="flex gap-3">
+      <button class="btn btn-ghost" id="back-to-stay" type="button">
+        <span class="material-symbols-outlined">arrow_back</span> Back
+      </button>
+      <button class="btn btn-secondary flex-1 btn-lg" id="request-payment" type="button" disabled>
+        <span class="material-symbols-outlined">send</span> Send Payment Request
+      </button>
+    </div>
+  </section>
+  {% endif %}
+</main>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="hide-desktop fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+  <div class="flex items-center justify-around h-16 max-w-lg mx-auto">
+    <a href="{% url 'manager_dashboard' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span class="text-[10px] font-semibold">Dashboard</span>
+    </a>
+    <a href="{% url 'staff_reservations' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">book_online</span>
+      <span class="text-[10px] font-semibold">Reservations</span>
+    </a>
+    <a href="{% url 'walkin_booking' %}" class="flex flex-col items-center gap-0.5 text-primary">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL'1;">person_add</span>
+      <span class="text-[10px] font-semibold">Walk-in</span>
+    </a>
+    <a href="{% url 'profile' %}" class="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] font-semibold">Profile</span>
+    </a>
+  </div>
+</nav>
+{% endblock %}
+
+{% block extra_style %}
+<style>
+  .date-picker-custom::-webkit-calendar-picker-indicator {
+    filter: invert(13%) sepia(85%) saturate(3635%) hue-rotate(224deg) brightness(92%) contrast(101%);
+    cursor: pointer;
+  }
+  .provider-card.selected {
+    border-color: var(--secondary, #735c00);
+    background: rgba(254, 214, 91, 0.12);
+  }
+  .provider-card.selected .provider-radio {
+    background: var(--secondary, #735c00);
+    border-color: var(--secondary, #735c00);
+    box-shadow: inset 0 0 0 3px white;
+  }
+  .step-transition { animation: fadeSlideIn 0.3s ease-out; }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  'use strict';
+  var csrfToken = StayHub.getCookie('csrftoken');
+  var HOTEL_ID = {{ hotel_id|default:"''" }};
+  var selectedRoomId = null;
+  var selectedProvider = null;
+  var rooms = [];
+
+  function formatCurrency(value) {
+    var amount = Number(value || 0);
+    return 'GH₵' + amount.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '-';
+    var d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function post(url, payload) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken },
+      body: JSON.stringify(payload || {}),
+    }).then(function (r) {
+      return r.json().then(function (data) {
+        if (!r.ok) throw new Error(data.detail || 'Something went wrong.');
+        return data;
+      });
+    });
+  }
+
+  function getSelectedRoom() {
+    return rooms.find(function (r) { return r.id === selectedRoomId; }) || null;
+  }
+
+  function cleanPhone() {
+    return document.getElementById('guest-phone').value.replace(/[\s\-()]/g, '');
+  }
+
+  function getPhoneDisplay() {
+    var local = document.getElementById('guest-phone').value.trim();
+    var code = document.getElementById('country-code').value;
+    return (code + ' ' + local).trim();
+  }
+
+  // ---------- Step navigation ----------
+  function goToStep(step) {
+    var map = { 1: 'client', 2: 'stay', 3: 'pay' };
+    document.querySelectorAll('[id^="section-"]').forEach(function (s) { s.classList.add('hidden'); });
+    var section = document.getElementById('section-' + map[step]);
+    if (section) { section.classList.remove('hidden'); section.classList.add('step-transition'); }
+    document.querySelectorAll('.step').forEach(function (s) { s.classList.remove('active', 'completed'); });
+    for (var i = 1; i <= 3; i++) {
+      var el = document.getElementById('step-' + map[i]);
+      if (!el) continue;
+      if (i < step) el.classList.add('completed');
+      else if (i === step) el.classList.add('active');
+    }
+    if (step === 3) updateSummary();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.getElementById('continue-to-stay') && document.getElementById('continue-to-stay').addEventListener('click', function () {
+    var name = document.getElementById('guest-name').value.trim();
+    var email = document.getElementById('guest-email').value.trim();
+    var phone = getPhoneDisplay();
+    var idNum = document.getElementById('id-number').value.trim();
+    var nationality = document.getElementById('nationality').value;
+    if (!name || !email || !phone || !idNum || !nationality) {
+      if (window.StayHub) StayHub.Toast.error('Please fill in all client details: name, email, phone, national ID and nationality.');
+      return;
+    }
+    document.getElementById('mm-phone-display').textContent = phone;
+    goToStep(2);
+  });
+  document.getElementById('back-to-client') && document.getElementById('back-to-client').addEventListener('click', function () { goToStep(1); });
+  document.getElementById('back-to-stay') && document.getElementById('back-to-stay').addEventListener('click', function () { goToStep(2); });
+
+  // ---------- Rooms ----------
+  function renderRooms() {
+    var grid = document.getElementById('room-grid');
+    var status = document.getElementById('room-status');
+    if (!rooms.length) {
+      grid.innerHTML = '';
+      status.innerHTML = '<span class="text-on-surface-variant">No available rooms at your hotel right now.</span>';
+      document.getElementById('continue-to-pay').disabled = true;
+      return;
+    }
+    status.innerHTML = '<span class="text-on-surface-variant">Select a room for this stay:</span>';
+    grid.innerHTML = rooms.map(function (room) {
+      var isSelected = selectedRoomId === room.id;
+      var price = room.room_type && room.room_type.price_per_night ? room.room_type.price_per_night : '0';
+      return '' +
+        '<button type="button" data-room-id="' + room.id + '"' +
+        ' class="relative text-left overflow-hidden rounded-xl border-2 transition-all duration-300 cursor-pointer' +
+        (isSelected ? ' border-primary ring-2 ring-primary/20' : ' border-outline-variant hover:border-primary/50') + '">' +
+        '<div class="p-4 bg-surface-container-lowest">' +
+        '<div class="flex justify-between items-start mb-1">' +
+        '<div><p class="font-label-md text-label-md text-on-surface font-bold">Room ' + room.room_number + '</p>' +
+        '<p class="text-xs text-on-surface-variant">' + (room.room_type && room.room_type.type_name || 'Room') + (room.floor ? ' • Floor ' + room.floor : '') + '</p></div>' +
+        '<div class="text-right"><p class="font-headline-md text-headline-md text-primary font-bold">' + formatCurrency(price) + '</p>' +
+        '<p class="text-xs text-on-surface-variant">/night</p></div></div>' +
+        (isSelected ? '<div class="absolute top-3 right-3 bg-primary text-white p-1.5 rounded-full"><span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span></div>' : '') +
+        '</div></button>';
+    }).join('');
+
+    grid.querySelectorAll('[data-room-id]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        selectedRoomId = Number(btn.getAttribute('data-room-id'));
+        renderRooms();
+        updateSummary();
+        document.getElementById('continue-to-pay').disabled = false;
+      });
+    });
+  }
+
+  function loadRooms() {
+    if (!HOTEL_ID) return;
+    var status = document.getElementById('room-status');
+    if (status) status.innerHTML = '<span class="skeleton skeleton-text" style="display:inline-block;width:180px;height:16px"></span>';
+    fetch('{% url "booking_options" %}?hotel=' + encodeURIComponent(HOTEL_ID))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        rooms = data.results || [];
+        renderRooms();
+        updateSummary();
+      })
+      .catch(function (e) {
+        if (window.StayHub) StayHub.Toast.error(e.message || 'Failed to load rooms.');
+      });
+  }
+
+  // ---------- Summary ----------
+  function updateSummary() {
+    var checkIn = document.getElementById('check-in').value;
+    var checkOut = document.getElementById('check-out').value;
+    var room = getSelectedRoom();
+    var nights = Math.max(1, Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24)) || 1);
+    var roomRate = room && room.room_type ? Number(room.room_type.price_per_night || 0) : 0;
+    var base = roomRate * nights;
+    var serviceFee = room ? 45 : 0;
+    var tax = room ? Math.round((base + serviceFee) * 0.12) : 0;
+    var total = base + serviceFee + tax;
+
+    document.getElementById('summary-room').textContent = room
+      ? (room.room_type && room.room_type.type_name || 'Room') + ' • Room ' + room.room_number
+      : 'Not selected';
+    document.getElementById('summary-dates').textContent = checkIn && checkOut ? formatDate(checkIn) + ' → ' + formatDate(checkOut) : '-';
+    document.getElementById('summary-subtotal').textContent = formatCurrency(base);
+    document.getElementById('summary-service').textContent = formatCurrency(serviceFee);
+    document.getElementById('summary-tax').textContent = formatCurrency(tax);
+    document.getElementById('summary-total').textContent = formatCurrency(total);
+  }
+
+  document.getElementById('check-in').addEventListener('change', updateSummary);
+  document.getElementById('check-out').addEventListener('change', updateSummary);
+
+  // ---------- Client lookup ----------
+  var findBtn = document.getElementById('find-client-btn');
+  var newBtn = document.getElementById('new-client-btn');
+  var clientSearch = document.getElementById('client-search');
+  if (findBtn && clientSearch) {
+    findBtn.addEventListener('click', function () {
+      var q = clientSearch.value.trim();
+      if (!q) { if (window.StayHub) StayHub.Toast.error('Enter a name, email, or phone to search.'); return; }
+      findBtn.disabled = true;
+      fetch('{% url "staff_guest_search" %}?q=' + encodeURIComponent(q), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.detail || 'Search failed.'); return d; }); })
+        .then(function (data) {
+          if (!data.results.length) {
+            if (window.StayHub) StayHub.Toast.error('No client found for "' + q + '". Fill in the form to add a new client.');
+            return;
+          }
+          var g = data.results[0];
+          document.getElementById('guest-name').value = g.guest_name || '';
+          document.getElementById('guest-email').value = g.guest_email || '';
+          var phone = g.guest_phone || '';
+          var code = '+233', local = phone;
+          ['+233', '+234', '+254', '+27', '+44', '+1'].forEach(function (c) {
+            if (phone.indexOf(c) === 0) { code = c; local = phone.slice(c.length); }
+          });
+          var cc = document.getElementById('country-code');
+          if (cc && Array.prototype.some.call(cc.options, function (o) { return o.value === code; })) cc.value = code;
+          document.getElementById('guest-phone').value = local.replace(/^0+/, '');
+          document.getElementById('id-number').value = g.id_number || '';
+          if (g.nationality) {
+            var nat = document.getElementById('nationality');
+            if (nat && Array.prototype.some.call(nat.options, function (o) { return o.value === g.nationality; })) nat.value = g.nationality;
+          }
+          if (window.StayHub) StayHub.Toast.success(data.results.length > 1 ? 'Multiple matches — using the first result.' : 'Client found — details prefilled.');
+        })
+        .catch(function (e) { if (window.StayHub) StayHub.Toast.error(e.message); })
+        .then(function () { findBtn.disabled = false; });
+    });
+    newBtn.addEventListener('click', function () {
+      clientSearch.value = '';
+      document.getElementById('guest-name').value = '';
+      document.getElementById('guest-email').value = '';
+      document.getElementById('guest-phone').value = '';
+      document.getElementById('id-number').value = '';
+      document.getElementById('nationality').value = 'Ghana';
+      if (window.StayHub) StayHub.Toast.success('New client — enter their details below.');
+    });
+  }
+
+  // ---------- Provider selection ----------
+  document.querySelectorAll('.provider-card').forEach(function (card) {
+    card.addEventListener('click', function () {
+      selectedProvider = card.getAttribute('data-provider');
+      document.querySelectorAll('.provider-card').forEach(function (c) { c.classList.remove('selected'); });
+      card.classList.add('selected');
+      document.getElementById('request-payment').disabled = false;
+    });
+  });
+
+  // ---------- Submit ----------
+  document.getElementById('request-payment') && document.getElementById('request-payment').addEventListener('click', function () {
+    var feedback = document.getElementById('walkin-feedback');
+    var btn = this;
+    var room = getSelectedRoom();
+    if (!room) { if (window.StayHub) StayHub.Toast.error('Select a room first.'); return; }
+    if (!selectedProvider) { if (window.StayHub) StayHub.Toast.error('Select a mobile money provider.'); return; }
+    var checkIn = document.getElementById('check-in').value;
+    var checkOut = document.getElementById('check-out').value;
+    var phone = document.getElementById('country-code').value + cleanPhone().replace(/^0+/, '');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size: 18px;">progress_activity</span> Creating booking...';
+    feedback.textContent = '';
+
+    var payload = {
+      guest_name: document.getElementById('guest-name').value.trim(),
+      guest_email: document.getElementById('guest-email').value.trim().toLowerCase(),
+      guest_phone: phone,
+      id_number: document.getElementById('id-number').value.trim(),
+      nationality: document.getElementById('nationality').value,
+      check_in: new Date(checkIn).toISOString(),
+      check_out: new Date(checkOut).toISOString(),
+      room_id: room.id,
+    };
+
+    post('{% url "create_booking" %}', payload)
+      .then(function (data) {
+        feedback.textContent = 'Sending mobile money request...';
+        feedback.className = 'text-sm mb-3 text-center text-primary font-semibold';
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size: 18px;">progress_activity</span> Sending request...';
+        return post('{% url "paystack_checkout" %}', {
+          invoice_id: data.invoice.id,
+          payment_method: 'mobile_money',
+          mobile_money_phone: document.getElementById('country-code').value + cleanPhone().replace(/^0+/, ''),
+          mobile_money_provider: selectedProvider,
+          callback_url_name: 'walkin_booking',
+        }).then(function (checkout) {
+          window.location.href = checkout.authorization_url;
+        });
+      })
+      .catch(function (e) {
+        feedback.textContent = e.message;
+        feedback.className = 'text-sm mb-3 text-center text-error';
+        if (window.StayHub) StayHub.Toast.error(e.message);
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined">send</span> Send Payment Request';
+      });
+  });
+
+  // ---------- Paystack callback handling ----------
+  function completePaystackReturn() {
+    var params = new URLSearchParams(window.location.search);
+    var reference = params.get('reference') || params.get('trxref');
+    if (!reference) return;
+    fetch('{% url "paystack_verify" reference="PAYSTACK_REFERENCE" %}'.replace('PAYSTACK_REFERENCE', encodeURIComponent(reference)))
+      .then(function (r) { return r.json().then(function (d) { if (!r.ok || d.status !== 'success') throw new Error(d.detail || 'Payment was not completed.'); return d; }); })
+      .then(function () {
+        var parts = reference.split('-');
+        if (parts.length !== 3 || parts[0] !== 'inv') throw new Error('Invalid payment reference.');
+        var url = new URL('{% url "reservation_confirmed" %}', window.location.origin);
+        url.searchParams.set('invoice_id', parts[1]);
+        url.searchParams.set('reservation_id', parts[2]);
+        window.location.replace(url.toString());
+      })
+      .catch(function (e) {
+        if (window.StayHub) StayHub.Toast.error(e.message);
+      });
+  }
+
+  // ---------- Init ----------
+  (function setDefaultDates() {
+    var today = new Date();
+    var inFiveDays = new Date(today);
+    inFiveDays.setDate(today.getDate() + 5);
+    var fmt = function (d) { return d.toISOString().split('T')[0]; };
+    var ci = document.getElementById('check-in');
+    var co = document.getElementById('check-out');
+    if (ci && !ci.value) ci.value = fmt(today);
+    if (co && !co.value) co.value = fmt(inFiveDays);
+  })();
+
+  completePaystackReturn();
+  loadRooms();
+})();
+</script>
+{% endblock %}

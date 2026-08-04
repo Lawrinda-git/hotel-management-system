@@ -3,11 +3,11 @@ Description=StayHub gunicorn daemon
 After=network.target postgresql.service
 
 [Service]
-User=ubuntu
-Group=ubuntu
-WorkingDirectory=/home/ubuntu/stayhub
-EnvironmentFile=/home/ubuntu/stayhub/.env
-ExecStart=/home/ubuntu/stayhub/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 config.wsgi:application
+User=admin
+Group=admin
+WorkingDirectory=/home/admin/StayHub/hotel-management-system
+EnvironmentFile=/home/admin/StayHub/hotel-management-system/.env
+ExecStart=/home/admin/StayHub/hotel-management-system/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 config.wsgi:application
 ExecReload=/bin/kill -s HUP $MAINPID
 Restart=always
 RestartSec=5

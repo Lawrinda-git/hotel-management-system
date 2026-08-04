@@ -1,0 +1,279 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub | Reservation #{{ reservation.id }}{% endblock %}
+{% block body_class %}bg-background text-on-surface pb-16{% endblock %}
+{% block content %}
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+    <div class="flex items-center justify-between px-margin-mobile h-16 w-full max-w-screen-xl mx-auto">
+        <div class="flex items-center gap-3">
+            <a href="{% if is_staff %}{% url 'manager_dashboard' %}{% else %}{% url 'my_bookings' %}{% endif %}" class="btn btn-icon btn-ghost" aria-label="Back">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <div>
+                <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold tracking-tight leading-tight">Reservation #{{ reservation.id }}</h1>
+                <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">{{ reservation.hotel.hotel_name|default:"StayHub" }}</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="{% url 'logout' %}" class="btn btn-icon btn-ghost" aria-label="Log out">
+                <span class="material-symbols-outlined">logout</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="pt-24 pb-8 px-margin-mobile max-w-screen-xl mx-auto">
+    <!-- Status banner -->
+    <section class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <span class="badge {% if reservation.status == 'Confirmed' %}badge-success{% elif reservation.status == 'Pending' %}badge-warning{% elif reservation.status == 'Checked_In' %}badge-primary{% elif reservation.status == 'Checked_Out' %}badge-outline{% elif reservation.status == 'Cancelled' or reservation.status == 'No_Show' %}badge-error{% else %}badge-outline{% endif %} text-sm px-4 py-1.5">
+                {{ reservation.status|title }}
+            </span>
+            <span class="text-sm text-on-surface-variant">Booked {{ reservation.booking_date|date:"M d, Y" }}</span>
+        </div>
+        {% if can_manage_operations %}
+        <div class="flex flex-wrap gap-3">
+            {% if reservation.status == 'Pending' or reservation.status == 'Confirmed' %}
+            <button class="btn btn-primary" id="btn-checkin" onclick="checkInReservation()">
+                <span class="material-symbols-outlined">login</span>
+                Check In
+            </button>
+            {% endif %}
+            {% if reservation.status == 'Checked_In' %}
+            <button class="btn btn-secondary" id="btn-checkout" onclick="checkOutReservation()">
+                <span class="material-symbols-outlined">logout</span>
+                Check Out
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Staff action feedback -->
+    <p id="staff-action-feedback" class="text-sm mb-4 text-on-surface-variant"></p>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left column: stay details -->
+        <div class="lg:col-span-7 space-y-6">
+            <!-- Guest card -->
+            <section class="card card-body">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">person</span>
+                    </div>
+                    <div>
+                        <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Guest</h2>
+                        <p class="text-xs text-on-surface-variant">Booking contact and identification</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-surface-container rounded-xl p-3">
+                        <p class="text-xs text-on-surface-variant mb-1">Full Name</p>
+                        <p class="text-sm font-semibold text-on-surface">{{ reservation.guest.guest_name }}</p>
+                    </div>
+                    <div class="bg-surface-container rounded-xl p-3">
+                        <p class="text-xs text-on-surface-variant mb-1">Email</p>
+                        <p class="text-sm font-semibold text-on-surface break-all">{{ reservation.guest.guest_email }}</p>
+                    </div>
+                    <div class="bg-surface-container rounded-xl p-3">
+                        <p class="text-xs text-on-surface-variant mb-1">Phone</p>
+                        <p class="text-sm font-semibold text-on-surface">{{ reservation.guest.guest_phone|default:"-" }}</p>
+                    </div>
+                    <div class="bg-surface-container rounded-xl p-3">
+                        <p class="text-xs text-on-surface-variant mb-1">Nationality</p>
+                        <p class="text-sm font-semibold text-on-surface">{{ reservation.guest.nationality|default:"-" }}</p>
+                    </div>
+                    {% if is_staff %}
+                    <div class="bg-surface-container rounded-xl p-3 sm:col-span-2">
+                        <p class="text-xs text-on-surface-variant mb-1">ID Number</p>
+                        <p class="text-sm font-mono font-semibold text-on-surface">{{ reservation.guest.id_number|default:"-" }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- Stay details card -->
+            <section class="card card-body">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">meeting_room</span>
+                    </div>
+                    <div>
+                        <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Stay Details</h2>
+                        <p class="text-xs text-on-surface-variant">Hotel, room and dates</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3 mb-4">
+                    <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                        <span class="text-sm text-on-surface-variant">Hotel</span>
+                        <span class="text-sm font-medium text-on-surface text-right">{{ reservation.hotel.hotel_name|default:"-" }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                        <span class="text-sm text-on-surface-variant">Room(s)</span>
+                        <span class="text-sm font-medium text-on-surface text-right">
+                            {% for room in rooms %}
+                                {{ room.room_type.type_name|default:"Room" }} • Room {{ room.room_number }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                Not assigned yet
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                        <span class="text-sm text-on-surface-variant">Check-in</span>
+                        <span class="text-sm font-semibold text-on-surface">{{ reservation.check_in|date:"D, M d, Y" }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                        <span class="text-sm text-on-surface-variant">Check-out</span>
+                        <span class="text-sm font-semibold text-on-surface">{{ reservation.check_out|date:"D, M d, Y" }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                        <span class="text-sm text-on-surface-variant">Nights</span>
+                        <span class="text-sm font-semibold text-on-surface">{{ nights }}</span>
+                    </div>
+                    {% if reservation.actual_check_in %}
+                    <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                        <span class="text-sm text-on-surface-variant">Actual Check-in</span>
+                        <span class="text-sm font-semibold text-on-surface">{{ reservation.actual_check_in|date:"M d, Y H:i" }}</span>
+                    </div>
+                    {% endif %}
+                    {% if reservation.actual_check_out %}
+                    <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                        <span class="text-sm text-on-surface-variant">Actual Check-out</span>
+                        <span class="text-sm font-semibold text-on-surface">{{ reservation.actual_check_out|date:"M d, Y H:i" }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
+
+        <!-- Right column: payment -->
+        <div class="lg:col-span-5 space-y-6">
+            <section class="card card-body">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">receipt_long</span>
+                    </div>
+                    <div>
+                        <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Payment</h2>
+                        <p class="text-xs text-on-surface-variant">Invoice and transactions</p>
+                    </div>
+                </div>
+
+                {% if invoice %}
+                <div class="bg-surface-container rounded-xl p-4 space-y-2 mb-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Invoice</span>
+                        <span class="text-sm font-mono font-medium text-on-surface">#{{ invoice.id }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Total</span>
+                        <span class="font-headline-md text-headline-md text-primary font-bold">GH₵{{ invoice.total_amount|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Paid</span>
+                        <span class="text-sm font-semibold text-on-surface">GH₵{{ invoice.amount_paid|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Balance</span>
+                        <span class="text-sm font-semibold {% if invoice.balance_due > 0 %}text-error{% else %}text-on-surface{% endif %}">GH₵{{ invoice.balance_due|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-on-surface-variant">Status</span>
+                        <span class="badge {% if invoice.status == 'paid' %}badge-success{% elif invoice.status == 'partial' %}badge-warning{% elif invoice.status == 'void' %}badge-error{% else %}badge-outline{% endif %}">{{ invoice.status|title }}</span>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-sm text-on-surface-variant bg-surface-container rounded-xl p-4 mb-4">No invoice issued for this reservation yet.</p>
+                {% endif %}
+
+                {% if payments %}
+                <div>
+                    <p class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-2">Transactions</p>
+                    <div class="space-y-2">
+                        {% for payment in payments %}
+                        <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                            <div>
+                                <p class="text-sm font-medium text-on-surface">GH₵{{ payment.amount|floatformat:2 }}</p>
+                                <p class="text-xs text-on-surface-variant">{{ payment.method|title }} • {{ payment.payment_date|date:"M d, Y" }}</p>
+                            </div>
+                            <span class="badge {% if payment.status == 'success' %}badge-success{% elif payment.status == 'failed' %}badge-error{% else %}badge-warning{% endif %}">{{ payment.status|title }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </section>
+
+            <!-- Help card -->
+            <section class="card card-body">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-secondary">support_agent</span>
+                    </div>
+                    <div>
+                        <h3 class="font-label-md text-label-md text-on-surface font-semibold mb-1">Need help with this reservation?</h3>
+                        <p class="text-sm text-on-surface-variant">
+                            {% if is_staff %}
+                                Manage this booking from the operations view — check guests in/out, assign rooms, or record payments from the dashboards.
+                            {% else %}
+                                Contact the hotel front desk and quote reservation <strong>#{{ reservation.id }}</strong> for assistance.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+
+{% if is_staff %}
+{% include "frontend/components/_staff_sidebar.html" %}
+{% else %}
+{% include "frontend/components/_guest_nav.html" %}
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const reservationId = {{ reservation.id }};
+
+    {% if is_staff %}
+    function runStaffAction(urlName, label, buttonId) {
+        const btn = document.getElementById(buttonId);
+        const feedback = document.getElementById('staff-action-feedback');
+        if (!btn) return;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size:18px;">progress_activity</span> ' + label + '...';
+        fetch(urlName, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': StayHub.getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ reservation_id: reservationId }),
+        })
+        .then(r => r.json().then(d => { if (!r.ok) throw new Error(d.detail || label + ' failed.'); return d; }))
+        .then(data => {
+            if (window.StayHub) StayHub.Toast.success(data.detail);
+            window.setTimeout(() => window.location.reload(), 800);
+        })
+        .catch(err => {
+            feedback.textContent = err.message;
+            feedback.className = 'text-sm mb-4 text-error';
+            if (window.StayHub) StayHub.Toast.error(err.message);
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined">' + (buttonId === 'btn-checkin' ? 'login' : 'logout') + '</span> ' + (buttonId === 'btn-checkin' ? 'Check In' : 'Check Out');
+        });
+    }
+
+    function checkInReservation() {
+        runStaffAction('{% url "staff_checkin" %}', 'Checking in', 'btn-checkin');
+    }
+    function checkOutReservation() {
+        runStaffAction('{% url "staff_checkout" %}', 'Checking out', 'btn-checkout');
+    }
+    {% endif %}
+</script>
+{% endblock %}

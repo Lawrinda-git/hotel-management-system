@@ -1,0 +1,120 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}StayHub | My Bookings{% endblock %}
+{% block body_class %}bg-background text-on-surface pb-16{% endblock %}
+{% block content %}
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+    <div class="flex items-center justify-between px-margin-mobile h-16 w-full max-w-screen-xl mx-auto">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'guest_home' %}" class="btn btn-icon btn-ghost" aria-label="Back">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold tracking-tight">My Bookings</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="{% url 'logout' %}" class="btn btn-icon btn-ghost" aria-label="Log out">
+                <span class="material-symbols-outlined">logout</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="pt-24 pb-8 px-margin-mobile max-w-screen-xl mx-auto">
+    <!-- Heading -->
+    <section class="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+            <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold">
+                {% if display_name %}{{ display_name }}, here are your stays{% else %}Your stays{% endif %}
+            </h2>
+            <p class="text-sm text-on-surface-variant mt-1">Every reservation you've made, in one place.</p>
+        </div>
+        <a href="{% url 'booking' %}" class="btn btn-primary w-full sm:w-auto justify-center">
+            <span class="material-symbols-outlined">add</span>
+            New Booking
+        </a>
+    </section>
+
+    {% if reservations %}
+    <section class="space-y-4">
+        {% for reservation in reservations %}
+        <a href="{% url 'reservation_detail' reservation_id=reservation.id %}"
+           class="card card-body block transition-all duration-200 hover:shadow-lg hover:border-primary/40 active:scale-[0.99]">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md">
+                        <span class="material-symbols-outlined text-white">confirmation_number</span>
+                    </div>
+                    <div>
+                        <p class="font-label-md text-label-md text-primary font-bold">#{{ reservation.id }}</p>
+                        <p class="text-xs text-on-surface-variant">Booked {{ reservation.booking_date|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+                <span class="badge {% if reservation.status == 'Confirmed' %}badge-success{% elif reservation.status == 'Pending' %}badge-warning{% elif reservation.status == 'Checked_In' %}badge-primary{% elif reservation.status == 'Checked_Out' %}badge-outline{% elif reservation.status == 'Cancelled' or reservation.status == 'No_Show' %}badge-error{% else %}badge-outline{% endif %}">
+                    {{ reservation.status|title }}
+                </span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-container/20 to-secondary-container/30 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-primary">hotel</span>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-medium text-on-surface truncate">{{ reservation.hotel.hotel_name|default:"StayHub Hotel" }}</p>
+                        {% with reservation.room_reservations.all.0 as room_link %}
+                        <p class="text-xs text-on-surface-variant truncate">
+                            {% if room_link %}
+                                {{ room_link.room.room_type.type_name|default:"Room" }} • Room {{ room_link.room.room_number }}
+                            {% else %}
+                                Room assignment pending
+                            {% endif %}
+                        </p>
+                        {% endwith %}
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 sm:gap-6 text-sm shrink-0">
+                    <div>
+                        <p class="text-xs text-on-surface-variant">Check-in</p>
+                        <p class="font-semibold text-on-surface">{{ reservation.check_in|date:"M d, Y" }}</p>
+                    </div>
+                    <span class="material-symbols-outlined text-on-surface-variant text-lg">arrow_forward</span>
+                    <div>
+                        <p class="text-xs text-on-surface-variant">Check-out</p>
+                        <p class="font-semibold text-on-surface">{{ reservation.check_out|date:"M d, Y" }}</p>
+                    </div>
+                    <span class="ml-auto sm:ml-2 material-symbols-outlined text-primary">chevron_right</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </section>
+    {% else %}
+    <!-- Empty state -->
+    <section class="card card-body py-16 text-center">
+        <div class="w-20 h-20 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
+            <span class="material-symbols-outlined text-primary" style="font-size: 40px;">event_available</span>
+        </div>
+        <h3 class="font-headline-md text-headline-md text-on-surface font-bold mb-2">No bookings yet</h3>
+        <p class="text-sm text-on-surface-variant max-w-sm mx-auto mb-6">
+            {% if guest %}
+                When you book a stay, your reservations will show up here so you can view their status and details anytime.
+            {% else %}
+                We couldn't find a guest profile linked to {{ user.email }}. Make a booking with this email and it will appear here.
+            {% endif %}
+        </p>
+        <div class="flex flex-wrap gap-3 justify-center">
+            <a href="{% url 'booking' %}" class="btn btn-primary">
+                <span class="material-symbols-outlined">add</span>
+                Book a Stay
+            </a>
+            <a href="{% url 'explore_stays' %}" class="btn btn-outline">
+                <span class="material-symbols-outlined">search</span>
+                Explore Stays
+            </a>
+        </div>
+    </section>
+    {% endif %}
+</main>
+
+{% include "frontend/components/_guest_nav.html" %}
+{% endblock %}
