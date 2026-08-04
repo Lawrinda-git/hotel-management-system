@@ -39,7 +39,4 @@ Thumbs.db
 download_fonts.py
 manage_seed.py
 AGENT_HANDOFF.sh
-deploy/stayhub-gunicorn.service
-deploy/deploy.sh
-deploy/nginx-stayhub.conf
 apps/accounts/migrations/0003_staff_two_factor_enabled.py
