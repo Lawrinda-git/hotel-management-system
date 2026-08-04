@@ -1,12 +1,16 @@
 {% extends "frontend/base.html" %}
 {% load static %}
 {% block title %}StayHub | Reservation #{{ reservation.id }}{% endblock %}
-{% block body_class %}bg-background text-on-surface pb-16{% endblock %}
+{% block body_class %}bg-background text-on-surface{% endblock %}
 {% block content %}
-<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+{% if is_staff %}
+<div class="flex">
+<main class="flex-1 pt-8 pb-8 px-margin-mobile max-w-screen-xl mx-auto lg:ml-80">
+{% else %}
+<header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md shadow-sm">
     <div class="flex items-center justify-between px-margin-mobile h-16 w-full max-w-screen-xl mx-auto">
         <div class="flex items-center gap-3">
-            <a href="{% if is_staff %}{% url 'manager_dashboard' %}{% else %}{% url 'my_bookings' %}{% endif %}" class="btn btn-icon btn-ghost" aria-label="Back">
+            <a href="{% url 'my_bookings' %}" class="btn btn-icon btn-ghost" aria-label="Back">
                 <span class="material-symbols-outlined">arrow_back</span>
             </a>
             <div>
@@ -23,6 +27,7 @@
 </header>
 
 <main class="pt-24 pb-8 px-margin-mobile max-w-screen-xl mx-auto">
+{% endif %}
     <!-- Status banner -->
     <section class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex items-center gap-3">
@@ -51,6 +56,29 @@
 
     <!-- Staff action feedback -->
     <p id="staff-action-feedback" class="text-sm mb-4 text-on-surface-variant"></p>
+
+    {% if can_manage_operations %}
+    <div class="mb-4 p-4 bg-surface-container rounded-xl border border-outline-variant/20">
+        <p class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-3">Assign / Transfer Room</p>
+        <div class="flex flex-wrap gap-2">
+            <select id="assign-room-select" class="h-10 px-3 bg-surface rounded-xl border border-outline-variant/40 text-sm">
+                <option value="">Select available room...</option>
+                {% for room in available_assignable_rooms %}
+                <option value="{{ room.id }}">{{ room.room_number }} — {{ room.room_type.type_name|default:"Standard" }}</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="assignSelectedRoom()">
+                <span class="material-symbols-outlined text-base">meeting_room</span>
+                Assign Room
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="transferRoom()" id="btn-transfer" disabled>
+                <span class="material-symbols-outlined text-base">swap_horiz</span>
+                Transfer
+            </button>
+        </div>
+        <p id="assign-feedback" class="text-xs mt-2 text-on-surface-variant"></p>
+    </div>
+    {% endif %}
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- Left column: stay details -->
@@ -228,44 +256,58 @@
 </main>
 
 {% if is_staff %}
+</div>
 {% include "frontend/components/_staff_sidebar.html" %}
-{% else %}
-{% include "frontend/components/_guest_nav.html" %}
 {% endif %}
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-    const reservationId = {{ reservation.id }};
+    var reservationId = {{ reservation.id }};
 
     {% if is_staff %}
+    // Auto sign-out after 5 minutes of inactivity
+    var logoutTimer;
+    var LOGOUT_DELAY = 300000;
+    function resetLogoutTimer() {
+        clearTimeout(logoutTimer);
+        logoutTimer = setTimeout(function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '{% url "logout" %}', true);
+            xhr.setRequestHeader('X-CSRFToken', StayHub.getCookie('csrftoken'));
+            xhr.onload = function() { window.location.href = '{% url "staff_login" %}'; };
+            xhr.send();
+        }, LOGOUT_DELAY);
+    }
+    document.addEventListener('mousemove', resetLogoutTimer);
+    document.addEventListener('keypress', resetLogoutTimer);
+    document.addEventListener('click', resetLogoutTimer);
+    resetLogoutTimer();
+
     function runStaffAction(urlName, label, buttonId) {
-        const btn = document.getElementById(buttonId);
-        const feedback = document.getElementById('staff-action-feedback');
+        var btn = document.getElementById(buttonId);
+        var feedback = document.getElementById('staff-action-feedback');
         if (!btn) return;
         btn.disabled = true;
         btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size:18px;">progress_activity</span> ' + label + '...';
-        fetch(urlName, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': StayHub.getCookie('csrftoken'),
-            },
-            body: JSON.stringify({ reservation_id: reservationId }),
-        })
-        .then(r => r.json().then(d => { if (!r.ok) throw new Error(d.detail || label + ' failed.'); return d; }))
-        .then(data => {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', urlName, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('X-CSRFToken', StayHub.getCookie('csrftoken'));
+        xhr.onload = function() {
+            var data = JSON.parse(xhr.responseText);
+            if (xhr.status >= 400) { throw new Error(data.detail || label + ' failed.'); }
             if (window.StayHub) StayHub.Toast.success(data.detail);
-            window.setTimeout(() => window.location.reload(), 800);
-        })
-        .catch(err => {
-            feedback.textContent = err.message;
+            window.setTimeout(function() { window.location.reload(); }, 800);
+        };
+        xhr.onerror = function() {
+            feedback.textContent = label + ' failed.';
             feedback.className = 'text-sm mb-4 text-error';
-            if (window.StayHub) StayHub.Toast.error(err.message);
+            if (window.StayHub) StayHub.Toast.error(label + ' failed.');
             btn.disabled = false;
             btn.innerHTML = '<span class="material-symbols-outlined">' + (buttonId === 'btn-checkin' ? 'login' : 'logout') + '</span> ' + (buttonId === 'btn-checkin' ? 'Check In' : 'Check Out');
-        });
+        };
+        xhr.send(JSON.stringify({ reservation_id: reservationId }));
     }
 
     function checkInReservation() {
@@ -273,6 +315,60 @@
     }
     function checkOutReservation() {
         runStaffAction('{% url "staff_checkout" %}', 'Checking out', 'btn-checkout');
+    }
+
+    function assignSelectedRoom() {
+        var select = document.getElementById('assign-room-select');
+        var roomId = select.value;
+        var feedback = document.getElementById('assign-feedback');
+        if (!roomId) {
+            feedback.textContent = 'Select a room first.';
+            feedback.className = 'text-xs mt-2 text-error';
+            return;
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '{% url "staff_assign_room" %}', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('X-CSRFToken', StayHub.getCookie('csrftoken'));
+        xhr.onload = function() {
+            var data = JSON.parse(xhr.responseText);
+            if (xhr.status >= 400) {
+                feedback.textContent = data.detail || 'Assign failed';
+                feedback.className = 'text-xs mt-2 text-error';
+                return;
+            }
+            feedback.textContent = data.detail;
+            feedback.className = 'text-xs mt-2 text-success';
+            window.setTimeout(function() { window.location.reload(); }, 600);
+        };
+        xhr.send(JSON.stringify({ reservation_id: reservationId, room_id: roomId }));
+    }
+
+    function transferRoom() {
+        var select = document.getElementById('assign-room-select');
+        var roomId = select.value;
+        var feedback = document.getElementById('assign-feedback');
+        if (!roomId) {
+            feedback.textContent = 'Select a room first.';
+            feedback.className = 'text-xs mt-2 text-error';
+            return;
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '{% url "staff_assign_room" %}', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('X-CSRFToken', StayHub.getCookie('csrftoken'));
+        xhr.onload = function() {
+            var data = JSON.parse(xhr.responseText);
+            if (xhr.status >= 400) {
+                feedback.textContent = data.detail || 'Transfer failed';
+                feedback.className = 'text-xs mt-2 text-error';
+                return;
+            }
+            feedback.textContent = 'Transferred to new room.';
+            feedback.className = 'text-xs mt-2 text-success';
+            window.setTimeout(function() { window.location.reload(); }, 600);
+        };
+        xhr.send(JSON.stringify({ reservation_id: reservationId, room_id: roomId }));
     }
     {% endif %}
 </script>

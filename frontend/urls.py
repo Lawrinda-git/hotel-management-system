@@ -24,38 +24,12 @@ urlpatterns = [
     path("two-factor/", views.two_factor, name="two_factor"),
     path("api/auth/two-factor/verify/", views.api_two_factor_verify, name="api_two_factor_verify"),
 
-    # Password Reset – using Django's built-in class-based views for reliability
+    # Password Reset – simple verification code flow
+    path("password-reset/", views.password_reset, name="password_reset"),
     path(
-        "password-reset/",
-        auth_views.PasswordResetView.as_view(
-            template_name="frontend/password_reset.html",
-            email_template_name="frontend/password_reset_email.html",
-            subject_template_name="frontend/password_reset_subject.txt",
-            success_url=reverse_lazy("password_reset_done"),
-        ),
-        name="password_reset",
-    ),
-    path(
-        "password-reset/done/",
-        auth_views.PasswordResetDoneView.as_view(
-            template_name="frontend/password_reset_done.html",
-        ),
-        name="password_reset_done",
-    ),
-    path(
-        "reset/<uidb64>/<token>/",
-        auth_views.PasswordResetConfirmView.as_view(
-            template_name="frontend/password_reset_confirm.html",
-            success_url=reverse_lazy("password_reset_complete"),
-        ),
-        name="password_reset_confirm",
-    ),
-    path(
-        "reset/done/",
-        auth_views.PasswordResetCompleteView.as_view(
-            template_name="frontend/password_reset_complete.html",
-        ),
-        name="password_reset_complete",
+        "password-reset/verify/",
+        views.password_reset_verify,
+        name="password_reset_verify",
     ),
 
     path("home/", views.guest_home, name="guest_home"),

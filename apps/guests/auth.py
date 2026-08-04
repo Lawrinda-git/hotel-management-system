@@ -18,6 +18,18 @@ from django.contrib.auth.backends import BaseBackend
 from .models import Guest
 
 
+class _GuestUserPkField:
+    """Fake PK field that mimics Django's AutoField for session serialization."""
+    def value_to_string(self, obj):
+        return str(obj.pk)
+
+
+class _GuestUserMeta:
+    """Minimal stand-in for Django's Model._meta so login() can serialize the user id."""
+    def __init__(self, pk):
+        self.pk = _GuestUserPkField()
+
+
 class GuestUser:
     """Adapter that lets a Guest be used as Django's request.user."""
 
@@ -27,11 +39,14 @@ class GuestUser:
     is_staff = False
     is_superuser = False
     role = "guest"
+    # Required by django.contrib.auth.login when multiple backends are configured.
+    backend = "apps.guests.auth.GuestBackend"
 
     def __init__(self, guest):
         self._guest = guest
         self.pk = guest.pk
         self.id = guest.pk
+        self._meta = _GuestUserMeta(guest.pk)
         self.email = guest.guest_email
         self.username = guest.guest_email
         self.staff_name = guest.guest_name
@@ -63,6 +78,11 @@ class GuestUser:
 
     def has_module_perms(self, app_label):
         return False
+
+    # login() fires user_logged_in -> update_last_login -> user.save().
+    # Guests don't track last_login, so make save() a no-op here.
+    def save(self, *args, **kwargs):
+        pass
 
     def __str__(self):
         return self._guest.guest_email

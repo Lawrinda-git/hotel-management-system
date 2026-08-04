@@ -3,10 +3,9 @@ Reusable mixins for StayHub.
 
 BranchScopedQuerysetMixin
 --------------------------
-Automatically filters querysets so that branch-level staff roles
-(receptionist, housekeeping, accountant) only see records belonging
-to their own hotel.  Manager and System Administrator roles see all
-records.
+Automatically filters querysets so that ALL staff roles only see records
+belonging to their own hotel.  This includes managers — managers can only
+see data for their assigned hotel.  Superusers bypass the hotel filter.
 
 Usage
 -----
@@ -27,13 +26,14 @@ hotel FK, pass a `branch_field` attribute on the viewset:
 from rest_framework.exceptions import PermissionDenied
 
 
-MANAGER_ROLES = {"manager", "admin"}
+MANAGER_ROLES = {"admin", "manager"}
 
 
 class BranchScopedQuerysetMixin:
     """
-    Restricts querysets to the current user's hotel (branch) unless
-    the user holds a manager / admin role.
+    Restricts querysets to the current user's assigned hotel.
+    All staff roles, including manager, are scoped to their hotel.
+    Superusers bypass the hotel filter.
     """
 
     # Override in the viewset when the model's hotel FK is not direct.
@@ -43,17 +43,15 @@ class BranchScopedQuerysetMixin:
         qs = super().get_queryset()
         user = self.request.user
 
-        # Anonymous users get nothing (shouldn't reach here if auth is
-        # configured, but be defensive).
+        # Anonymous users get nothing.
         if not user or not user.is_authenticated:
             return qs.none()
 
-        # Manager / admin see everything.
-        role = (user.role or "").lower()
-        if role in MANAGER_ROLES:
+        # Superusers see everything.
+        if getattr(user, "is_superuser", False):
             return qs
 
-        # Branch-level staff must be assigned to a hotel.
+        # All staff must be assigned to a hotel.
         hotel_id = user.hotel_id
         if hotel_id is None:
             return qs.none()

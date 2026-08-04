@@ -12,16 +12,5 @@ class StaffViewSet(BranchScopedQuerysetMixin, ModelViewSet):
 	serializer_class = StaffSerializer
 	filter_backends = [DjangoFilterBackend]
 	filterset_fields = ["role", "hotel", "department", "is_active", "is_staff", "username"]
-
-	def get_queryset(self):
-		qs = super().get_queryset()
-		user = self.request.user
-		if not user or not user.is_authenticated:
-			return qs.none()
-		role = (user.role or "").lower()
-		if role in MANAGER_ROLES:
-			return qs
-		# Branch staff can only see other staff at their own hotel
-		if user.hotel_id:
-			return qs.filter(hotel_id=user.hotel_id)
-		return qs.none()
+	# Managers are scoped to their hotel just like receptionists/accountants.
+	branch_field = "hotel"

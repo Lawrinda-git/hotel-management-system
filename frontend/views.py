@@ -151,6 +151,102 @@ def signin(request):
     return render(request, "frontend/signin.html")
 
 
+@require_http_methods(["GET", "POST"])
+def password_reset(request):
+    """Step 1: ask for email, send a 6-digit verification code."""
+    if request.method == "POST":
+        email = (request.POST.get("email") or "").strip().lower()
+        if not email:
+            return render(request, "frontend/password_reset.html", {"error": "Enter your email address.", "email": email})
+
+        user = None
+        if "@" in email:
+            user = Staff.objects.filter(email__iexact=email).first()
+            if user is None:
+                user = Guest.objects.filter(guest_email__iexact=email).first()
+        if user is None:
+            return render(request, "frontend/password_reset.html", {"error": "No account found with that email.", "email": email})
+
+        code = f"{secrets.randbelow(1_000_000):06d}"
+        request.session["reset_email"] = email
+        request.session["reset_code"] = make_password(code)
+        request.session["reset_expires_at"] = time.time() + 600
+        request.session["reset_user_type"] = "staff" if isinstance(user, Staff) else "guest"
+        try:
+            send_mail(
+                "Your StayHub password reset code",
+                f"Your verification code is {code}. It expires in 10 minutes.",
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
+            return render(request, "frontend/password_reset.html", {"sent": True, "email": email})
+        except Exception:
+            logger.exception("Failed to send password reset code to %s", email)
+            return render(request, "frontend/password_reset.html", {"error": "We could not send the email. Try again later.", "email": email})
+
+    return render(request, "frontend/password_reset.html")
+
+
+@require_http_methods(["POST"])
+def password_reset_verify(request):
+    """Step 2: verify code and set a new password."""
+    email = (request.POST.get("email") or "").strip().lower()
+    code = (request.POST.get("code") or "").strip()
+    new_password1 = (request.POST.get("new_password1") or "").strip()
+    new_password2 = (request.POST.get("new_password2") or "").strip()
+
+    if not email or not code or not new_password1 or not new_password2:
+        return render(request, "frontend/password_reset.html", {
+            "error": "All fields are required.", "sent": True, "email": email, "code": code,
+        })
+    if new_password1 != new_password2:
+        return render(request, "frontend/password_reset.html", {
+            "error": "Passwords do not match.", "sent": True, "email": email, "code": code,
+        })
+    if len(new_password1) < 8:
+        return render(request, "frontend/password_reset.html", {
+            "error": "Password must be at least 8 characters.", "sent": True, "email": email, "code": code,
+        })
+
+    expected_code = request.session.get("reset_code", "")
+    expires_at = request.session.get("reset_expires_at", 0)
+    session_email = request.session.get("reset_email", "")
+    if not expected_code or time.time() > expires_at or session_email != email:
+        return render(request, "frontend/password_reset.html", {
+            "error": "This code has expired. Please request a new one.", "email": email,
+        })
+    if not check_password(code, expected_code):
+        return render(request, "frontend/password_reset.html", {
+            "error": "Invalid verification code.", "sent": True, "email": email, "code": code,
+        })
+
+    user_type = request.session.get("reset_user_type", "guest")
+    user = None
+    if user_type == "staff":
+        user = Staff.objects.filter(email__iexact=email).first()
+    else:
+        user = Guest.objects.filter(guest_email__iexact=email).first()
+
+    if user is None:
+        return render(request, "frontend/password_reset.html", {
+            "error": "Account not found.", "email": email,
+        })
+
+    if user_type == "staff":
+        user.set_password(new_password1)
+        user.save(update_fields=["password"])
+    else:
+        if isinstance(user, Guest):
+            user.set_password(new_password1)
+            user.save(update_fields=["password"])
+
+    for key in ("reset_email", "reset_code", "reset_expires_at", "reset_user_type"):
+        request.session.pop(key, None)
+
+    return redirect("signin")
+
+
 def database_health(request):
     """Confirm the configured Django database is reachable."""
     try:
@@ -799,6 +895,15 @@ def reservation_detail(request, reservation_id):
         and request.user.is_authenticated
         and role in ("admin", "manager", "receptionist")
     )
+    available_assignable_rooms = []
+    if can_manage_operations and request.user.hotel_id:
+        assigned_room_ids = list(Room.objects.filter(room_reservations__resv=reservation).values_list("pk", flat=True))
+        available_assignable_rooms = (
+            Room.objects.select_related("room_type")
+            .filter(hotel_id=request.user.hotel_id, status=Room.RoomStatus.AVAILABLE)
+            .exclude(pk__in=assigned_room_ids)
+            .order_by("room_number")[:50]
+        )
     return render(request, "frontend/reservation_detail.html", {
         "reservation": reservation,
         "invoice": invoice,
@@ -807,6 +912,7 @@ def reservation_detail(request, reservation_id):
         "nights": nights,
         "is_staff": is_staff and request.user.is_authenticated,
         "can_manage_operations": can_manage_operations,
+        "available_assignable_rooms": available_assignable_rooms,
     })
 
 
@@ -987,24 +1093,20 @@ def manager_dashboard(request):
     user = request.user
     role = (user.role or "").lower()
     is_manager_admin = role in MANAGER_ROLES
+    is_superuser = getattr(user, "is_superuser", False)
     
+    # All staff are scoped to their assigned hotel, including managers.
+    # Superusers bypass the hotel filter.
     staff_qs = Staff.objects.all()
     room_qs = Room.objects.all()
     reservation_qs = Reservation.objects.all()
     maintenance_qs = Maintenance.objects.select_related("room", "room__hotel")
     
-    if not is_manager_admin and user.hotel_id:
+    if not is_superuser and user.hotel_id:
         staff_qs = staff_qs.filter(hotel_id=user.hotel_id)
         room_qs = room_qs.filter(hotel_id=user.hotel_id)
         reservation_qs = reservation_qs.filter(hotel_id=user.hotel_id)
         maintenance_qs = maintenance_qs.filter(room__hotel_id=user.hotel_id)
-    
-    if is_manager_admin and user.hotel_id:
-        if request.GET.get("scope") != "all":
-            staff_qs = staff_qs.filter(hotel_id=user.hotel_id)
-            room_qs = room_qs.filter(hotel_id=user.hotel_id)
-            reservation_qs = reservation_qs.filter(hotel_id=user.hotel_id)
-            maintenance_qs = maintenance_qs.filter(room__hotel_id=user.hotel_id)
     
     today = timezone.localdate()
     context = {
@@ -1020,6 +1122,8 @@ def manager_dashboard(request):
         "today_checkouts": reservation_qs.filter(check_out__date=today).select_related("guest", "hotel").order_by("check_out")[:10],
         "live_rooms": room_qs.select_related("room_type").order_by("room_number")[:24],
         "recent_reservations": reservation_qs.select_related("guest", "hotel").order_by("-booking_date")[:10],
+        "user_hotel_id": user.hotel_id,
+        "is_superuser": is_superuser,
     }
     return render(request, "frontend/manager_dashboard.html", context)
 
