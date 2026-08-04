@@ -16,6 +16,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet
 
 from apps.common.mixins import BranchScopedQuerysetMixin
+from apps.reservations.models import Reservation
 from .models import Invoice, Payment
 from .serializers import InvoiceSerializer, PaymentSerializer
 
@@ -123,6 +124,7 @@ def verify_paystack_payment(request, reference):
                             provider_reference=reference,
                             defaults={
                                 "invoice": invoice,
+                                "hotel": invoice.hotel,
                                 "amount": amount,
                                 "method": Payment.PaymentMethod.PAYSTACK,
                                 "status": Payment.PaymentStatus.SUCCESS,
@@ -244,13 +246,14 @@ def paystack_webhook(request):
 	amount = Decimal(str(data.get("amount", 0))) / Decimal("100")
 
 	with transaction.atomic():
-		invoice = Invoice.objects.select_for_update().filter(pk=invoice_id).first()
+		invoice = Invoice.objects.select_for_update().select_related("reservation").filter(pk=invoice_id).first()
 		if invoice is None:
 			return HttpResponse(status=200)
 		payment, created = Payment.objects.get_or_create(
 			provider_reference=reference,
 			defaults={
 				"invoice": invoice,
+				"hotel": invoice.hotel,
 				"amount": amount,
 				"method": Payment.PaymentMethod.PAYSTACK,
 				"status": Payment.PaymentStatus.SUCCESS,
@@ -259,11 +262,12 @@ def paystack_webhook(request):
 		)
 		if not created:
 			payment.invoice = invoice
+			payment.hotel = invoice.hotel
 			payment.amount = amount
 			payment.method = Payment.PaymentMethod.PAYSTACK
 			payment.status = Payment.PaymentStatus.SUCCESS
 			payment.provider_response = data
-			payment.save(update_fields=["invoice", "amount", "method", "status", "provider_response"])
+			payment.save(update_fields=["invoice", "hotel", "amount", "method", "status", "provider_response"])
 
 		paid_total = invoice.amount_paid
 		if paid_total >= invoice.total_amount:
@@ -271,6 +275,13 @@ def paystack_webhook(request):
 		elif paid_total > 0:
 			invoice.status = Invoice.InvoiceStatus.PARTIAL
 		invoice.save(update_fields=["status"])
+
+		# Confirm the reservation once the invoice is fully paid.
+		if invoice.status == Invoice.InvoiceStatus.PAID and invoice.reservation:
+			reservation = invoice.reservation
+			if reservation.status == Reservation.ReservationStatus.PENDING:
+				reservation.status = Reservation.ReservationStatus.CONFIRMED
+				reservation.save(update_fields=["status"])
 
 	return HttpResponse(status=200)
 

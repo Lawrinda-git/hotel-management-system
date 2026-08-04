@@ -52,8 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-    
+    'django.contrib.staticfiles',    
     "rest_framework",
     "corsheaders",
     "django_filters",
@@ -203,16 +202,26 @@ CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in config(
         "CSRF_TRUSTED_ORIGINS",
-        default="http://localhost:8000,https://*.ngrok-free.dev",
+        default="http://localhost:8000,https://*.devtunnels.ms",
     ).split(",")
     if origin.strip()
 ]
 
 BREVO_API_KEY = config("BREVO_API_KEY", default="")
 BREVO_SMS_SENDER = config("BREVO_SMS_SENDER", default="StayHub")
+
+# ── Base URL ────────────────────────────────────────────────────
+# Set BASE_URL in .env to the public origin of your deployment
+# (e.g. https://your-tunnel.devtunnels.ms). All callback/webhook
+# URLs below derive from it, so changing this one value re-points
+# Paystack, Google OAuth, and every redirect to the new host.
+BASE_URL = config("BASE_URL", default="http://localhost:8000").rstrip("/")
+
 PAYSTACK_SECRET_KEY = config("PAYSTACK_SECRET_KEY", default="")
 PAYSTACK_PUBLIC_KEY = config("PAYSTACK_PUBLIC_KEY", default="")
-PAYSTACK_RETURN_URL = config("PAYSTACK_RETURN_URL", default="http://localhost:8000/booking/")
+PAYSTACK_RETURN_URL = config("PAYSTACK_RETURN_URL", default=f"{BASE_URL}/booking/")
+PAYSTACK_WEBHOOK_URL = config("PAYSTACK_WEBHOOK_URL", default=f"{BASE_URL}/api/billing/paystack/webhook/")
+DELIVERED_URL = BASE_URL  # deprecated alias, keep for compatibility
 
 # Development mail is printed to the terminal.  Set EMAIL_BACKEND to Django's
 # SMTP backend and the SMTP_* variables in the deployment environment to send
@@ -232,11 +241,17 @@ DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="StayHub <no-reply@sta
 GOOGLE_OAUTH_CLIENT_ID = config("GOOGLE_OAUTH_CLIENT_ID", default="")
 GOOGLE_OAUTH_CLIENT_SECRET = config("GOOGLE_OAUTH_CLIENT_SECRET", default="")
 GOOGLE_OAUTH_REDIRECT_URI = config(
-    "GOOGLE_OAUTH_REDIRECT_URI", default="http://localhost:8000/api/auth/google/callback/"
+    "GOOGLE_OAUTH_REDIRECT_URI", default=f"{BASE_URL}/api/auth/google/callback/"
 )
+# If GOOGLE_OAUTH_REDIRECT_URIS isn't set, build a sensible default from
+# BASE_URL so a single .env change re-points Google sign-in too.
 GOOGLE_OAUTH_REDIRECT_URIS = [
-    value.strip() for value in config("GOOGLE_OAUTH_REDIRECT_URIS", default=GOOGLE_OAUTH_REDIRECT_URI).split(",") if value.strip()
+    value.strip() for value in config(
+        "GOOGLE_OAUTH_REDIRECT_URIS",
+        default=f"http://localhost:8000/api/auth/google/callback/,{BASE_URL}/api/auth/google/callback/",
+    ).split(",") if value.strip()
 ]
+ADMIN_SIGNUP_KEY = config("ADMIN_SIGNUP_KEY", default="")
 ADMIN_SIGNUP_KEY = config("ADMIN_SIGNUP_KEY", default="")
 
 

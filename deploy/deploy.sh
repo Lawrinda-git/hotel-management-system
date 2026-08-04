@@ -69,8 +69,16 @@ fi
 # ── 3) Install Python dependencies (gunicorn pinned in requirements.txt) ───
 echo "==> Installing Python dependencies"
 if [[ ! -d venv ]]; then
-    echo "==> Creating virtualenv (python3 -m venv venv)"
-    python3 -m venv venv
+    # Django 6 needs Python >= 3.12; prefer the newest interpreter available.
+    py_cmd="python3"
+    for candidate in python3.13 python3.12; do
+        if command -v "${candidate}" >/dev/null 2>&1; then
+            py_cmd="${candidate}"
+            break
+        fi
+    done
+    echo "==> Creating virtualenv (${py_cmd} -m venv venv)"
+    "${py_cmd}" -m venv venv
 fi
 source venv/bin/activate
 python -m pip install --upgrade pip

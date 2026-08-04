@@ -364,6 +364,8 @@
         currentStep: 1,
     };
 
+    var HOTEL_ID = {{ hotel_id|default:"''" }};
+
     async function completePaystackReturn() {
         const params = new URLSearchParams(window.location.search);
         const reference = params.get('reference') || params.get('trxref');
@@ -554,7 +556,8 @@
         const status = document.getElementById('room-status');
         if (status) status.innerHTML = '<span class="skeleton skeleton-text" style="display:inline-block;width:180px;height:16px"></span>';
         try {
-            const response = await fetch('{% url "booking_options" %}');
+            const url = '{% url "booking_options" %}' + (HOTEL_ID ? '?hotel=' + encodeURIComponent(HOTEL_ID) : '');
+            const response = await fetch(url);
             const data = await response.json();
             if (!response.ok) throw new Error(data.detail || 'Failed to load rooms.');
             bookingState.rooms = data.results || [];

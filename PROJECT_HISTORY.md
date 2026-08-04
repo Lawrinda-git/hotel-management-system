@@ -174,7 +174,7 @@ The `.env` file contains **real credentials** appropriate for development:
 | PAYSTACK_PUBLIC_KEY | `pk_test_...` | Test keys |
 | BREVO_API_KEY | `xkeysib-...` | Real |
 | SMTP_* | Gmail creds | Real |
-| CSRF_TRUSTED_ORIGINS | `http://localhost:8000,https://*.ngrok-free.dev` | ngrok-ready |
+| CSRF_TRUSTED_ORIGINS | `http://localhost:8000,https://*.devtunnels.ms` | dev-tunnel-ready |
 
 > ⚠️ **WARNING:** Never commit `.env` — it's git-ignored. Contains real API keys/secrets.
 

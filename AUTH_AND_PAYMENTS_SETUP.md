@@ -31,15 +31,15 @@ Create a Google Cloud OAuth **Web application** client, then set the
 GOOGLE_OAUTH_CLIENT_ID=...
 GOOGLE_OAUTH_CLIENT_SECRET=...
 GOOGLE_OAUTH_REDIRECT_URI=http://localhost:8000/api/auth/google/callback/
-GOOGLE_OAUTH_REDIRECT_URIS=http://localhost:8000/api/auth/google/callback/,https://your-domain.com/api/auth/google/callback/
+GOOGLE_OAUTH_REDIRECT_URIS=http://localhost:8000/api/auth/google/callback/,https://npc0sh6x-8000.euw.devtunnels.ms/api/auth/google/callback/
 ```
 
 Register the callback **exactly** as configured in Google Cloud — Google requires
 an exact match. The view picks the callback whose host matches the current
 request, so `GOOGLE_OAUTH_REDIRECT_URIS` (comma-separated) lets you support
-local, ngrok, and the production domain at once. The callback verifies the
-`state` token and the ID token's audience/issuer/email, then logs in the guest
-(or the matching staff account when the staff-login flow was used).
+local, the dev tunnel, and the production domain at once. The callback verifies
+the `state` token and the ID token's audience/issuer/email, then logs in the
+guest (or the matching staff account when the staff-login flow was used).
 
 ## Payments (Paystack)
 
@@ -69,10 +69,11 @@ PAYSTACK_SECRET_KEY=your_paystack_secret_key
      restricted to **Ghana mobile money** (`channels: ["mobile_money"]`,
      `currency: GHS`) and pushed to the client's number for them to confirm.
 3. **Webhook** — register
-   `https://your-domain.com/api/billing/paystack/webhook/` in your Paystack
-   dashboard. The endpoint verifies the `x-paystack-signature` (HMAC-SHA512
-   over the raw body) before recording the payment and updating the invoice
-   status (paid/partial).
+   `https://npc0sh6x-8000.euw.devtunnels.ms/api/billing/paystack/webhook/`
+   in your Paystack dashboard (Settings → Webhooks → Add webhook). The
+   endpoint verifies the `x-paystack-signature` (HMAC-SHA512 over the raw
+   body) before recording the payment, updating the invoice status (paid/
+   partial), and confirming the reservation.
 4. **Verification fallback** — `GET /api/billing/paystack/verify/<reference>/`
    polls Paystack when webhooks are delayed; on success it records the payment,
    marks the invoice `PAID`, and confirms the reservation.

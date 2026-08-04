@@ -540,12 +540,14 @@ def booking(request):
     user_phone = getattr(request.user, 'staff_phone', '') if request.user.is_authenticated else ""
     user_name = getattr(request.user, 'staff_name', name) if request.user.is_authenticated else name
     is_staff = request.user.is_authenticated and (request.user.role or "").lower() in ("admin", "manager", "receptionist", "accountant", "housekeeping")
+    hotel_id = request.GET.get("hotel", "")
     return render(request, "frontend/booking.html", {
         "display_name": name,
         "user_email": user_email,
         "user_phone": user_phone,
         "user_name": user_name,
         "is_staff": is_staff,
+        "hotel_id": hotel_id,
     })
 
 

@@ -193,7 +193,7 @@ All settings are read from environment variables via `python-decouple` (put them
 | `EMAIL_BACKEND` | `console` (prints to terminal) | Set to `django.core.mail.backends.smtp.EmailBackend` to send real mail |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USERNAME` / `SMTP_PASSWORD` / `SMTP_USE_TLS` | — | SMTP server settings |
 | `DEFAULT_FROM_EMAIL` | `StayHub <no-reply@stayhub.local>` | From address for emails |
-| `CSRF_TRUSTED_ORIGINS` | `http://localhost:8000,https://*.ngrok-free.dev` | Comma-separated trusted origins |
+| `CSRF_TRUSTED_ORIGINS` | `http://localhost:8000,https://*.devtunnels.ms` | Comma-separated trusted origins |
 
 > ⚠️ **Never commit real keys.** A full integration walkthrough (Brevo, Google OAuth, Paystack) is in [`AUTH_AND_PAYMENTS_SETUP.md`](AUTH_AND_PAYMENTS_SETUP.md).
 
