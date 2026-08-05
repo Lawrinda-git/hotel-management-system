@@ -9,25 +9,24 @@
  */
 
 import type {Message as MessageType} from '../Data/parseLogBoxLog';
-
-import View from '../../Components/View/View';
+import * as React from 'react';
 import Image from '../../Image/Image';
 import StyleSheet from '../../StyleSheet/StyleSheet';
 import Text from '../../Text/Text';
-import * as LogBoxData from '../Data/LogBoxData';
-import LogBoxLog from '../Data/LogBoxLog';
+import View from '../../Components/View/View';
 import LogBoxButton from './LogBoxButton';
-import LogBoxMessage from './LogBoxMessage';
 import * as LogBoxStyle from './LogBoxStyle';
-import * as React from 'react';
+import LogBoxLog from '../Data/LogBoxLog';
+import LogBoxMessage from './LogBoxMessage';
+import * as LogBoxData from '../Data/LogBoxData';
 
-type Props = $ReadOnly<{
+type Props = $ReadOnly<{|
   log: LogBoxLog,
   totalLogCount: number,
   level: 'warn' | 'error',
   onPressOpen: () => void,
   onPressDismiss: () => void,
-}>;
+|}>;
 
 function LogBoxLogNotification(props: Props): React.Node {
   const {totalLogCount, level, log} = props;
@@ -56,7 +55,9 @@ function LogBoxLogNotification(props: Props): React.Node {
   );
 }
 
-function CountBadge(props: {count: number, level: 'error' | 'warn'}) {
+function CountBadge(
+  props: $TEMPORARY$object<{count: number, level: 'error' | 'warn'}>,
+) {
   return (
     <View style={countStyles.outside}>
       {/* $FlowFixMe[incompatible-type] (>=0.114.0) This suppression was added
@@ -71,7 +72,7 @@ function CountBadge(props: {count: number, level: 'error' | 'warn'}) {
   );
 }
 
-function Message(props: {message: MessageType}) {
+function Message(props: $TEMPORARY$object<{message: MessageType}>) {
   return (
     <View style={messageStyles.container}>
       <Text numberOfLines={1} style={messageStyles.text}>
@@ -87,7 +88,7 @@ function Message(props: {message: MessageType}) {
   );
 }
 
-function DismissButton(props: {onPress: () => void}) {
+function DismissButton(props: $TEMPORARY$object<{onPress: () => void}>) {
   return (
     <View style={dismissStyles.container}>
       <LogBoxButton

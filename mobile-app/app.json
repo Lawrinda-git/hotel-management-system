@@ -1,4 +1,4 @@
- {
+{
   "expo": {
     "name": "StayHub Mobile",
     "slug": "stayhub-mobile",
@@ -32,6 +32,11 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "owner": "eantow"
+    "owner": "eantow",
+    "extra": {
+      "eas": {
+        "projectId": "79b21bee-3df3-4142-9008-6f213eb1a767"
+      }
+    }
   }
 }

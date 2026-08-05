@@ -39,10 +39,7 @@ if (__DEV__) {
       // Get hostname from development server (packager)
       const devServer = getDevServer();
       const host = devServer.bundleLoadedFromServer
-        ? devServer.url
-            .replace(/https?:\/\//, '')
-            .replace(/\/$/, '')
-            .split(':')[0]
+        ? devServer.url.replace(/https?:\/\//, '').split(':')[0]
         : 'localhost';
 
       // Read the optional global variable for backward compatibility.
@@ -62,7 +59,6 @@ if (__DEV__) {
       });
 
       const ReactNativeStyleAttributes = require('../Components/View/ReactNativeStyleAttributes');
-      const devToolsSettingsManager = require('../DevToolsSettings/DevToolsSettingsManager');
 
       reactDevTools.connectToDevTools({
         isAppActive,
@@ -71,7 +67,6 @@ if (__DEV__) {
           ReactNativeStyleAttributes,
         ),
         websocket: ws,
-        devToolsSettingsManager,
       });
     }
   };

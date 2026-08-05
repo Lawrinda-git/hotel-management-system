@@ -10,8 +10,8 @@
 
 'use strict';
 
-import SectionList from '../SectionList';
 import * as React from 'react';
+import SectionList from '../SectionList';
 
 function renderMyListItem(info: {
   item: {title: string, ...},
@@ -76,7 +76,7 @@ module.exports = {
   },
 
   testBadInheritedDefaultProp(): React.MixedElement {
-    const sections: $FlowFixMe = [];
+    const sections = [];
     return (
       <SectionList
         renderItem={renderMyListItem}
