@@ -935,11 +935,45 @@ def booking_options(request):
 
     Supports an optional ``hotel`` query param so staff walk-in bookings can
     be scoped to the staff member's own hotel.
+
+    When ``check_in`` and ``check_out`` ISO dates are provided, rooms that have
+    a reservation overlapping those dates are excluded — but rooms reserved for
+    *other* dates are still shown (time-bound availability).
     """
-    rooms = Room.objects.select_related("hotel", "room_type").filter(status=Room.RoomStatus.AVAILABLE)
+    from django.templatetags.static import static
+    from datetime import datetime as _dt
+
     hotel_id = request.GET.get("hotel")
+    check_in_raw = request.GET.get("check_in", "")
+    check_out_raw = request.GET.get("check_out", "")
+
+    # Parse dates if provided
+    check_in = None
+    check_out = None
+    if check_in_raw and check_out_raw:
+        try:
+            check_in = _dt.fromisoformat(check_in_raw)
+            check_out = _dt.fromisoformat(check_out_raw)
+        except ValueError:
+            check_in = None
+            check_out = None
+
+    # Start with all rooms that are not under maintenance
+    rooms = Room.objects.select_related("hotel", "room_type").exclude(status=Room.RoomStatus.MAINTENANCE)
     if hotel_id:
         rooms = rooms.filter(hotel_id=hotel_id)
+
+    # If dates are provided, exclude rooms with overlapping reservations
+    if check_in and check_out:
+        # Find rooms that have a reservation overlapping the selected dates
+        from apps.reservations.models import RoomReservation
+        overlapping_room_ids = RoomReservation.objects.filter(
+            resv__check_in__lt=check_out,
+            resv__check_out__gt=check_in,
+            resv__status__in=["PENDING", "CHECKED_IN"],
+        ).values_list("room_id", flat=True)
+        rooms = rooms.exclude(pk__in=list(overlapping_room_ids))
+
     rooms = rooms.order_by("hotel__hotel_name", "price_per_night", "room_number")
 
     payload = [
@@ -948,6 +982,7 @@ def booking_options(request):
             "room_number": room.room_number,
             "status": room.status,
             "floor": room.floor,
+            "image": static(room.image) if room.image else "",
             "hotel": {
                 "id": room.hotel_id,
                 "hotel_name": room.hotel.hotel_name,

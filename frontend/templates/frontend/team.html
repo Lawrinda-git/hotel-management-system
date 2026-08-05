@@ -3,103 +3,373 @@
 {% block title %}StayHub | Our Team{% endblock %}
 {% block body_class %}bg-background text-on-surface{% endblock %}
 {% block content %}
-<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm border-b border-outline-variant/10">
     <div class="flex items-center justify-between px-margin-mobile h-16 w-full max-w-screen-xl mx-auto">
         <div class="flex items-center gap-3">
             <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold tracking-tight">StayHub</h1>
+            <span class="hidden sm:inline-flex items-center rounded-full bg-primary/10 px-3 py-1 font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wide">Our Team</span>
         </div>
         <div class="flex items-center gap-4">
             {% if user.is_authenticated %}
             <a href="{% url 'logout' %}" class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95" aria-label="Log out">logout</a>
             {% else %}
-            <a href="{% url 'signin' %}" class="font-label-md text-label-md text-primary font-semibold">Sign In</a>
+            <a href="{% url 'signin' %}" class="font-label-md text-label-md text-primary font-semibold hover:opacity-80 transition-opacity">Sign In</a>
             {% endif %}
         </div>
     </div>
 </header>
 <main class="pt-24 pb-20 px-margin-mobile max-w-screen-xl mx-auto">
-    <section class="text-center mb-16">
-        <h2 class="font-headline-xl text-headline-xl text-primary tracking-tight mb-4">Meet the StayHub Development Team</h2>
-        <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">The designers, engineers, and product leaders who build and support the StayHub experience.</p>
+
+    <!-- ===== HERO ===== -->
+    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary-container to-primary shadow-xl mb-16 animate-fade-in-up">
+        <!-- Decorative blobs -->
+        <div class="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-secondary-container/30 blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-white/10 blur-3xl pointer-events-none"></div>
+        <div class="absolute top-10 right-10 w-24 h-24 rounded-full border border-white/15 pointer-events-none hidden md:block"></div>
+        <div class="absolute bottom-10 left-1/4 w-16 h-16 rounded-full border border-white/15 pointer-events-none hidden md:block"></div>
+
+        <div class="relative z-10 px-6 md:px-14 py-14 md:py-20 text-center">
+            <p class="font-label-md text-label-md text-secondary-container tracking-[0.25em] uppercase mb-4">StayHub · Launch Team</p>
+            <h1 class="font-headline-xl text-headline-xl text-white tracking-tight mb-5 max-w-3xl mx-auto">
+                The people behind the platform
+            </h1>
+            <p class="font-body-lg text-body-lg text-white/85 max-w-2xl mx-auto">
+                A multidisciplinary team of designers, engineers, and product leaders building a
+                hospitality experience that feels effortless — from first search to final checkout.
+            </p>
+
+            <!-- Stats band -->
+            <div class="mt-10 grid grid-cols-3 gap-4 max-w-2xl mx-auto divide-x divide-white/20">
+                <div class="px-2">
+                    <p class="font-headline-lg text-headline-lg text-secondary-container font-bold leading-none">10</p>
+                    <p class="mt-2 font-label-sm text-label-sm text-white/75 uppercase tracking-wider">Team members</p>
+                </div>
+                <div class="px-2">
+                    <p class="font-headline-lg text-headline-lg text-secondary-container font-bold leading-none">8</p>
+                    <p class="mt-2 font-label-sm text-label-sm text-white/75 uppercase tracking-wider">Disciplines</p>
+                </div>
+                <div class="px-2">
+                    <p class="font-headline-lg text-headline-lg text-secondary-container font-bold leading-none">1</p>
+                    <p class="mt-2 font-label-sm text-label-sm text-white/75 uppercase tracking-wider">Shared mission</p>
+                </div>
+            </div>
+        </div>
     </section>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-        <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-outline-variant/10 hover:shadow-xl transition-all group">
-            <div class="h-64 bg-gradient-to-br from-primary-container/30 to-secondary-container/40 flex items-end justify-center p-6">
-                <div class="w-28 h-28 rounded-full bg-primary/20 border-4 border-white shadow-lg flex items-center justify-center -mb-16">
-                    <span class="material-symbols-outlined text-5xl text-primary" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+
+    <!-- ===== TEAM GRID ===== -->
+    <section class="mb-16">
+        <div class="text-center mb-12 animate-fade-in-up">
+            <p class="font-label-md text-label-md text-primary font-semibold tracking-[0.25em] uppercase mb-3">Meet the Team</p>
+            <h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">The people who make StayHub possible</h2>
+            <div class="mt-4 mx-auto w-16 h-1 rounded-full bg-secondary-container"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+
+            <!-- Lawrinda Kwaah Obo (Project Leader) -->
+            <article class="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.02s">
+                <div class="relative h-72 overflow-hidden bg-gradient-to-br from-primary/10 via-primary-container/10 to-secondary-container/20">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="font-headline-lg text-headline-lg text-primary/25 select-none">LR</span>
+                    </div>
+                    <img src="{% static 'frontend/team/lawrinda.jpg' %}" alt="Lawrinda Kwaah Obo" class="relative z-10 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out" onerror="this.remove()" loading="lazy" />
+                    <div class="absolute inset-0 z-20 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <span class="absolute z-20 top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-3 py-1 font-label-sm text-label-sm text-primary font-semibold shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                        Leadership
+                    </span>
                 </div>
+                <div class="flex flex-col flex-1 p-6">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Lawrinda Kwaah Obo</h3>
+                    <p class="mt-1.5 font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wide">Project Leader</p>
+                    <p class="mt-3 text-sm text-on-surface-variant leading-relaxed flex-1">Project lead coordinating development and delivery for the StayHub application.</p>
+                    <a href="mailto:team@stayhub.com?subject=StayHub%20—%20Hello%20Lawrinda" class="mt-5 inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-outline-variant/20 text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all active:scale-[0.98]" aria-label="Email Lawrinda Kwaah Obo">
+                        <span class="material-symbols-outlined text-base">mail</span>
+                        Contact
+                    </a>
+                </div>
+            </article>
+
+            <!-- Ezeoke, Stephanie Chinazom (Requirements & Research Officer) -->
+            <article class="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.06s">
+                <div class="relative h-72 overflow-hidden bg-gradient-to-br from-tertiary/10 via-tertiary-container/10 to-secondary-container/20">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="font-headline-lg text-headline-lg text-tertiary/25 select-none">ES</span>
+                    </div>
+                    <img src="{% static 'frontend/team/ezeoke.jpg' %}" alt="Ezeoke Stephanie Chinazom" class="relative z-10 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out" onerror="this.remove()" loading="lazy" />
+                    <div class="absolute inset-0 z-20 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <span class="absolute z-20 top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-3 py-1 font-label-sm text-label-sm text-primary font-semibold shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                        Product &amp; Research
+                    </span>
+                </div>
+                <div class="flex flex-col flex-1 p-6">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Ezeoke, Stephanie Chinazom</h3>
+                    <p class="mt-1.5 font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wide">Requirements &amp; Research Officer</p>
+                    <p class="mt-3 text-sm text-on-surface-variant leading-relaxed flex-1">Leads requirements gathering and research to shape product direction.</p>
+                    <a href="mailto:team@stayhub.com?subject=StayHub%20—%20Hello%20Stephanie" class="mt-5 inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-outline-variant/20 text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all active:scale-[0.98]" aria-label="Email Ezeoke Stephanie Chinazom">
+                        <span class="material-symbols-outlined text-base">mail</span>
+                        Contact
+                    </a>
+                </div>
+            </article>
+
+            <!-- Bosomtwi Akosua Serwaa Maame (UI Designer) -->
+            <article class="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.10s">
+                <div class="relative h-72 overflow-hidden bg-gradient-to-br from-secondary/10 via-secondary-container/20 to-primary-container/10">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="font-headline-lg text-headline-lg text-secondary/25 select-none">BA</span>
+                    </div>
+                    <img src="{% static 'frontend/team/bosomtwi.jpg' %}" alt="Bosomtwi Akosua Serwaa Maame" class="relative z-10 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out" onerror="this.remove()" loading="lazy" />
+                    <div class="absolute inset-0 z-20 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <span class="absolute z-20 top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-3 py-1 font-label-sm text-label-sm text-primary font-semibold shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                        Design
+                    </span>
+                </div>
+                <div class="flex flex-col flex-1 p-6">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Bosomtwi Akosua Serwaa Maame</h3>
+                    <p class="mt-1.5 font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wide">UI Designer</p>
+                    <p class="mt-3 text-sm text-on-surface-variant leading-relaxed flex-1">Designs intuitive interfaces and visual assets for the StayHub user experience.</p>
+                    <a href="mailto:team@stayhub.com?subject=StayHub%20—%20Hello%20Akosua" class="mt-5 inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-outline-variant/20 text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all active:scale-[0.98]" aria-label="Email Bosomtwi Akosua Serwaa Maame">
+                        <span class="material-symbols-outlined text-base">mail</span>
+                        Contact
+                    </a>
+                </div>
+            </article>
+
+            <!-- Kwarteng Caleb Owusu (Frontend Developer) -->
+            <article class="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.14s">
+                <div class="relative h-72 overflow-hidden bg-gradient-to-br from-primary/10 via-primary-container/10 to-secondary-container/20">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="font-headline-lg text-headline-lg text-primary/25 select-none">KC</span>
+                    </div>
+                    <img src="{% static 'frontend/team/caleb.jpg' %}" alt="Kwarteng Caleb Owusu" class="relative z-10 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out" onerror="this.remove()" loading="lazy" />
+                    <div class="absolute inset-0 z-20 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <span class="absolute z-20 top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-3 py-1 font-label-sm text-label-sm text-primary font-semibold shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                        Engineering
+                    </span>
+                </div>
+                <div class="flex flex-col flex-1 p-6">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Kwarteng Caleb Owusu</h3>
+                    <p class="mt-1.5 font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wide">Frontend Developer</p>
+                    <p class="mt-3 text-sm text-on-surface-variant leading-relaxed flex-1">Implements responsive UI components and integrates frontend features.</p>
+                    <a href="mailto:team@stayhub.com?subject=StayHub%20—%20Hello%20Caleb" class="mt-5 inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-outline-variant/20 text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all active:scale-[0.98]" aria-label="Email Kwarteng Caleb Owusu">
+                        <span class="material-symbols-outlined text-base">mail</span>
+                        Contact
+                    </a>
+                </div>
+            </article>
+
+            <!-- Modilim Chinemelum Jude (Frontend Developer) -->
+            <article class="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.18s">
+                <div class="relative h-72 overflow-hidden bg-gradient-to-br from-tertiary/10 via-tertiary-container/10 to-secondary-container/20">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="font-headline-lg text-headline-lg text-tertiary/25 select-none">MJ</span>
+                    </div>
+                    <img src="{% static 'frontend/team/jude.jpg' %}" alt="Modilim Chinemelum Jude" class="relative z-10 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out" onerror="this.remove()" loading="lazy" />
+                    <div class="absolute inset-0 z-20 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <span class="absolute z-20 top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-3 py-1 font-label-sm text-label-sm text-primary font-semibold shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                        Engineering
+                    </span>
+                </div>
+                <div class="flex flex-col flex-1 p-6">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Modilim Chinemelum Jude</h3>
+                    <p class="mt-1.5 font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wide">Frontend Developer</p>
+                    <p class="mt-3 text-sm text-on-surface-variant leading-relaxed flex-1">Builds client-facing features and collaborates on UX implementation.</p>
+                    <a href="mailto:team@stayhub.com?subject=StayHub%20—%20Hello%20Jude" class="mt-5 inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-outline-variant/20 text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all active:scale-[0.98]" aria-label="Email Modilim Chinemelum Jude">
+                        <span class="material-symbols-outlined text-base">mail</span>
+                        Contact
+                    </a>
+                </div>
+            </article>
+
+            <!-- Ntow Emmanuel Akyea (Backend Developer) -->
+            <article class="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.22s">
+                <div class="relative h-72 overflow-hidden bg-gradient-to-br from-primary/10 via-primary-container/10 to-secondary-container/20">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="font-headline-lg text-headline-lg text-primary/25 select-none">NA</span>
+                    </div>
+                    <img src="{% static 'frontend/team/ntow.jpg' %}" alt="Ntow Emmanuel Akyea" class="relative z-10 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out" onerror="this.remove()" loading="lazy" />
+                    <div class="absolute inset-0 z-20 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <span class="absolute z-20 top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-3 py-1 font-label-sm text-label-sm text-primary font-semibold shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                        Engineering
+                    </span>
+                </div>
+                <div class="flex flex-col flex-1 p-6">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Ntow Emmanuel Akyea</h3>
+                    <p class="mt-1.5 font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wide">Backend Developer</p>
+                    <p class="mt-3 text-sm text-on-surface-variant leading-relaxed flex-1">Develops APIs and server-side logic powering StayHub services.</p>
+                    <a href="mailto:team@stayhub.com?subject=StayHub%20—%20Hello%20Emmanuel" class="mt-5 inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-outline-variant/20 text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all active:scale-[0.98]" aria-label="Email Ntow Emmanuel Akyea">
+                        <span class="material-symbols-outlined text-base">mail</span>
+                        Contact
+                    </a>
+                </div>
+            </article>
+
+            <!-- Michelle Grace Kyei (Backend Developer) -->
+            <article class="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.26s">
+                <div class="relative h-72 overflow-hidden bg-gradient-to-br from-secondary/10 via-secondary-container/20 to-primary-container/10">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="font-headline-lg text-headline-lg text-secondary/25 select-none">MK</span>
+                    </div>
+                    <img src="{% static 'frontend/team/michelle.jpg' %}" alt="Michelle Grace Kyei" class="relative z-10 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out" onerror="this.remove()" loading="lazy" />
+                    <div class="absolute inset-0 z-20 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <span class="absolute z-20 top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-3 py-1 font-label-sm text-label-sm text-primary font-semibold shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                        Engineering
+                    </span>
+                </div>
+                <div class="flex flex-col flex-1 p-6">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Michelle Grace Kyei</h3>
+                    <p class="mt-1.5 font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wide">Backend Developer</p>
+                    <p class="mt-3 text-sm text-on-surface-variant leading-relaxed flex-1">Works on core backend features, integrations, and reliability.</p>
+                    <a href="mailto:team@stayhub.com?subject=StayHub%20—%20Hello%20Michelle" class="mt-5 inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-outline-variant/20 text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all active:scale-[0.98]" aria-label="Email Michelle Grace Kyei">
+                        <span class="material-symbols-outlined text-base">mail</span>
+                        Contact
+                    </a>
+                </div>
+            </article>
+
+            <!-- Calvin Deladem Yao Herchel (Database Developer) -->
+            <article class="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.30s">
+                <div class="relative h-72 overflow-hidden bg-gradient-to-br from-tertiary/10 via-tertiary-container/10 to-secondary-container/20">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="font-headline-lg text-headline-lg text-tertiary/25 select-none">CH</span>
+                    </div>
+                    <img src="{% static 'frontend/team/calvin.jpg' %}" alt="Calvin Deladem Yao Herchel" class="relative z-10 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out" onerror="this.remove()" loading="lazy" />
+                    <div class="absolute inset-0 z-20 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <span class="absolute z-20 top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-3 py-1 font-label-sm text-label-sm text-primary font-semibold shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                        Engineering
+                    </span>
+                </div>
+                <div class="flex flex-col flex-1 p-6">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Calvin Deladem Yao Herchel</h3>
+                    <p class="mt-1.5 font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wide">Database Developer</p>
+                    <p class="mt-3 text-sm text-on-surface-variant leading-relaxed flex-1">Designs and maintains the database schemas and data integrity.</p>
+                    <a href="mailto:team@stayhub.com?subject=StayHub%20—%20Hello%20Calvin" class="mt-5 inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-outline-variant/20 text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all active:scale-[0.98]" aria-label="Email Calvin Deladem Yao Herchel">
+                        <span class="material-symbols-outlined text-base">mail</span>
+                        Contact
+                    </a>
+                </div>
+            </article>
+
+            <!-- Isobel Naa Norkor Noye (Tester) -->
+            <article class="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.34s">
+                <div class="relative h-72 overflow-hidden bg-gradient-to-br from-primary/10 via-primary-container/10 to-secondary-container/20">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="font-headline-lg text-headline-lg text-primary/25 select-none">IN</span>
+                    </div>
+                    <img src="{% static 'frontend/team/isobel.jpg' %}" alt="Isobel Naa Norkor Noye" class="relative z-10 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out" onerror="this.remove()" loading="lazy" />
+                    <div class="absolute inset-0 z-20 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <span class="absolute z-20 top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-3 py-1 font-label-sm text-label-sm text-primary font-semibold shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                        Quality
+                    </span>
+                </div>
+                <div class="flex flex-col flex-1 p-6">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Isobel Naa Norkor Noye</h3>
+                    <p class="mt-1.5 font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wide">Tester</p>
+                    <p class="mt-3 text-sm text-on-surface-variant leading-relaxed flex-1">Ensures quality through testing and validation of product features.</p>
+                    <a href="mailto:team@stayhub.com?subject=StayHub%20—%20Hello%20Isobel" class="mt-5 inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-outline-variant/20 text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all active:scale-[0.98]" aria-label="Email Isobel Naa Norkor Noye">
+                        <span class="material-symbols-outlined text-base">mail</span>
+                        Contact
+                    </a>
+                </div>
+            </article>
+
+            <!-- Obeng Emmanuella Yaa Agyapomaa (Documentation & Presentation Officer) -->
+            <article class="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.38s">
+                <div class="relative h-72 overflow-hidden bg-gradient-to-br from-secondary/10 via-secondary-container/20 to-primary-container/10">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="font-headline-lg text-headline-lg text-secondary/25 select-none">OE</span>
+                    </div>
+                    <img src="{% static 'frontend/team/obeng-emmanuella-yaa-agyapomaa.jpg' %}" alt="Obeng Emmanuella Yaa Agyapomaa" class="relative z-10 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out" onerror="this.remove()" loading="lazy" />
+                    <div class="absolute inset-0 z-20 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <span class="absolute z-20 top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-3 py-1 font-label-sm text-label-sm text-primary font-semibold shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                        Quality
+                    </span>
+                </div>
+                <div class="flex flex-col flex-1 p-6">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Obeng Emmanuella Yaa Agyapomaa</h3>
+                    <p class="mt-1.5 font-label-sm text-label-sm text-primary font-semibold uppercase tracking-wide">Documentation &amp; Presentation Officer</p>
+                    <p class="mt-3 text-sm text-on-surface-variant leading-relaxed flex-1">Prepares documentation and presentation materials for the project.</p>
+                    <a href="mailto:team@stayhub.com?subject=StayHub%20—%20Hello%20Emmanuella" class="mt-5 inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-outline-variant/20 text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all active:scale-[0.98]" aria-label="Email Obeng Emmanuella Yaa Agyapomaa">
+                        <span class="material-symbols-outlined text-base">mail</span>
+                        Contact
+                    </a>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- ===== VALUES ===== -->
+    <section class="mb-16">
+        <div class="text-center mb-12 animate-fade-in-up">
+            <p class="font-label-md text-label-md text-primary font-semibold tracking-[0.25em] uppercase mb-3">Our Values</p>
+            <h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">What guides our work</h2>
+            <div class="mt-4 mx-auto w-16 h-1 rounded-full bg-secondary-container"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white rounded-2xl p-8 border border-outline-variant/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center animate-fade-in-up">
+                <div class="mx-auto w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-5">
+                    <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-2">Crafted with care</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Every screen and flow is designed to feel premium, intuitive, and effortless for our guests.</p>
             </div>
-            <div class="pt-20 p-6 text-center">
-                <h3 class="font-headline-md text-headline-md text-on-surface mb-1">Lawrinda Adjei-Agyapong</h3>
-                <p class="font-label-md text-label-md text-primary font-semibold mb-3">Founder & CEO</p>
-                <p class="font-body-md text-body-md text-on-surface-variant">Visionary leader shaping the future of luxury hospitality in Ghana with a passion for exceptional guest experiences.</p>
+            <div class="bg-white rounded-2xl p-8 border border-outline-variant/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center animate-fade-in-up" style="animation-delay: 0.08s">
+                <div class="mx-auto w-14 h-14 rounded-2xl bg-secondary-container/30 text-secondary flex items-center justify-center mb-5">
+                    <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">engineering</span>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-2">Engineered to last</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Robust APIs and reliable data models keep StayHub fast and dependable at scale.</p>
+            </div>
+            <div class="bg-white rounded-2xl p-8 border border-outline-variant/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center animate-fade-in-up" style="animation-delay: 0.16s">
+                <div class="mx-auto w-14 h-14 rounded-2xl bg-tertiary/10 text-tertiary flex items-center justify-center mb-5">
+                    <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">groups</span>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-2">Grounded in teamwork</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Leadership, design, engineering, and quality work as one team toward a single mission.</p>
             </div>
         </div>
-        <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-outline-variant/10 hover:shadow-xl transition-all group">
-            <div class="h-64 bg-gradient-to-br from-secondary-container/30 to-primary-container/40 flex items-end justify-center p-6">
-                <div class="w-28 h-28 rounded-full bg-secondary/20 border-4 border-white shadow-lg flex items-center justify-center -mb-16">
-                    <span class="material-symbols-outlined text-5xl text-secondary" style="font-variation-settings: 'FILL' 1;">account_circle</span>
-                </div>
-            </div>
-            <div class="pt-20 p-6 text-center">
-                <h3 class="font-headline-md text-headline-md text-on-surface mb-1">Kwame Asante</h3>
-                <p class="font-label-md text-label-md text-primary font-semibold mb-3">Chief Operations Officer</p>
-                <p class="font-body-md text-body-md text-on-surface-variant">Ensuring seamless operations across all StayHub properties with a focus on excellence and efficiency.</p>
-            </div>
+    </section>
+
+    <!-- ===== JOIN OUR TEAM ===== -->
+    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary-container to-primary shadow-xl animate-fade-in-up">
+        <div class="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-secondary-container/25 blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-28 -right-20 w-80 h-80 rounded-full bg-white/10 blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 px-6 md:px-14 py-14 md:py-16 text-center">
+            <span class="material-symbols-outlined text-5xl text-secondary-container mb-4 inline-block" style="font-variation-settings: 'FILL' 1;">emoji_people</span>
+            <h2 class="font-headline-lg text-headline-lg text-white tracking-tight mb-4">Join Our Team</h2>
+            <p class="font-body-lg text-body-lg text-white/85 max-w-lg mx-auto mb-8">
+                We're always looking for talented individuals who share our passion for hospitality excellence.
+            </p>
+            <a href="mailto:team@stayhub.com" class="inline-flex items-center gap-2 bg-secondary-container text-primary px-8 py-4 rounded-full font-label-md text-label-md hover:bg-secondary-fixed transition-all shadow-lg active:scale-95">
+                Contact the Team
+                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </a>
         </div>
-        <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-outline-variant/10 hover:shadow-xl transition-all group">
-            <div class="h-64 bg-gradient-to-br from-primary-container/20 to-tertiary-container/30 flex items-end justify-center p-6">
-                <div class="w-28 h-28 rounded-full bg-tertiary/20 border-4 border-white shadow-lg flex items-center justify-center -mb-16">
-                    <span class="material-symbols-outlined text-5xl text-tertiary" style="font-variation-settings: 'FILL' 1;">account_circle</span>
-                </div>
-            </div>
-            <div class="pt-20 p-6 text-center">
-                <h3 class="font-headline-md text-headline-md text-on-surface mb-1">Abena Osei</h3>
-                <p class="font-label-md text-label-md text-primary font-semibold mb-3">Head of Guest Relations</p>
-                <p class="font-body-md text-body-md text-on-surface-variant">Dedicated to creating memorable experiences for every guest who walks through our doors.</p>
-            </div>
-        </div>
-        <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-outline-variant/10 hover:shadow-xl transition-all group">
-            <div class="h-64 bg-gradient-to-br from-secondary-container/30 to-primary-container/20 flex items-end justify-center p-6">
-                <div class="w-28 h-28 rounded-full bg-primary-container/30 border-4 border-white shadow-lg flex items-center justify-center -mb-16">
-                    <span class="material-symbols-outlined text-5xl text-primary-container" style="font-variation-settings: 'FILL' 1;">account_circle</span>
-                </div>
-            </div>
-            <div class="pt-20 p-6 text-center">
-                <h3 class="font-headline-md text-headline-md text-on-surface mb-1">Nana Yaw Mensah</h3>
-                <p class="font-label-md text-label-md text-primary font-semibold mb-3">Head of Technology</p>
-                <p class="font-body-md text-body-md text-on-surface-variant">Building innovative digital solutions that power the StayHub platform and enhance guest experiences.</p>
-            </div>
-        </div>
-        <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-outline-variant/10 hover:shadow-xl transition-all group">
-            <div class="h-64 bg-gradient-to-br from-tertiary-container/20 to-secondary-container/30 flex items-end justify-center p-6">
-                <div class="w-28 h-28 rounded-full bg-secondary-container/30 border-4 border-white shadow-lg flex items-center justify-center -mb-16">
-                    <span class="material-symbols-outlined text-5xl text-secondary-container" style="font-variation-settings: 'FILL' 1;">account_circle</span>
-                </div>
-            </div>
-            <div class="pt-20 p-6 text-center">
-                <h3 class="font-headline-md text-headline-md text-on-surface mb-1">Efua Sutherland</h3>
-                <p class="font-label-md text-label-md text-primary font-semibold mb-3">Director of Sales & Marketing</p>
-                <p class="font-body-md text-body-md text-on-surface-variant">Driving growth and brand awareness for StayHub across Ghana and the West African region.</p>
-            </div>
-        </div>
-        <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-outline-variant/10 hover:shadow-xl transition-all group">
-            <div class="h-64 bg-gradient-to-br from-primary-container/30 to-secondary-container/30 flex items-end justify-center p-6">
-                <div class="w-28 h-28 rounded-full bg-primary/20 border-4 border-white shadow-lg flex items-center justify-center -mb-16">
-                    <span class="material-symbols-outlined text-5xl text-primary" style="font-variation-settings: 'FILL' 1;">account_circle</span>
-                </div>
-            </div>
-            <div class="pt-20 p-6 text-center">
-                <h3 class="font-headline-md text-headline-md text-on-surface mb-1">Kofi Annan</h3>
-                <p class="font-label-md text-label-md text-primary font-semibold mb-3">Housekeeping Manager</p>
-                <p class="font-body-md text-body-md text-on-surface-variant">Maintaining the highest standards of cleanliness and comfort across all StayHub properties.</p>
-            </div>
-        </div>
-    </div>
-    <section class="text-center bg-surface-container-low rounded-3xl p-12 shadow-sm border border-outline-variant/10">
-        <h3 class="font-headline-lg text-headline-lg text-primary mb-4">Join Our Team</h3>
-        <p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg mx-auto mb-6">We're always looking for talented individuals who share our passion for hospitality excellence.</p>
-        <a href="mailto:team@stayhub.com" class="inline-block bg-primary text-white px-8 py-4 rounded-full font-label-md text-label-md hover:opacity-90 transition-all shadow-lg active:scale-95">Contact the Team</a>
     </section>
 </main>
+{% endblock %}
+
+{% block extra_style %}
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(24px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up {
+        animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .animate-fade-in-up { animation: none; }
+    }
+</style>
 {% endblock %}

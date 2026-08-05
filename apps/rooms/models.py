@@ -64,6 +64,7 @@ class Room(models.Model):
         related_name="assigned_rooms",
     )
     room_number         = models.CharField(max_length=10)
+    image               = models.CharField(max_length=255, blank=True, default="", help_text="Static image path, e.g. frontend/img/xxx.jpg")
     price_per_night     = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     status              = models.CharField(
         max_length=20,

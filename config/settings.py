@@ -27,7 +27,8 @@ _DEFAULT_DEV_SECRET = "django-insecure-01ky-fhel2(q*!u&v4dj6vc(ivnq*vzxi0p9jtebl
 SECRET_KEY = config("SECRET_KEY", default=_DEFAULT_DEV_SECRET)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", default=True, cast=bool)
+_debug_raw = config("DEBUG", default="1")
+DEBUG = str(_debug_raw).strip().lower() in ("1", "true", "yes", "y", "on", "t")
 
 # Fail loudly instead of serving production traffic with the known dev key.
 if not DEBUG and SECRET_KEY == _DEFAULT_DEV_SECRET:
@@ -52,7 +53,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticiles",
+    "django.contrib.staticfiles",
     "rest_framework",
     "corsheaders",
     "django_filters",
@@ -243,7 +244,7 @@ EMAIL_HOST = config("SMTP_HOST", default="")
 EMAIL_PORT = config("SMTP_PORT", default=587, cast=int)
 EMAIL_HOST_USER = config("SMTP_USERNAME", default="")
 EMAIL_HOST_PASSWORD = config("SMTP_PASSWORD", default="")
-EMAIL_USE_TLS = config("SMTP_USE_TLS", default=True, cast=bool)
+EMAIL_USE_TLS = str(config("SMTP_USE_TLS", default="true")).strip().lower() in ("1", "true", "yes", "y", "on", "t")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="StayHub <no-reply@stayhub.local>")
 
 # Google OAuth is deliberately environment-configured: never commit a client

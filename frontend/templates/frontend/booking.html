@@ -278,7 +278,7 @@
 
                 <!-- Room Preview -->
                 <div id="summary-room-preview" class="hidden">
-                    <div class="aspect-[16/9] rounded-xl bg-gradient-to-br from-primary-container/20 to-secondary-container/30 mb-3 flex items-center justify-center">
+                    <div id="summary-room-image-container" class="aspect-[16/9] rounded-xl bg-gradient-to-br from-primary-container/20 to-secondary-container/30 mb-3 flex items-center justify-center overflow-hidden">
                         <span class="material-symbols-outlined text-primary" style="font-size: 48px;">meeting_room</span>
                     </div>
                     <p class="font-label-md text-label-md text-primary font-semibold" id="summary-room-name">Room Name</p>
@@ -459,6 +459,14 @@
             document.getElementById('summary-room-preview').classList.remove('hidden');
             document.getElementById('summary-room-name').textContent = room.room_type?.type_name || 'Room';
             document.getElementById('summary-room-desc').textContent = room.hotel?.hotel_name + ' • Room ' + room.room_number + (room.floor ? ' • Floor ' + room.floor : '');
+            // Update room preview image
+            const imgContainer = document.getElementById('summary-room-image-container');
+            if (room.image) {
+                imgContainer.innerHTML = `<img src="${room.image}" alt="Room ${room.room_number}" class="w-full h-full object-cover" />`;
+                imgContainer.classList.remove('bg-gradient-to-br', 'from-primary-container/20', 'to-secondary-container/30', 'flex', 'items-center', 'justify-center');
+            } else {
+                imgContainer.innerHTML = '<span class="material-symbols-outlined text-primary" style="font-size: 48px;">meeting_room</span>';
+            }
         } else {
             document.getElementById('summary-room').textContent = 'No room selected';
             document.getElementById('summary-room-preview').classList.add('hidden');
@@ -512,11 +520,13 @@
         grid.innerHTML = bookingState.rooms.map((room) => {
             const isSelected = bookingState.selectedRoom === room.id;
             const price = room.room_type?.price_per_night || '0';
+            const imgSrc = room.image || '';
             return `
                 <button type="button" data-room-id="${room.id}"
                     class="relative text-left overflow-hidden rounded-xl border-2 transition-all duration-300 cursor-pointer
                     ${isSelected ? 'border-primary ring-2 ring-primary/20' : 'border-outline-variant hover:border-primary/50'}">
-                    <div class="aspect-[16/9] bg-gradient-to-br from-primary-container/20 to-secondary-container/30 relative">
+                    <div class="aspect-[16/9] relative overflow-hidden ${imgSrc ? '' : 'bg-gradient-to-br from-primary-container/20 to-secondary-container/30'}">
+                        ${imgSrc ? `<img src="${imgSrc}" alt="Room ${room.room_number}" class="absolute inset-0 w-full h-full object-cover" />` : ''}
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                         <div class="absolute top-3 left-3">
                             <span class="badge badge-primary text-[10px]">${room.room_type?.type_name || 'Room'}</span>
@@ -556,7 +566,13 @@
         const status = document.getElementById('room-status');
         if (status) status.innerHTML = '<span class="skeleton skeleton-text" style="display:inline-block;width:180px;height:16px"></span>';
         try {
-            const url = '{% url "booking_options" %}' + (HOTEL_ID ? '?hotel=' + encodeURIComponent(HOTEL_ID) : '');
+            const params = new URLSearchParams();
+            if (HOTEL_ID) params.set('hotel', HOTEL_ID);
+            const checkInVal = document.getElementById('check-in') ? document.getElementById('check-in').value : '';
+            const checkOutVal = document.getElementById('check-out') ? document.getElementById('check-out').value : '';
+            if (checkInVal) params.set('check_in', checkInVal);
+            if (checkOutVal) params.set('check_out', checkOutVal);
+            const url = '{% url "booking_options" %}' + (params.toString() ? '?' + params.toString() : '');
             const response = await fetch(url);
             const data = await response.json();
             if (!response.ok) throw new Error(data.detail || 'Failed to load rooms.');
@@ -638,9 +654,15 @@
         }
     }
 
-    // Event listeners
-    document.getElementById('check-in').addEventListener('change', updateSummary);
-    document.getElementById('check-out').addEventListener('change', updateSummary);
+    // Event listeners - update summary and reload rooms when dates change
+    document.getElementById('check-in').addEventListener('change', function() {
+        updateSummary();
+        if (bookingState.currentStep === 2) loadRooms();
+    });
+    document.getElementById('check-out').addEventListener('change', function() {
+        updateSummary();
+        if (bookingState.currentStep === 2) loadRooms();
+    });
 
     // Sensible defaults: check-in today, check-out in 5 days (min = today)
     (function setDefaultDates() {
