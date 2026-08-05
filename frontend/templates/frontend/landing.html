@@ -16,7 +16,6 @@
     <header class="fixed top-0 w-full z-50 flex items-center justify-between px-margin-mobile h-16 md:px-margin-desktop">
         <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-white font-bold tracking-tight md:font-headline-lg md:text-headline-lg">StayHub</h1>
         <nav class="hidden md:flex items-center gap-5 text-sm font-semibold text-white" aria-label="Landing page links">
-            <a href="{% url 'explore_stays' %}" class="hover:underline underline-offset-4">Explore Stays</a>
             <a href="{% url 'team' %}" class="hover:underline underline-offset-4">Meet the Dev Team</a>
             <a href="{% url 'staff_login' %}" class="hover:underline underline-offset-4">Staff Portal</a>
         </nav>
@@ -54,10 +53,6 @@
         </div>
 
         <nav class="mt-8 flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-3 text-sm text-white/85" aria-label="StayHub pages">
-            <a href="{% url 'guest_home' %}" class="hover:text-white hover:underline underline-offset-4">Guest Home</a>
-            <a href="{% url 'explore_stays' %}" class="hover:text-white hover:underline underline-offset-4">Explore Stays</a>
-            <a href="{% url 'hotel_details' %}" class="hover:text-white hover:underline underline-offset-4">Hotel Details</a>
-            <a href="{% url 'booking' %}" class="hover:text-white hover:underline underline-offset-4">Book a Stay</a>
             <a href="{% url 'team' %}" class="hover:text-white hover:underline underline-offset-4">Meet the Dev Team</a>
             <a href="{% url 'staff_login' %}" class="hover:text-white hover:underline underline-offset-4">Staff Portal</a>
         </nav>
