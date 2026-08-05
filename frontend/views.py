@@ -507,7 +507,7 @@ def api_two_factor_verify(request):
     user = Staff.objects.filter(pk=user_id, is_active=True).first()
     if user is None:
         return JsonResponse({"detail": "Account unavailable."}, status=400)
-    login(request, user)
+    login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     for key in ("pending_login_user_id", "pending_login_code", "pending_login_expires_at"):
         request.session.pop(key, None)
     return JsonResponse({"detail": "Signed in successfully.", "redirect_url": _redirect_for_role(user.role)})
@@ -576,7 +576,7 @@ def google_callback(request):
         request.session["pending_login_user_id"] = user.id
         request.session["pending_login_channel"] = "email"
         return redirect("verification_method")
-    login(request, user)
+    login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     return redirect(_redirect_for_role(user.role))
 
 

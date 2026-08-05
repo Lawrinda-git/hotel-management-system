@@ -181,7 +181,13 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # WhiteNoise: serve collected static files with gzip/brotli compression.
+# The "default" entry keeps Django's standard FileSystemStorage for media
+# uploads (profile pictures, hotel/room images). Without it, Django 4.2+
+# raises InvalidStorageError on every FileField save.
 STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
