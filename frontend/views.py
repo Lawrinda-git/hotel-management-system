@@ -15,6 +15,7 @@ from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.hashers import check_password, make_password
+from django.core.mail import send_mail
 from django.db import connection, transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -295,6 +296,13 @@ def profile(request):
         return render(request, template, context)
 
     if request.method == "POST":
+        # Detect a 2FA-only toggle submission (no profile fields present).
+        post_keys = set(request.POST.keys())
+        if post_keys <= {"csrfmiddlewaretoken", "two_factor_enabled"}:
+            user.two_factor_enabled = request.POST.get("two_factor_enabled") == "1"
+            user.save(update_fields=["two_factor_enabled"])
+            return redirect("staff_profile" if is_staff else "profile")
+
         full_name = (request.POST.get("full_name") or "").strip()
         email = (request.POST.get("email") or "").strip().lower()
         staff_phone = _phone_value(request.POST.get("country_code"), request.POST.get("staff_phone"))

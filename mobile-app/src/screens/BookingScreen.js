@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { API_BASE_URL } from '../config/api';
 
 const BookingScreen = ({ navigation }) => {
   const [bookings, setBookings] = useState([]);
@@ -11,7 +12,7 @@ const BookingScreen = ({ navigation }) => {
 
   const fetchBookings = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/booking/options/');
+      const response = await fetch(`${API_BASE_URL}/api/booking/options/`);
       const data = await response.json();
       setBookings(data.results || []);
     } catch (error) {

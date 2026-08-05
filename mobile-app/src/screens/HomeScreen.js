@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, RefreshControl } from 'react-native';
+import { API_BASE_URL } from '../config/api';
 
 const HomeScreen = ({ navigation }) => {
   const [rooms, setRooms] = useState([]);
@@ -7,9 +8,9 @@ const HomeScreen = ({ navigation }) => {
 
   const fetchRooms = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/mobile/rooms/');
+      const response = await fetch(`${API_BASE_URL}/api/booking/options/`);
       const data = await response.json();
-      setRooms(data.rooms);
+      setRooms(data.results || []);
     } catch (error) {
       console.error('Failed to fetch rooms:', error);
     }

@@ -1,13 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { API_BASE_URL } from '../config/api';
 
 const SearchScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [hotels] = useState([
-    { id: 1, name: 'La Palm Royal Beach Hotel', location: 'Accra' },
-    { id: 2, name: 'Kempinski Hotel', location: 'Accra' },
-    { id: 3, name: 'Royal Senchi Resort', location: 'Senchi' },
-  ]);
+  const [hotels, setHotels] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/booking/options/`)
+      .then(res => res.json())
+      .then(data => {
+        const uniqueHotels = [];
+        const seen = new Set();
+        for (const room of data.results || []) {
+          const key = room.hotel?.id || room.hotel?.hotel_name;
+          if (key && !seen.has(key)) {
+            seen.add(key);
+            uniqueHotels.push({
+              id: room.hotel?.id || key,
+              name: room.hotel?.hotel_name || 'Unknown Hotel',
+              location: 'Ghana',
+            });
+          }
+        }
+        setHotels(uniqueHotels);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f7f9fb' }}>
