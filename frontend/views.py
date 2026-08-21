@@ -663,17 +663,43 @@ def hotel_details(request):
         return redirect("manager_dashboard" if (request.user.role or "").lower() in ("admin", "manager") else f"{(request.user.role or '').lower()}_dashboard")
     name = request.user.get_full_name().strip() if request.user.is_authenticated else "Guest"
     name = name or (request.user.staff_name if request.user.is_authenticated else "Guest")
-    hotel_id = request.GET.get("hotel", "1")
+    # Prefer a real Hotel record when available so links use the correct PK
+    hotel_id = request.GET.get("hotel", None)
+    hotel = None
+    if hotel_id:
+        try:
+            hotel = Hotel.objects.filter(pk=int(hotel_id)).first()
+        except (ValueError, TypeError):
+            hotel = None
+
+    if hotel is None:
+        # Fall back to the first available hotel in DB, or a static demo
+        hotel = Hotel.objects.first()
+
+    if hotel:
+        return render(request, "frontend/hotel_details.html", {
+            "display_name": name,
+            "hotel_id": hotel.id,
+            "hotel_name": hotel.hotel_name,
+            "hotel_location": getattr(hotel, 'address', '') or getattr(hotel, 'location', ''),
+            "hotel_rating": getattr(hotel, 'rating', '4.5'),
+            "hotel_price": getattr(hotel, 'default_price', 'GH₵0'),
+            "hotel_image": getattr(hotel, 'hero_image', 'frontend/img/961517923804f2e48a85a5c1ac83e837.jpg'),
+            "hotel_category": getattr(hotel, 'category', 'HOTEL'),
+            "hotel_description": getattr(hotel, 'description', ''),
+        })
+
+    # No hotels in DB — fall back to static demo data
     hotels = {
         "1": {"name": "La Palm Royal Beach Hotel", "location": "Liberation Road, Accra", "rating": "5.0", "price": "GH₵250", "image": "frontend/img/008833018260f8f9343a80c63b5be476.jpg", "category": "RESORT", "description": "Luxury beachfront resort with ocean views and premium amenities."},
         "2": {"name": "Kempinski Hotel Gold Coast City", "location": "Gamel Abdul Nasser Avenue, Accra", "rating": "4.9", "price": "GH₵400", "image": "frontend/img/d903519e676e485832027f1ced40bc7b.jpg", "category": "HOTEL", "description": "Five-star urban hotel in the heart of Accra's business district."},
         "3": {"name": "Royal Senchi Resort", "location": "Senchi, Eastern Region", "rating": "4.8", "price": "GH₵350", "image": "frontend/img/acb50fa45400182975c5ad13e56831a3.jpg", "category": "RESORT", "description": "Serene resort nestled along the Volta River with lush gardens."},
         "4": {"name": "Busua Beach Resort", "location": "Busua, Western Region", "rating": "5.0", "price": "GH₵250", "image": "frontend/img/961517923804f2e48a85a5c1ac83e837.jpg", "category": "RESORT", "description": "Beachfront resort with golden sands, surf lessons, and fresh seafood."},
     }
-    hotel_info = hotels.get(hotel_id, hotels["1"])
+    hotel_info = hotels.get(str(hotel_id) if hotel_id else "1", hotels["1"])
     return render(request, "frontend/hotel_details.html", {
         "display_name": name,
-        "hotel_id": hotel_id,
+        "hotel_id": hotel_id or "1",
         "hotel_name": hotel_info["name"],
         "hotel_location": hotel_info["location"],
         "hotel_rating": hotel_info["rating"],
@@ -1038,8 +1064,20 @@ def create_booking(request):
     except Room.DoesNotExist:
         return JsonResponse({"detail": "Selected room does not exist."}, status=404)
 
+    # Ensure room is available and not reserved for overlapping dates
     if room.status != Room.RoomStatus.AVAILABLE:
         return JsonResponse({"detail": "Selected room is not available."}, status=409)
+
+    # Check overlapping reservations for the room between check_in and check_out
+    from apps.reservations.models import RoomReservation
+    overlapping = RoomReservation.objects.filter(
+        room_id=room.id,
+        resv__check_in__lt=check_out,
+        resv__check_out__gt=check_in,
+        resv__status__in=["PENDING", "CHECKED_IN"],
+    ).exists()
+    if overlapping:
+        return JsonResponse({"detail": "Selected room is already reserved for the chosen dates."}, status=409)
 
     with transaction.atomic():
         guest, _ = Guest.objects.get_or_create(

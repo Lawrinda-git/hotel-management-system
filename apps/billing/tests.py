@@ -103,3 +103,85 @@ class PaystackBillingTests(TestCase):
 		self.assertEqual(payment.status, Payment.PaymentStatus.SUCCESS)
 		self.invoice.refresh_from_db()
 		self.assertEqual(self.invoice.status, Invoice.InvoiceStatus.PAID)
+
+	def _paystack_verify_response(self, reference, amount_pesewas):
+		mock_response = Mock()
+		mock_response.ok = True
+		mock_response.json.return_value = {
+			"status": True,
+			"data": {
+				"status": "success",
+				"reference": reference,
+				"amount": amount_pesewas,
+				"paid_at": "2027-06-01T00:00:00.000Z",
+			},
+		}
+		return mock_response
+
+	@override_settings(PAYSTACK_SECRET_KEY="test-secret")
+	def test_paystack_verify_records_full_payment_and_confirms_reservation(self):
+		self.invoice.reservation.status = Reservation.ReservationStatus.PENDING
+		self.invoice.reservation.save(update_fields=["status"])
+		reference = f"inv-{self.invoice.id}-{self.invoice.reservation_id}"
+
+		with patch("apps.billing.views.requests.get", return_value=self._paystack_verify_response(reference, 50000)):
+			response = self.client.get(reverse("paystack_verify", args=[reference]))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.json()["status"], "success")
+		payment = Payment.objects.get(provider_reference=reference)
+		self.assertEqual(payment.amount, Decimal("500.00"))
+		self.assertEqual(payment.method, Payment.PaymentMethod.PAYSTACK)
+		self.invoice.refresh_from_db()
+		self.assertEqual(self.invoice.status, Invoice.InvoiceStatus.PAID)
+		self.invoice.reservation.refresh_from_db()
+		self.assertEqual(self.invoice.reservation.status, Reservation.ReservationStatus.CONFIRMED)
+
+	@override_settings(PAYSTACK_SECRET_KEY="test-secret")
+	def test_paystack_verify_records_balance_due_after_partial_payment(self):
+		# The guest already paid GH₵200 by cash, so the Paystack charge is only
+		# for the GH₵300 balance. The callback must record it even though the
+		# charged amount is below the invoice total.
+		Payment.objects.create(
+			invoice=self.invoice,
+			hotel=self.invoice.hotel,
+			amount=Decimal("200.00"),
+			method=Payment.PaymentMethod.CASH,
+			status=Payment.PaymentStatus.SUCCESS,
+		)
+		self.invoice.reservation.status = Reservation.ReservationStatus.PENDING
+		self.invoice.reservation.save(update_fields=["status"])
+		reference = f"inv-{self.invoice.id}-{self.invoice.reservation_id}"
+
+		with patch("apps.billing.views.requests.get", return_value=self._paystack_verify_response(reference, 30000)):
+			response = self.client.get(reverse("paystack_verify", args=[reference]))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.json()["status"], "success")
+		self.invoice.refresh_from_db()
+		self.assertEqual(self.invoice.status, Invoice.InvoiceStatus.PAID)
+		self.assertEqual(Payment.objects.filter(invoice=self.invoice).count(), 2)
+		self.invoice.reservation.refresh_from_db()
+		self.assertEqual(self.invoice.reservation.status, Reservation.ReservationStatus.CONFIRMED)
+
+	@override_settings(PAYSTACK_SECRET_KEY="test-secret")
+	def test_paystack_verify_is_idempotent_after_webhook(self):
+		# Webhook already recorded the charge and marked the invoice paid; the
+		# browser callback must not create a duplicate payment.
+		reference = f"inv-{self.invoice.id}-{self.invoice.reservation_id}"
+		Payment.objects.create(
+			invoice=self.invoice,
+			hotel=self.invoice.hotel,
+			amount=Decimal("500.00"),
+			method=Payment.PaymentMethod.PAYSTACK,
+			status=Payment.PaymentStatus.SUCCESS,
+			provider_reference=reference,
+		)
+		self.invoice.status = Invoice.InvoiceStatus.PAID
+		self.invoice.save(update_fields=["status"])
+
+		with patch("apps.billing.views.requests.get", return_value=self._paystack_verify_response(reference, 50000)):
+			response = self.client.get(reverse("paystack_verify", args=[reference]))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(Payment.objects.filter(provider_reference=reference).count(), 1)

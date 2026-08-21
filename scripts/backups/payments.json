@@ -1,0 +1,715 @@
+[
+{
+  "model": "billing.payment",
+  "pk": 1,
+  "fields": {
+    "hotel": null,
+    "invoice": 1,
+    "amount": "414.40",
+    "method": "Paystack",
+    "status": "success",
+    "provider_reference": null,
+    "provider_response": null,
+    "payment_date": "2026-07-30T11:40:17.809Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 3,
+  "fields": {
+    "hotel": null,
+    "invoice": 3,
+    "amount": "414.40",
+    "method": "Paystack",
+    "status": "success",
+    "provider_reference": null,
+    "provider_response": null,
+    "payment_date": "2026-07-30T11:40:17.821Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 6,
+  "fields": {
+    "hotel": 4,
+    "invoice": 6,
+    "amount": "2000.00",
+    "method": "Mobile_Money",
+    "status": "success",
+    "provider_reference": "MTN-PAY-20250715-001",
+    "provider_response": {
+      "phone": "+233244123001",
+      "status": "success",
+      "network": "MTN"
+    },
+    "payment_date": "2025-07-15T16:00:00Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 7,
+  "fields": {
+    "hotel": 4,
+    "invoice": 8,
+    "amount": "9000.00",
+    "method": "Card",
+    "status": "success",
+    "provider_reference": "CARD-VISA-20250717-001",
+    "provider_response": {
+      "last4": "4242",
+      "status": "success",
+      "card_type": "VISA"
+    },
+    "payment_date": "2025-07-17T14:00:00Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 8,
+  "fields": {
+    "hotel": 4,
+    "invoice": 12,
+    "amount": "3400.00",
+    "method": "Mobile_Money",
+    "status": "success",
+    "provider_reference": "VOD-PAY-20250710-001",
+    "provider_response": {
+      "phone": "+233244123005",
+      "status": "success",
+      "network": "Vodafone"
+    },
+    "payment_date": "2025-07-14T09:00:00Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 9,
+  "fields": {
+    "hotel": 4,
+    "invoice": 13,
+    "amount": "4400.00",
+    "method": "Cash",
+    "status": "success",
+    "provider_reference": null,
+    "provider_response": null,
+    "payment_date": "2025-07-12T10:00:00Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 10,
+  "fields": {
+    "hotel": 5,
+    "invoice": 14,
+    "amount": "700.00",
+    "method": "Cash",
+    "status": "success",
+    "provider_reference": null,
+    "provider_response": null,
+    "payment_date": "2025-07-15T15:00:00Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 11,
+  "fields": {
+    "hotel": 5,
+    "invoice": 16,
+    "amount": "2400.00",
+    "method": "Paystack",
+    "status": "success",
+    "provider_reference": "PSK-REF-20250717-78901",
+    "provider_response": {
+      "amount": 240000,
+      "status": "success",
+      "currency": "GHS",
+      "reference": "PSK-REF-20250717-78901"
+    },
+    "payment_date": "2025-07-17T14:20:00Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 12,
+  "fields": {
+    "hotel": 5,
+    "invoice": 18,
+    "amount": "1920.00",
+    "method": "Cash",
+    "status": "success",
+    "provider_reference": null,
+    "provider_response": null,
+    "payment_date": "2025-07-13T10:00:00Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 13,
+  "fields": {
+    "hotel": 6,
+    "invoice": 19,
+    "amount": "1000.00",
+    "method": "Mobile_Money",
+    "status": "success",
+    "provider_reference": "MTN-PAY-20250715-002",
+    "provider_response": {
+      "phone": "+233244123001",
+      "status": "success",
+      "network": "MTN"
+    },
+    "payment_date": "2025-07-15T15:30:00Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 14,
+  "fields": {
+    "hotel": 6,
+    "invoice": 20,
+    "amount": "1300.00",
+    "method": "Card",
+    "status": "success",
+    "provider_reference": "CARD-MAST-20250716-002",
+    "provider_response": {
+      "last4": "5555",
+      "status": "success",
+      "card_type": "Mastercard"
+    },
+    "payment_date": "2025-07-16T15:00:00Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 15,
+  "fields": {
+    "hotel": 6,
+    "invoice": 23,
+    "amount": "1520.00",
+    "method": "Cash",
+    "status": "success",
+    "provider_reference": null,
+    "provider_response": null,
+    "payment_date": "2025-07-11T10:00:00Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 16,
+  "fields": {
+    "hotel": 5,
+    "invoice": 15,
+    "amount": "2880.00",
+    "method": "Paystack",
+    "status": "pending",
+    "provider_reference": "PSK-REF-20250718-99001",
+    "provider_response": {
+      "status": "pending",
+      "reference": "PSK-REF-20250718-99001"
+    },
+    "payment_date": "2025-07-18T09:00:00Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 17,
+  "fields": {
+    "hotel": null,
+    "invoice": 25,
+    "amount": "2178.40",
+    "method": "Paystack",
+    "status": "success",
+    "provider_reference": "inv-25-27",
+    "provider_response": {
+      "data": {
+        "id": 6422450537,
+        "log": {
+          "input": [],
+          "errors": 0,
+          "mobile": false,
+          "history": [
+            {
+              "time": 38,
+              "type": "action",
+              "message": "Set payment method to: card"
+            },
+            {
+              "time": 56,
+              "type": "action",
+              "message": "Attempted to pay with card"
+            },
+            {
+              "time": 68,
+              "type": "success",
+              "message": "Successfully paid with card"
+            }
+          ],
+          "success": true,
+          "attempts": 1,
+          "start_time": 1785803157,
+          "time_spent": 68
+        },
+        "fees": 4248,
+        "plan": null,
+        "split": {},
+        "amount": 217840,
+        "domain": "test",
+        "paidAt": "2026-08-04T00:26:55.000Z",
+        "source": null,
+        "status": "success",
+        "channel": "card",
+        "connect": null,
+        "message": null,
+        "paid_at": "2026-08-04T00:26:55.000Z",
+        "currency": "GHS",
+        "customer": {
+          "id": 386571886,
+          "email": "testuser@stayhub.com",
+          "phone": null,
+          "metadata": null,
+          "last_name": null,
+          "first_name": null,
+          "risk_action": "default",
+          "customer_code": "CUS_mncgj49pczi5pho",
+          "international_format_phone": null
+        },
+        "metadata": {
+          "guest_name": "testuser",
+          "invoice_id": "25",
+          "guest_phone": "+233123456789",
+          "reservation_id": "27"
+        },
+        "order_id": null,
+        "createdAt": "2026-08-04T00:25:45.000Z",
+        "reference": "inv-25-27",
+        "created_at": "2026-08-04T00:25:45.000Z",
+        "fees_split": null,
+        "ip_address": "154.161.232.97",
+        "subaccount": {},
+        "plan_object": {},
+        "authorization": {
+          "bin": "408408",
+          "bank": "TEST BANK",
+          "brand": "visa",
+          "last4": "4081",
+          "channel": "card",
+          "exp_year": "2030",
+          "reusable": true,
+          "card_type": "visa ",
+          "exp_month": "12",
+          "signature": "SIG_QuZJZBmkvXVDXyhleoXw",
+          "account_name": null,
+          "country_code": "GH",
+          "receiver_bank": null,
+          "authorization_code": "AUTH_mc8i5b216j",
+          "receiver_bank_account_number": null
+        },
+        "response_code": "00",
+        "fees_breakdown": null,
+        "receipt_number": null,
+        "gateway_response": "Successful",
+        "requested_amount": 217840,
+        "transaction_date": "2026-08-04T00:25:45.000Z",
+        "pos_transaction_data": null,
+        "gateway_response_code": "approved"
+      },
+      "status": true,
+      "message": "Verification successful"
+    },
+    "payment_date": "2026-08-04T00:27:10.499Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 18,
+  "fields": {
+    "hotel": null,
+    "invoice": 35,
+    "amount": "25250.40",
+    "method": "Paystack",
+    "status": "success",
+    "provider_reference": "inv-35-37",
+    "provider_response": {
+      "id": 6424345872,
+      "log": null,
+      "fees": 49239,
+      "plan": {},
+      "split": {},
+      "amount": 2525040,
+      "domain": "test",
+      "paidAt": "2026-08-04T13:55:58.000Z",
+      "source": {
+        "type": "api",
+        "source": "merchant_api",
+        "identifier": null,
+        "entry_point": "transaction_initialize"
+      },
+      "status": "success",
+      "channel": "mobile_money",
+      "message": null,
+      "paid_at": "2026-08-04T13:55:58.000Z",
+      "currency": "GHS",
+      "customer": {
+        "id": 388214953,
+        "email": "calvinherchel@gmail.com",
+        "phone": null,
+        "metadata": null,
+        "last_name": null,
+        "first_name": null,
+        "risk_action": "default",
+        "customer_code": "CUS_kk7961db3n4iwnt",
+        "international_format_phone": null
+      },
+      "metadata": {
+        "guest_name": "Calvin Herchel",
+        "invoice_id": "35",
+        "guest_phone": "+233256319149",
+        "reservation_id": "37"
+      },
+      "order_id": null,
+      "reference": "inv-35-37",
+      "created_at": "2026-08-04T13:55:35.000Z",
+      "fees_split": null,
+      "ip_address": "154.161.122.222",
+      "subaccount": {},
+      "authorization": {
+        "bin": "055XXX",
+        "bank": "MTN",
+        "brand": "Mtn",
+        "last4": "X987",
+        "channel": "mobile_money",
+        "exp_year": "9999",
+        "reusable": false,
+        "card_type": "",
+        "exp_month": "12",
+        "signature": null,
+        "account_name": null,
+        "country_code": "GH",
+        "receiver_bank": null,
+        "authorization_code": "AUTH_6u7heffbb8",
+        "receiver_bank_account_number": null
+      },
+      "fees_breakdown": null,
+      "gateway_response": "Approved",
+      "requested_amount": 2525040,
+      "pos_transaction_data": null
+    },
+    "payment_date": "2026-08-04T13:56:01.032Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 19,
+  "fields": {
+    "hotel": null,
+    "invoice": 36,
+    "amount": "7610.40",
+    "method": "Paystack",
+    "status": "success",
+    "provider_reference": "inv-36-38",
+    "provider_response": {
+      "id": 6424359216,
+      "log": null,
+      "fees": 14841,
+      "plan": {},
+      "split": {},
+      "amount": 761040,
+      "domain": "test",
+      "paidAt": "2026-08-04T14:01:28.000Z",
+      "source": {
+        "type": "api",
+        "source": "merchant_api",
+        "identifier": null,
+        "entry_point": "transaction_initialize"
+      },
+      "status": "success",
+      "channel": "mobile_money",
+      "message": null,
+      "paid_at": "2026-08-04T14:01:28.000Z",
+      "currency": "GHS",
+      "customer": {
+        "id": 388239982,
+        "email": "isobelnoye1@gmail.com",
+        "phone": null,
+        "metadata": null,
+        "last_name": null,
+        "first_name": null,
+        "risk_action": "default",
+        "customer_code": "CUS_bxhw2u3yw50hh0x",
+        "international_format_phone": null
+      },
+      "metadata": {
+        "guest_name": "Naa Norkor",
+        "invoice_id": "36",
+        "guest_phone": "+233509103915",
+        "reservation_id": "38"
+      },
+      "order_id": null,
+      "reference": "inv-36-38",
+      "created_at": "2026-08-04T14:00:03.000Z",
+      "fees_split": null,
+      "ip_address": "102.176.95.120",
+      "subaccount": {},
+      "authorization": {
+        "bin": "055XXX",
+        "bank": "MTN",
+        "brand": "Mtn",
+        "last4": "X987",
+        "channel": "mobile_money",
+        "exp_year": "9999",
+        "reusable": false,
+        "card_type": "",
+        "exp_month": "12",
+        "signature": null,
+        "account_name": null,
+        "country_code": "GH",
+        "receiver_bank": null,
+        "authorization_code": "AUTH_b9i7qo9jmp",
+        "receiver_bank_account_number": null
+      },
+      "fees_breakdown": null,
+      "gateway_response": "Approved",
+      "requested_amount": 761040,
+      "pos_transaction_data": null
+    },
+    "payment_date": "2026-08-04T14:02:51.656Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 20,
+  "fields": {
+    "hotel": null,
+    "invoice": 38,
+    "amount": "1450.40",
+    "method": "Paystack",
+    "status": "success",
+    "provider_reference": "inv-38-40",
+    "provider_response": {
+      "id": 6424435575,
+      "log": null,
+      "fees": 2829,
+      "plan": {},
+      "split": {},
+      "amount": 145040,
+      "domain": "test",
+      "paidAt": "2026-08-04T14:31:17.000Z",
+      "source": {
+        "type": "api",
+        "source": "merchant_api",
+        "identifier": null,
+        "entry_point": "transaction_initialize"
+      },
+      "status": "success",
+      "channel": "card",
+      "message": null,
+      "paid_at": "2026-08-04T14:31:17.000Z",
+      "currency": "GHS",
+      "customer": {
+        "id": 388214953,
+        "email": "calvinherchel@gmail.com",
+        "phone": null,
+        "metadata": null,
+        "last_name": null,
+        "first_name": null,
+        "risk_action": "default",
+        "customer_code": "CUS_kk7961db3n4iwnt",
+        "international_format_phone": null
+      },
+      "metadata": {
+        "guest_name": "Calvin Herchel",
+        "invoice_id": "38",
+        "guest_phone": "+233256319149",
+        "reservation_id": "40"
+      },
+      "order_id": null,
+      "reference": "inv-38-40",
+      "created_at": "2026-08-04T14:30:33.000Z",
+      "fees_split": null,
+      "ip_address": "154.161.122.222",
+      "subaccount": {},
+      "authorization": {
+        "bin": "408408",
+        "bank": "TEST BANK",
+        "brand": "visa",
+        "last4": "4081",
+        "channel": "card",
+        "exp_year": "2030",
+        "reusable": true,
+        "card_type": "visa ",
+        "exp_month": "12",
+        "signature": "SIG_QuZJZBmkvXVDXyhleoXw",
+        "account_name": null,
+        "country_code": "GH",
+        "receiver_bank": null,
+        "authorization_code": "AUTH_vuq9ssf5fj",
+        "receiver_bank_account_number": null
+      },
+      "response_code": "00",
+      "fees_breakdown": null,
+      "gateway_response": "Successful",
+      "requested_amount": 145040,
+      "pos_transaction_data": null,
+      "gateway_response_code": "approved"
+    },
+    "payment_date": "2026-08-04T14:31:21.329Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 21,
+  "fields": {
+    "hotel": 4,
+    "invoice": 39,
+    "amount": "4810.40",
+    "method": "Paystack",
+    "status": "success",
+    "provider_reference": "inv-39-41",
+    "provider_response": {
+      "id": 6424653512,
+      "log": null,
+      "fees": 9381,
+      "plan": {},
+      "split": {},
+      "amount": 481040,
+      "domain": "test",
+      "paidAt": "2026-08-04T15:52:27.000Z",
+      "source": {
+        "type": "api",
+        "source": "merchant_api",
+        "identifier": null,
+        "entry_point": "transaction_initialize"
+      },
+      "status": "success",
+      "channel": "mobile_money",
+      "message": null,
+      "paid_at": "2026-08-04T15:52:27.000Z",
+      "currency": "GHS",
+      "customer": {
+        "id": 388268300,
+        "email": "saram@gmail.com",
+        "phone": null,
+        "metadata": null,
+        "last_name": null,
+        "first_name": null,
+        "risk_action": "default",
+        "customer_code": "CUS_8oxm84m4ahaf6av",
+        "international_format_phone": null
+      },
+      "metadata": {
+        "guest_name": "Sarah Marshall",
+        "invoice_id": "39",
+        "guest_phone": "+233592304553",
+        "reservation_id": "41"
+      },
+      "order_id": null,
+      "reference": "inv-39-41",
+      "created_at": "2026-08-04T15:52:16.000Z",
+      "fees_split": null,
+      "ip_address": "41.204.44.213",
+      "subaccount": {},
+      "authorization": {
+        "bin": "055XXX",
+        "bank": "MTN",
+        "brand": "Mtn",
+        "last4": "X987",
+        "channel": "mobile_money",
+        "exp_year": "9999",
+        "reusable": false,
+        "card_type": "",
+        "exp_month": "12",
+        "signature": null,
+        "account_name": null,
+        "country_code": "GH",
+        "receiver_bank": null,
+        "authorization_code": "AUTH_6ktdv1d7wj",
+        "receiver_bank_account_number": null
+      },
+      "fees_breakdown": null,
+      "gateway_response": "Approved",
+      "requested_amount": 481040,
+      "pos_transaction_data": null
+    },
+    "payment_date": "2026-08-04T15:52:29.273Z"
+  }
+},
+{
+  "model": "billing.payment",
+  "pk": 22,
+  "fields": {
+    "hotel": 3,
+    "invoice": 40,
+    "amount": "1450.40",
+    "method": "Paystack",
+    "status": "success",
+    "provider_reference": "inv-40-42",
+    "provider_response": {
+      "id": 6427608482,
+      "log": null,
+      "fees": 2829,
+      "plan": {},
+      "split": {},
+      "amount": 145040,
+      "domain": "test",
+      "paidAt": "2026-08-05T12:42:22.000Z",
+      "source": {
+        "type": "api",
+        "source": "merchant_api",
+        "identifier": null,
+        "entry_point": "transaction_initialize"
+      },
+      "status": "success",
+      "channel": "card",
+      "message": "test-3ds",
+      "paid_at": "2026-08-05T12:42:22.000Z",
+      "currency": "GHS",
+      "customer": {
+        "id": 388501552,
+        "email": "cielcalel@gmail.com",
+        "phone": null,
+        "metadata": null,
+        "last_name": null,
+        "first_name": null,
+        "risk_action": "default",
+        "customer_code": "CUS_bawx699zp74dlgl",
+        "international_format_phone": null
+      },
+      "metadata": {
+        "guest_name": "Calvin Herchel",
+        "invoice_id": "40",
+        "guest_phone": "+233256319149",
+        "reservation_id": "42"
+      },
+      "order_id": null,
+      "reference": "inv-40-42",
+      "created_at": "2026-08-05T12:42:03.000Z",
+      "fees_split": null,
+      "ip_address": "154.161.243.100",
+      "subaccount": {},
+      "authorization": {
+        "bin": "408408",
+        "bank": "TEST BANK",
+        "brand": "visa",
+        "last4": "0409",
+        "channel": "card",
+        "exp_year": "2030",
+        "reusable": true,
+        "card_type": "visa ",
+        "exp_month": "01",
+        "signature": "SIG_gS9LmgScqLSjswcfHQ9o",
+        "account_name": null,
+        "country_code": "GH",
+        "receiver_bank": null,
+        "authorization_code": "AUTH_j4wx5cjudu",
+        "receiver_bank_account_number": null
+      },
+      "response_code": null,
+      "fees_breakdown": null,
+      "gateway_response": "[Test] Approved",
+      "requested_amount": 145040,
+      "pos_transaction_data": null,
+      "gateway_response_code": null
+    },
+    "payment_date": "2026-08-05T12:42:25.522Z"
+  }
+}
+]

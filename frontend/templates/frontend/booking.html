@@ -366,6 +366,40 @@
 
     var HOTEL_ID = {{ hotel_id|default:"''" }};
 
+    // Verify a Paystack payment server-side. Webhooks can be slow and the
+    // verify endpoint can hit transient Paystack API hiccups, so retry a few
+    // times with a timeout instead of stranding the guest after a real charge.
+    // Definitive answers (payment abandoned/failed, 4xx) fail fast.
+    async function verifyPayment(reference) {
+        const verifyUrl = '{% url "paystack_verify" reference="PAYSTACK_REFERENCE" %}'.replace('PAYSTACK_REFERENCE', encodeURIComponent(reference));
+        let lastError = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            let transient = true;
+            try {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 30000);
+                const response = await fetch(verifyUrl, { signal: controller.signal });
+                clearTimeout(timer);
+                const payment = await response.json();
+                if (!response.ok) {
+                    // 5xx may be a temporary gateway hiccup; 4xx is final.
+                    transient = response.status >= 500;
+                    throw new Error(payment.detail || 'Payment could not be verified.');
+                }
+                if (payment.status !== 'success') {
+                    transient = false;
+                    throw new Error('Payment was not completed.');
+                }
+                return payment;
+            } catch (error) {
+                lastError = error;
+                if (!transient || attempt >= 2) break;
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+            }
+        }
+        throw lastError;
+    }
+
     async function completePaystackReturn() {
         const params = new URLSearchParams(window.location.search);
         const reference = params.get('reference') || params.get('trxref');
@@ -373,10 +407,7 @@
         const status = document.getElementById('room-status');
         if (status) status.innerHTML = '<span class="skeleton skeleton-text" style="display:inline-block;width:220px;height:16px"></span>';
         try {
-            const verifyUrl = '{% url "paystack_verify" reference="PAYSTACK_REFERENCE" %}'.replace('PAYSTACK_REFERENCE', encodeURIComponent(reference));
-            const response = await fetch(verifyUrl);
-            const payment = await response.json();
-            if (!response.ok || payment.status !== 'success') throw new Error(payment.detail || 'Payment was not completed.');
+            await verifyPayment(reference);
             const parts = reference.split('-');
             if (parts.length !== 3 || parts[0] !== 'inv') throw new Error('Invalid payment reference.');
             const url = new URL('{% url "reservation_confirmed" %}', window.location.origin);

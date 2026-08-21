@@ -557,12 +557,47 @@
   });
 
   // ---------- Paystack callback handling ----------
+  // Verify the payment server-side, retrying a few times so a slow webhook or
+  // a transient Paystack API hiccup does not strand the staff member after a
+  // real charge. Definitive answers (payment abandoned/failed, 4xx) fail fast.
+  function verifyPayment(reference) {
+    var verifyUrl = '{% url "paystack_verify" reference="PAYSTACK_REFERENCE" %}'.replace('PAYSTACK_REFERENCE', encodeURIComponent(reference));
+    var attempt = 0;
+    function tryVerify() {
+      return fetch(verifyUrl)
+        .then(function (r) {
+          return r.json().then(function (d) {
+            if (!r.ok) {
+              // 5xx may be a temporary gateway hiccup; 4xx is final.
+              if (r.status >= 500) throw new Error(d.detail || 'Payment could not be verified.');
+              var err = new Error(d.detail || 'Payment could not be verified.');
+              err.definitive = true;
+              throw err;
+            }
+            if (d.status !== 'success') {
+              var err2 = new Error('Payment was not completed.');
+              err2.definitive = true;
+              throw err2;
+            }
+            return d;
+          });
+        })
+        .catch(function (e) {
+          if (!e.definitive && attempt < 2) {
+            attempt += 1;
+            return new Promise(function (resolve) { setTimeout(resolve, 2000); }).then(tryVerify);
+          }
+          throw e;
+        });
+    }
+    return tryVerify();
+  }
+
   function completePaystackReturn() {
     var params = new URLSearchParams(window.location.search);
     var reference = params.get('reference') || params.get('trxref');
     if (!reference) return;
-    fetch('{% url "paystack_verify" reference="PAYSTACK_REFERENCE" %}'.replace('PAYSTACK_REFERENCE', encodeURIComponent(reference)))
-      .then(function (r) { return r.json().then(function (d) { if (!r.ok || d.status !== 'success') throw new Error(d.detail || 'Payment was not completed.'); return d; }); })
+    verifyPayment(reference)
       .then(function () {
         var parts = reference.split('-');
         if (parts.length !== 3 || parts[0] !== 'inv') throw new Error('Invalid payment reference.');

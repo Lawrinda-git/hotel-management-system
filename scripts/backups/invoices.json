@@ -1,0 +1,409 @@
+[
+{
+  "model": "billing.invoice",
+  "pk": 1,
+  "fields": {
+    "hotel": 1,
+    "reservation": 1,
+    "total_amount": "414.40",
+    "issue_date": "2026-07-30T11:40:17.804Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 3,
+  "fields": {
+    "hotel": 3,
+    "reservation": 3,
+    "total_amount": "414.40",
+    "issue_date": "2026-07-30T11:40:17.818Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 6,
+  "fields": {
+    "hotel": 4,
+    "reservation": 6,
+    "total_amount": "4590.00",
+    "issue_date": "2025-07-15T15:30:00Z",
+    "status": "partial"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 7,
+  "fields": {
+    "hotel": 4,
+    "reservation": 7,
+    "total_amount": "3300.00",
+    "issue_date": "2025-07-16T14:45:00Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 8,
+  "fields": {
+    "hotel": 4,
+    "reservation": 8,
+    "total_amount": "9000.00",
+    "issue_date": "2025-07-17T13:55:00Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 9,
+  "fields": {
+    "hotel": 4,
+    "reservation": 9,
+    "total_amount": "13500.00",
+    "issue_date": "2025-07-18T16:00:00Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 10,
+  "fields": {
+    "hotel": 4,
+    "reservation": 10,
+    "total_amount": "3400.00",
+    "issue_date": "2025-07-10T16:00:00Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 11,
+  "fields": {
+    "hotel": 4,
+    "reservation": 11,
+    "total_amount": "7200.00",
+    "issue_date": "2025-07-12T10:00:00Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 12,
+  "fields": {
+    "hotel": 4,
+    "reservation": 13,
+    "total_amount": "3400.00",
+    "issue_date": "2025-07-10T15:00:00Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 13,
+  "fields": {
+    "hotel": 4,
+    "reservation": 14,
+    "total_amount": "4400.00",
+    "issue_date": "2025-07-08T14:30:00Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 14,
+  "fields": {
+    "hotel": 5,
+    "reservation": 16,
+    "total_amount": "1440.00",
+    "issue_date": "2025-07-15T14:30:00Z",
+    "status": "partial"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 15,
+  "fields": {
+    "hotel": 5,
+    "reservation": 17,
+    "total_amount": "2880.00",
+    "issue_date": "2025-07-16T15:00:00Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 16,
+  "fields": {
+    "hotel": 5,
+    "reservation": 18,
+    "total_amount": "2400.00",
+    "issue_date": "2025-07-17T14:15:00Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 17,
+  "fields": {
+    "hotel": 5,
+    "reservation": 19,
+    "total_amount": "2400.00",
+    "issue_date": "2025-07-11T16:00:00Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 18,
+  "fields": {
+    "hotel": 5,
+    "reservation": 20,
+    "total_amount": "1920.00",
+    "issue_date": "2025-07-09T14:00:00Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 19,
+  "fields": {
+    "hotel": 6,
+    "reservation": 21,
+    "total_amount": "1900.00",
+    "issue_date": "2025-07-15T15:00:00Z",
+    "status": "partial"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 20,
+  "fields": {
+    "hotel": 6,
+    "reservation": 22,
+    "total_amount": "1300.00",
+    "issue_date": "2025-07-16T14:30:00Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 21,
+  "fields": {
+    "hotel": 6,
+    "reservation": 23,
+    "total_amount": "2600.00",
+    "issue_date": "2025-07-18T14:00:00Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 22,
+  "fields": {
+    "hotel": 6,
+    "reservation": 24,
+    "total_amount": "3800.00",
+    "issue_date": "2025-07-12T09:00:00Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 23,
+  "fields": {
+    "hotel": 6,
+    "reservation": 25,
+    "total_amount": "1520.00",
+    "issue_date": "2025-07-07T14:00:00Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 24,
+  "fields": {
+    "hotel": 5,
+    "reservation": 26,
+    "total_amount": "10970.40",
+    "issue_date": "2026-08-04T00:24:01.129Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 25,
+  "fields": {
+    "hotel": 6,
+    "reservation": 27,
+    "total_amount": "2178.40",
+    "issue_date": "2026-08-04T00:25:44.527Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 26,
+  "fields": {
+    "hotel": 6,
+    "reservation": 28,
+    "total_amount": "2178.40",
+    "issue_date": "2026-08-04T12:15:46.020Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 27,
+  "fields": {
+    "hotel": 6,
+    "reservation": 29,
+    "total_amount": "3690.40",
+    "issue_date": "2026-08-04T12:30:52.636Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 28,
+  "fields": {
+    "hotel": 6,
+    "reservation": 30,
+    "total_amount": "5370.40",
+    "issue_date": "2026-08-04T12:34:44.183Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 29,
+  "fields": {
+    "hotel": 4,
+    "reservation": 31,
+    "total_amount": "10130.40",
+    "issue_date": "2026-08-04T12:36:04.385Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 30,
+  "fields": {
+    "hotel": 6,
+    "reservation": 32,
+    "total_amount": "5370.40",
+    "issue_date": "2026-08-04T13:32:28.214Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 31,
+  "fields": {
+    "hotel": 3,
+    "reservation": 33,
+    "total_amount": "1450.40",
+    "issue_date": "2026-08-04T13:34:51.588Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 32,
+  "fields": {
+    "hotel": 4,
+    "reservation": 34,
+    "total_amount": "10130.40",
+    "issue_date": "2026-08-04T13:36:01.404Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 33,
+  "fields": {
+    "hotel": 1,
+    "reservation": 35,
+    "total_amount": "1450.40",
+    "issue_date": "2026-08-04T13:48:02.491Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 34,
+  "fields": {
+    "hotel": 1,
+    "reservation": 36,
+    "total_amount": "1450.40",
+    "issue_date": "2026-08-04T13:50:25.056Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 35,
+  "fields": {
+    "hotel": 4,
+    "reservation": 37,
+    "total_amount": "25250.40",
+    "issue_date": "2026-08-04T13:55:34.333Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 36,
+  "fields": {
+    "hotel": 3,
+    "reservation": 38,
+    "total_amount": "7610.40",
+    "issue_date": "2026-08-04T14:00:00.668Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 37,
+  "fields": {
+    "hotel": 1,
+    "reservation": 39,
+    "total_amount": "4250.40",
+    "issue_date": "2026-08-04T14:12:55.828Z",
+    "status": "unpaid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 38,
+  "fields": {
+    "hotel": 3,
+    "reservation": 40,
+    "total_amount": "1450.40",
+    "issue_date": "2026-08-04T14:30:29.754Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 39,
+  "fields": {
+    "hotel": 4,
+    "reservation": 41,
+    "total_amount": "4810.40",
+    "issue_date": "2026-08-04T15:52:15.569Z",
+    "status": "paid"
+  }
+},
+{
+  "model": "billing.invoice",
+  "pk": 40,
+  "fields": {
+    "hotel": 3,
+    "reservation": 42,
+    "total_amount": "1450.40",
+    "issue_date": "2026-08-05T12:41:57.222Z",
+    "status": "paid"
+  }
+}
+]

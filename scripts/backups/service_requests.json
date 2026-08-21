@@ -1,0 +1,178 @@
+[
+{
+  "model": "services.servicerequest",
+  "pk": 4,
+  "fields": {
+    "service": 4,
+    "staff": null,
+    "resv": 8,
+    "request_time": "2025-07-17T09:00:00Z",
+    "status": "Pending"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 5,
+  "fields": {
+    "service": 3,
+    "staff": null,
+    "resv": 9,
+    "request_time": "2025-07-18T11:00:00Z",
+    "status": "Pending"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 9,
+  "fields": {
+    "service": 12,
+    "staff": null,
+    "resv": 18,
+    "request_time": "2025-07-17T08:00:00Z",
+    "status": "Pending"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 12,
+  "fields": {
+    "service": 19,
+    "staff": null,
+    "resv": 23,
+    "request_time": "2025-07-18T11:00:00Z",
+    "status": "Pending"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 1,
+  "fields": {
+    "service": 1,
+    "staff": null,
+    "resv": 6,
+    "request_time": "2025-07-16T08:30:00Z",
+    "status": "Completed"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 2,
+  "fields": {
+    "service": 2,
+    "staff": null,
+    "resv": 6,
+    "request_time": "2025-07-16T10:00:00Z",
+    "status": "Completed"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 3,
+  "fields": {
+    "service": 1,
+    "staff": null,
+    "resv": 7,
+    "request_time": "2025-07-17T07:45:00Z",
+    "status": "In_Progress"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 6,
+  "fields": {
+    "service": 8,
+    "staff": null,
+    "resv": 6,
+    "request_time": "2025-07-18T08:00:00Z",
+    "status": "In_Progress"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 7,
+  "fields": {
+    "service": 9,
+    "staff": null,
+    "resv": 16,
+    "request_time": "2025-07-15T09:00:00Z",
+    "status": "Completed"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 8,
+  "fields": {
+    "service": 10,
+    "staff": null,
+    "resv": 17,
+    "request_time": "2025-07-16T10:30:00Z",
+    "status": "In_Progress"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 10,
+  "fields": {
+    "service": 15,
+    "staff": null,
+    "resv": 21,
+    "request_time": "2025-07-15T09:30:00Z",
+    "status": "Completed"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 11,
+  "fields": {
+    "service": 16,
+    "staff": null,
+    "resv": 22,
+    "request_time": "2025-07-16T10:00:00Z",
+    "status": "In_Progress"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 13,
+  "fields": {
+    "service": 1,
+    "staff": null,
+    "resv": 13,
+    "request_time": "2025-07-11T08:00:00Z",
+    "status": "Completed"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 14,
+  "fields": {
+    "service": 3,
+    "staff": null,
+    "resv": 14,
+    "request_time": "2025-07-10T09:00:00Z",
+    "status": "Completed"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 15,
+  "fields": {
+    "service": 12,
+    "staff": null,
+    "resv": 20,
+    "request_time": "2025-07-10T10:00:00Z",
+    "status": "Completed"
+  }
+},
+{
+  "model": "services.servicerequest",
+  "pk": 16,
+  "fields": {
+    "service": 15,
+    "staff": null,
+    "resv": 25,
+    "request_time": "2025-07-08T14:00:00Z",
+    "status": "Completed"
+  }
+}
+]

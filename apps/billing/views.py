@@ -3,6 +3,7 @@ import hmac
 import json
 import logging
 from decimal import Decimal
+from urllib.parse import quote
 
 import requests
 from django.conf import settings
@@ -90,7 +91,7 @@ def verify_paystack_payment(request, reference):
     
     try:
         response = requests.get(
-            f"https://api.paystack.co/transaction/verify/{reference}",
+            f"https://api.paystack.co/transaction/verify/{quote(reference, safe='')}",
             headers={
                 "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
             },
@@ -105,12 +106,25 @@ def verify_paystack_payment(request, reference):
         
         payment_data = data.get("data", {})
         status = payment_data.get("status")
-        amount = Decimal(str(payment_data.get("amount", 0))) / Decimal("100")
         paid_at = payment_data.get("paid_at")
+
+        # Paystack reports the amount in the smallest currency unit
+        # (pesewas for GHS), so divide by 100. Defensively default to 0 so a
+        # malformed payload can never crash the callback page.
+        try:
+            amount = Decimal(str(payment_data.get("amount", 0))) / Decimal("100")
+        except (TypeError, ValueError, ArithmeticError):
+            amount = Decimal("0")
 
         # Complete the matching invoice/reservation only after Paystack has
         # verified a successful transaction. References are generated as
         # inv-{invoice_id}-{reservation_id} during checkout initialization.
+        #
+        # The checkout is initialized for invoice.balance_due (not
+        # total_amount), so a successful charge may settle the whole invoice OR
+        # just the remaining balance after earlier partial payments. Record
+        # whatever was charged and recompute the invoice status from the total
+        # amount paid, exactly like the webhook does.
         payment_recorded = False
         if status == "success":
             reference_parts = reference.split("-")
@@ -118,8 +132,15 @@ def verify_paystack_payment(request, reference):
                 invoice = Invoice.objects.select_related("reservation").filter(
                     pk=reference_parts[1], reservation_id=reference_parts[2]
                 ).first()
-                if invoice and amount >= invoice.total_amount:
+                if invoice and amount > 0:
                     with transaction.atomic():
+                        # Lock the invoice so a simultaneous webhook delivery
+                        # cannot double-apply the same charge.
+                        invoice = (
+                            Invoice.objects.select_for_update()
+                            .select_related("reservation")
+                            .get(pk=invoice.pk)
+                        )
                         Payment.objects.update_or_create(
                             provider_reference=reference,
                             defaults={
@@ -131,10 +152,22 @@ def verify_paystack_payment(request, reference):
                                 "provider_response": data,
                             },
                         )
-                        invoice.status = Invoice.InvoiceStatus.PAID
+                        paid_total = invoice.amount_paid
+                        if paid_total >= invoice.total_amount:
+                            invoice.status = Invoice.InvoiceStatus.PAID
+                        elif paid_total > 0:
+                            invoice.status = Invoice.InvoiceStatus.PARTIAL
                         invoice.save(update_fields=["status"])
-                        invoice.reservation.status = invoice.reservation.ReservationStatus.CONFIRMED
-                        invoice.reservation.save(update_fields=["status"])
+                        # Confirm the reservation once the invoice is fully
+                        # paid (PENDING -> CONFIRMED only, so a cancelled or
+                        # checked-in reservation is never resurrected).
+                        if (
+                            invoice.status == Invoice.InvoiceStatus.PAID
+                            and invoice.reservation
+                            and invoice.reservation.status == Reservation.ReservationStatus.PENDING
+                        ):
+                            invoice.reservation.status = Reservation.ReservationStatus.CONFIRMED
+                            invoice.reservation.save(update_fields=["status"])
                         payment_recorded = True
 
         if status == "success" and not payment_recorded:

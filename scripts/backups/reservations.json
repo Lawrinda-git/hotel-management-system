@@ -1,0 +1,548 @@
+[
+{
+  "model": "reservations.reservation",
+  "pk": 1,
+  "fields": {
+    "guest": 1,
+    "hotel": 1,
+    "check_in": "2026-08-01T00:00:00Z",
+    "check_out": "2026-08-03T00:00:00Z",
+    "actual_check_in": null,
+    "actual_check_out": null,
+    "status": "Confirmed",
+    "booking_date": "2026-07-30T11:40:17.793Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 30,
+  "fields": {
+    "guest": 4,
+    "hotel": 6,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": null,
+    "actual_check_out": null,
+    "status": "Pending",
+    "booking_date": "2026-08-04T12:34:44.174Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 6,
+  "fields": {
+    "guest": 8,
+    "hotel": 4,
+    "check_in": "2025-07-15T14:00:00Z",
+    "check_out": "2025-07-20T11:00:00Z",
+    "actual_check_in": "2025-07-15T15:30:00Z",
+    "actual_check_out": null,
+    "status": "Checked_In",
+    "booking_date": "2025-07-01T10:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 7,
+  "fields": {
+    "guest": 19,
+    "hotel": 4,
+    "check_in": "2025-07-16T14:00:00Z",
+    "check_out": "2025-07-19T11:00:00Z",
+    "actual_check_in": "2025-07-16T14:45:00Z",
+    "actual_check_out": null,
+    "status": "Checked_In",
+    "booking_date": "2025-07-03T14:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 13,
+  "fields": {
+    "guest": 12,
+    "hotel": 4,
+    "check_in": "2025-07-10T14:00:00Z",
+    "check_out": "2025-07-14T11:00:00Z",
+    "actual_check_in": "2025-07-10T15:00:00Z",
+    "actual_check_out": "2025-07-14T10:30:00Z",
+    "status": "Checked_Out",
+    "booking_date": "2025-06-25T11:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 14,
+  "fields": {
+    "guest": 22,
+    "hotel": 4,
+    "check_in": "2025-07-08T14:00:00Z",
+    "check_out": "2025-07-12T11:00:00Z",
+    "actual_check_in": "2025-07-08T14:30:00Z",
+    "actual_check_out": "2025-07-12T11:00:00Z",
+    "status": "Checked_Out",
+    "booking_date": "2025-06-28T09:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 35,
+  "fields": {
+    "guest": 32,
+    "hotel": 1,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": "2026-08-04T15:42:18.950Z",
+    "actual_check_out": null,
+    "status": "Checked_In",
+    "booking_date": "2026-08-04T13:48:02.485Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 15,
+  "fields": {
+    "guest": 13,
+    "hotel": 4,
+    "check_in": "2025-07-20T14:00:00Z",
+    "check_out": "2025-07-23T11:00:00Z",
+    "actual_check_in": null,
+    "actual_check_out": null,
+    "status": "Cancelled",
+    "booking_date": "2025-07-05T13:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 36,
+  "fields": {
+    "guest": 29,
+    "hotel": 1,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": "2026-08-04T15:42:28.505Z",
+    "actual_check_out": null,
+    "status": "Checked_In",
+    "booking_date": "2026-08-04T13:50:25.052Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 16,
+  "fields": {
+    "guest": 14,
+    "hotel": 5,
+    "check_in": "2025-07-15T14:00:00Z",
+    "check_out": "2025-07-18T11:00:00Z",
+    "actual_check_in": "2025-07-15T14:30:00Z",
+    "actual_check_out": null,
+    "status": "Checked_In",
+    "booking_date": "2025-07-02T10:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 39,
+  "fields": {
+    "guest": 33,
+    "hotel": 1,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-19T00:00:00Z",
+    "actual_check_in": "2026-08-04T15:43:00.402Z",
+    "actual_check_out": null,
+    "status": "Checked_In",
+    "booking_date": "2026-08-04T14:12:55.824Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 17,
+  "fields": {
+    "guest": 18,
+    "hotel": 5,
+    "check_in": "2025-07-16T14:00:00Z",
+    "check_out": "2025-07-20T11:00:00Z",
+    "actual_check_in": "2025-07-16T15:00:00Z",
+    "actual_check_out": null,
+    "status": "Checked_In",
+    "booking_date": "2025-07-04T14:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 18,
+  "fields": {
+    "guest": 15,
+    "hotel": 5,
+    "check_in": "2025-07-17T14:00:00Z",
+    "check_out": "2025-07-19T11:00:00Z",
+    "actual_check_in": "2025-07-17T14:15:00Z",
+    "actual_check_out": null,
+    "status": "Checked_In",
+    "booking_date": "2025-07-06T09:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 19,
+  "fields": {
+    "guest": 16,
+    "hotel": 5,
+    "check_in": "2025-07-22T14:00:00Z",
+    "check_out": "2025-07-27T11:00:00Z",
+    "actual_check_in": null,
+    "actual_check_out": null,
+    "status": "Confirmed",
+    "booking_date": "2025-07-11T16:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 20,
+  "fields": {
+    "guest": 17,
+    "hotel": 5,
+    "check_in": "2025-07-09T14:00:00Z",
+    "check_out": "2025-07-13T11:00:00Z",
+    "actual_check_in": "2025-07-09T14:00:00Z",
+    "actual_check_out": "2025-07-13T10:45:00Z",
+    "status": "Checked_Out",
+    "booking_date": "2025-06-29T09:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 21,
+  "fields": {
+    "guest": 8,
+    "hotel": 6,
+    "check_in": "2025-07-15T14:00:00Z",
+    "check_out": "2025-07-20T11:00:00Z",
+    "actual_check_in": "2025-07-15T15:00:00Z",
+    "actual_check_out": null,
+    "status": "Checked_In",
+    "booking_date": "2025-07-03T11:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 38,
+  "fields": {
+    "guest": 33,
+    "hotel": 3,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-31T00:00:00Z",
+    "actual_check_in": "2026-08-04T16:28:30.953Z",
+    "actual_check_out": "2026-08-04T16:32:40.641Z",
+    "status": "Checked_Out",
+    "booking_date": "2026-08-04T14:00:00.658Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 22,
+  "fields": {
+    "guest": 9,
+    "hotel": 6,
+    "check_in": "2025-07-16T14:00:00Z",
+    "check_out": "2025-07-18T11:00:00Z",
+    "actual_check_in": "2025-07-16T14:30:00Z",
+    "actual_check_out": null,
+    "status": "Checked_In",
+    "booking_date": "2025-07-05T14:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 33,
+  "fields": {
+    "guest": 29,
+    "hotel": 3,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": "2026-08-04T16:32:14.642Z",
+    "actual_check_out": "2026-08-04T16:32:48.936Z",
+    "status": "Checked_Out",
+    "booking_date": "2026-08-04T13:34:51.582Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 23,
+  "fields": {
+    "guest": 10,
+    "hotel": 6,
+    "check_in": "2025-07-18T14:00:00Z",
+    "check_out": "2025-07-22T11:00:00Z",
+    "actual_check_in": "2025-07-18T14:00:00Z",
+    "actual_check_out": null,
+    "status": "Checked_In",
+    "booking_date": "2025-07-07T10:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 24,
+  "fields": {
+    "guest": 11,
+    "hotel": 6,
+    "check_in": "2025-07-21T14:00:00Z",
+    "check_out": "2025-07-25T11:00:00Z",
+    "actual_check_in": null,
+    "actual_check_out": null,
+    "status": "Confirmed",
+    "booking_date": "2025-07-12T09:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 40,
+  "fields": {
+    "guest": 23,
+    "hotel": 3,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": "2026-08-04T16:33:31.574Z",
+    "actual_check_out": "2026-08-04T16:33:36.338Z",
+    "status": "Checked_Out",
+    "booking_date": "2026-08-04T14:30:29.745Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 25,
+  "fields": {
+    "guest": 20,
+    "hotel": 6,
+    "check_in": "2025-07-07T14:00:00Z",
+    "check_out": "2025-07-11T11:00:00Z",
+    "actual_check_in": "2025-07-07T14:00:00Z",
+    "actual_check_out": "2025-07-11T10:30:00Z",
+    "status": "Checked_Out",
+    "booking_date": "2025-06-27T15:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 26,
+  "fields": {
+    "guest": 4,
+    "hotel": 5,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": null,
+    "actual_check_out": null,
+    "status": "Pending",
+    "booking_date": "2026-08-04T00:24:01.119Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 27,
+  "fields": {
+    "guest": 4,
+    "hotel": 6,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": null,
+    "actual_check_out": null,
+    "status": "Confirmed",
+    "booking_date": "2026-08-04T00:25:44.523Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 28,
+  "fields": {
+    "guest": 4,
+    "hotel": 6,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": null,
+    "actual_check_out": null,
+    "status": "Pending",
+    "booking_date": "2026-08-04T12:15:45.972Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 29,
+  "fields": {
+    "guest": 23,
+    "hotel": 6,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": null,
+    "actual_check_out": null,
+    "status": "Pending",
+    "booking_date": "2026-08-04T12:30:52.618Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 32,
+  "fields": {
+    "guest": 29,
+    "hotel": 6,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": "2026-08-04T22:19:32.403Z",
+    "actual_check_out": null,
+    "status": "Checked_In",
+    "booking_date": "2026-08-04T13:32:28.198Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 41,
+  "fields": {
+    "guest": 34,
+    "hotel": 4,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": "2026-08-04T16:53:44.951Z",
+    "actual_check_out": "2026-08-04T23:09:38.883Z",
+    "status": "Checked_Out",
+    "booking_date": "2026-08-04T15:52:15.564Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 3,
+  "fields": {
+    "guest": 3,
+    "hotel": 3,
+    "check_in": "2026-08-03T00:00:00Z",
+    "check_out": "2026-08-05T00:00:00Z",
+    "actual_check_in": "2026-08-04T23:11:57.497Z",
+    "actual_check_out": null,
+    "status": "Checked_In",
+    "booking_date": "2026-07-30T11:40:17.802Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 37,
+  "fields": {
+    "guest": 23,
+    "hotel": 4,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": "2026-08-05T09:49:57.722Z",
+    "actual_check_out": "2026-08-05T09:50:04.072Z",
+    "status": "Checked_Out",
+    "booking_date": "2026-08-04T13:55:34.320Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 42,
+  "fields": {
+    "guest": 40,
+    "hotel": 3,
+    "check_in": "2026-08-05T00:00:00Z",
+    "check_out": "2026-08-10T00:00:00Z",
+    "actual_check_in": null,
+    "actual_check_out": null,
+    "status": "Confirmed",
+    "booking_date": "2026-08-05T12:41:57.208Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 34,
+  "fields": {
+    "guest": 23,
+    "hotel": 4,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": "2026-08-05T12:52:30.931Z",
+    "actual_check_out": "2026-08-05T12:52:36.385Z",
+    "status": "Checked_Out",
+    "booking_date": "2026-08-04T13:36:01.398Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 31,
+  "fields": {
+    "guest": 4,
+    "hotel": 4,
+    "check_in": "2026-08-04T00:00:00Z",
+    "check_out": "2026-08-09T00:00:00Z",
+    "actual_check_in": "2026-08-05T12:52:53.231Z",
+    "actual_check_out": "2026-08-05T12:52:56.845Z",
+    "status": "Checked_Out",
+    "booking_date": "2026-08-04T12:36:04.379Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 11,
+  "fields": {
+    "guest": 10,
+    "hotel": 4,
+    "check_in": "2025-07-22T14:00:00Z",
+    "check_out": "2025-07-26T11:00:00Z",
+    "actual_check_in": "2026-08-05T12:53:09.642Z",
+    "actual_check_out": "2026-08-05T12:53:12.984Z",
+    "status": "Checked_Out",
+    "booking_date": "2025-07-12T10:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 10,
+  "fields": {
+    "guest": 9,
+    "hotel": 4,
+    "check_in": "2025-07-21T14:00:00Z",
+    "check_out": "2025-07-25T11:00:00Z",
+    "actual_check_in": "2026-08-05T12:53:19.652Z",
+    "actual_check_out": "2026-08-05T12:53:24.811Z",
+    "status": "Checked_Out",
+    "booking_date": "2025-07-10T16:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 9,
+  "fields": {
+    "guest": 21,
+    "hotel": 4,
+    "check_in": "2025-07-18T14:00:00Z",
+    "check_out": "2025-07-21T11:00:00Z",
+    "actual_check_in": "2025-07-18T16:00:00Z",
+    "actual_check_out": "2026-08-05T12:53:30.988Z",
+    "status": "Checked_Out",
+    "booking_date": "2025-07-06T11:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 8,
+  "fields": {
+    "guest": 20,
+    "hotel": 4,
+    "check_in": "2025-07-17T14:00:00Z",
+    "check_out": "2025-07-22T11:00:00Z",
+    "actual_check_in": "2025-07-17T13:55:00Z",
+    "actual_check_out": "2026-08-05T12:53:41.082Z",
+    "status": "Checked_Out",
+    "booking_date": "2025-07-05T09:00:00Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 12,
+  "fields": {
+    "guest": 11,
+    "hotel": 4,
+    "check_in": "2025-07-28T14:00:00Z",
+    "check_out": "2025-07-30T11:00:00Z",
+    "actual_check_in": "2026-08-05T12:55:36.746Z",
+    "actual_check_out": "2026-08-05T12:55:39.851Z",
+    "status": "Checked_Out",
+    "booking_date": "2025-07-15T09:30:00Z"
+  }
+}
+]

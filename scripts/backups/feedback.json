@@ -1,0 +1,50 @@
+[
+{
+  "model": "feedback.feedback",
+  "pk": 1,
+  "fields": {
+    "hotel": 4,
+    "guest": 12,
+    "resv": 13,
+    "rating": 5,
+    "comments": "Exceptional service throughout our stay. The staff, especially at the front desk, were incredibly professional and warm. The room was spotless and the view of Accra at night was breathtaking. Will definitely return.",
+    "date": "2025-07-14T14:00:00Z"
+  }
+},
+{
+  "model": "feedback.feedback",
+  "pk": 2,
+  "fields": {
+    "hotel": 4,
+    "guest": 22,
+    "resv": 14,
+    "rating": 4,
+    "comments": "Very comfortable stay at the Kempinski. Breakfast was outstanding — fresh local fruits and international options. The only minor issue was the air conditioning in our room was a bit loud at night.",
+    "date": "2025-07-12T12:00:00Z"
+  }
+},
+{
+  "model": "feedback.feedback",
+  "pk": 3,
+  "fields": {
+    "hotel": 5,
+    "guest": 17,
+    "resv": 20,
+    "rating": 5,
+    "comments": "Labadi Beach Hotel exceeded all expectations! Waking up to the sound of the Atlantic was magical. The beach bungalow was pristine and the staff were so friendly. The Ghanaian cuisine at the restaurant was authentic and delicious.",
+    "date": "2025-07-13T11:00:00Z"
+  }
+},
+{
+  "model": "feedback.feedback",
+  "pk": 4,
+  "fields": {
+    "hotel": 6,
+    "guest": 20,
+    "resv": 25,
+    "rating": 5,
+    "comments": "The Elmina Beach Resort is a hidden gem. Staying so close to the historic Elmina Castle was surreal. The staff arranged an incredible guided tour for us. The ocean chalet with the hammock on the deck was absolutely perfect.",
+    "date": "2025-07-11T15:00:00Z"
+  }
+}
+]
